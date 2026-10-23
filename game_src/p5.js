@@ -457,8 +457,8 @@ function setDot(sel,n,col){const b=$(sel);let d=b.querySelector('.dot');if(n){if
 /* ---------- modais ---------- */
 function openModal(html){$('#mcard').innerHTML=html;$('#modal').hidden=false;}
 function closeModal(){$('#modal').hidden=true;}
-$('#modal').addEventListener('click',e=>{if(e.target.id==='modal'){closeModal();return;}const b=e.target.closest('[data-m]');if(!b)return;audioInit();const k=b.dataset.m;
-  if(k==='close'){sfx('click');closeModal();}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal'){clearInterval(openSlot._t);closeModal();return;}const b=e.target.closest('[data-m]');if(!b)return;audioInit();const k=b.dataset.m;
+  if(k==='close'){sfx('click');clearInterval(openSlot._t);closeModal();}
   else if(k==='evc')chooseEv(+b.dataset.i);
   else if(k==='sw'){const key=b.dataset.k;S.set[key]=!S.set[key];b.classList.toggle('on',S.set[key]);applyVol();sfx('click');save();}
   else if(k==='copy'){const ta=$('#saveTa');const txt=ta.value;if(NATIVE){native('copy:'+txt);toast('Copiado!','g');return;}try{navigator.clipboard.writeText(txt).then(()=>toast('Copiado!','g'),()=>{ta.select();toast('Selecione e copie manualmente');});}catch(err){ta.select();}}
@@ -501,6 +501,7 @@ $('#btnSettings').addEventListener('click',()=>{audioInit();sfx('click');openSet
 $('#carBtn').addEventListener('click',()=>{audioInit();if(!adCar)return;const [wx,wy]=[adCar.x,adCar.y];cam.tx=wx;cam.ty=wy-20;cam.tz=1.3;sfx('click');requestAd('car');});
 $('#wheelBtn').addEventListener('click',()=>{audioInit();sfx('click');openWheel();});
 $('#rankBtn').addEventListener('click',()=>{audioInit();sfx('click');openSheet('missions','rank');});
+$('#slotBtn').addEventListener('click',()=>{audioInit();sfx('click');openSlot();});
 function openWheel(){const ready=wheelReady();
   openModal(`<h2>Baú misterioso diário</h2>
   <p class="note" style="text-align:center">${ready?'Escolha um dos 3 baús. Um prêmio surpresa te espera!':'Você já abriu hoje. Volte amanhã para um novo prêmio!'}</p>
@@ -520,6 +521,40 @@ function openWheel(){const ready=wheelReady();
       screenConfetti(100);sfx('unlock');vib([20,30,20]);
     });
   });}
+function slotRow(){const n=S.spins,cap=spinCap();
+  let timeTxt='';if(n<cap&&S.spinNext)timeTxt=' · próximo giro em '+fmtTime(Math.max(0,(S.spinNext-Date.now())/1000));
+  return `<div id="slotCount" class="note" style="text-align:center">Giros: <b>${n}/${cap}</b>${timeTxt}</div>`;}
+function openSlot(){
+  openModal(`<h2>🎰 Caça-Moedas</h2>
+  <p class="note" style="text-align:center">Gaste um giro e combine 3 símbolos iguais pra um super prêmio! Os giros se recarregam com o tempo.</p>
+  <div id="slotReels" style="display:flex;gap:10px;justify-content:center;margin:14px 0">
+    ${[0,1,2].map(()=>`<div class="sreel" style="flex:1;max-width:92px;aspect-ratio:1;border-radius:16px;border:2px solid #fff;background:linear-gradient(180deg,#2b2350,#1a1536);box-shadow:0 4px 0 #0f0c22;font-size:34px;display:flex;align-items:center;justify-content:center">❔</div>`).join('')}
+  </div>
+  <div id="slotResult" style="text-align:center;min-height:30px"></div>
+  <div id="slotCountWrap">${slotRow()}</div>
+  <button class="btn big p" id="slotGo" ${S.spins<=0?'disabled':''}>Girar! (1 giro)</button>
+  <button class="btn" id="slotBuy" style="margin-top:8px" ${S.spins>=spinCap()?'disabled':''}>Comprar giro extra · 💎10</button>
+  <button class="btn big" data-m="close" style="margin-top:8px">Fechar</button>`);
+  let spinning=false;
+  clearInterval(openSlot._t);
+  openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=slotRow();
+    const go=$('#slotGo'),buy=$('#slotBuy');if(go&&!spinning)go.disabled=S.spins<=0;if(buy)buy.disabled=S.spins>=spinCap();},1000);
+  $('#slotGo').addEventListener('click',()=>{
+    if(spinning||S.spins<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
+    const boxes=document.querySelectorAll('#slotReels .sreel');
+    const anim=setInterval(()=>{boxes.forEach(b=>b.textContent=pickSlotSym().ic);sfx('click');},90);
+    setTimeout(()=>{clearInterval(anim);const res=doSpin();spinning=false;
+      if(!res){$('#slotGo').disabled=S.spins<=0;return;}
+      boxes.forEach((b,i)=>b.textContent=res.reels[i].ic);
+      const parts=[];if(res.coins)parts.push('+'+fmt(res.coins)+' moedas');if(res.gems)parts.push('+'+res.gems+' joias');if(res.crys)parts.push('+'+res.crys+' Cristal');if(res.turboMin)parts.push('Turbo 2× por '+Math.round(res.turboMin)+' min');
+      $('#slotResult').innerHTML=res.combo?`<b style="font-size:17px;color:var(--grape)">🎉 COMBO! x4</b><br><span class="note">${parts.join(' · ')}</span>`:`<span class="note">${parts.join(' · ')}</span>`;
+      const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();
+      $('#slotGo').disabled=S.spins<=0;
+      screenConfetti(res.combo?120:35);sfx(res.combo?'unlock':'coin');vib(res.combo?[20,30,20,30,20]:[15]);
+    },900);
+  });
+  $('#slotBuy').addEventListener('click',()=>{if(buySpin()){sfx('up');const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();$('#slotGo').disabled=S.spins<=0;$('#slotBuy').disabled=S.spins>=spinCap();}else{sfx('err');toast('Joias insuficientes ou giros no máximo','r');}});
+}
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
 function newComplex(cp,d){showBanner(cp.n,'Complexo formado em '+DIST[d].n);screenConfetti(90);sfx('unlock');const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);burst(wx,wy-20,40);toast(cp.fx,'p');}
 function v2Intro(){openModal(`<div class="speaker">${portrait('lucia','talk')}<div><small style="color:${CHARS.lucia.col}">Prefeita Lúcia</small><h2 style="text-align:left;font-size:22px">A cidade ganhou vida!</h2></div></div>

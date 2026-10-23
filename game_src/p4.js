@@ -8,7 +8,7 @@ function newState(){
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
-    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0};
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,spins:3,spinNext:0};
 }
 let S=newState();
 function initCity(st){
@@ -232,6 +232,42 @@ function checkFlashProgress(){if(!S.flash)return;
   if(S.run-S.flash.startRun>=S.flash.goal){const r=S.flash.reward;earn(r.coins);S.gems+=r.gems;
     showBanner('⚡ Missão relâmpago!','+'+fmt(r.coins)+' moedas e +'+r.gems+' joias');screenConfetti(90);sfx('unlock');vib([20,30,20]);S.flash=null;save();return;}
   if(Date.now()>S.flash.until)S.flash=null;}
+
+/* ---------- Caça-Moedas (caça-níqueis permanente, estilo Coin Master) ---------- */
+const SLOT_REGEN_MS=12*60000;
+const SLOT_SYMS=[
+  {id:'c1',ic:'🪙',w:30,k:'coin',m:6},
+  {id:'c2',ic:'💰',w:20,k:'coin',m:24},
+  {id:'c3',ic:'🏆',w:8, k:'coin',m:85},
+  {id:'gem',ic:'💎',w:16,k:'gem',v:2},
+  {id:'turbo',ic:'⚡',w:14,k:'turbo',v:8},
+  {id:'crys',ic:'🔮',w:4, k:'crys',v:1},
+  {id:'star',ic:'⭐',w:8, k:'star'},
+];
+function spinCap(){return Math.min(9,5+Math.floor(S.rank/2));}
+function pickSlotSym(){const tot=SLOT_SYMS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(const s of SLOT_SYMS){if(r<s.w)return s;r-=s.w;}return SLOT_SYMS[0];}
+function tickSpinRegen(){const cap=spinCap();
+  if(S.spins>=cap){S.spinNext=0;return;}
+  if(!S.spinNext){S.spinNext=Date.now()+SLOT_REGEN_MS;return;}
+  if(Date.now()>=S.spinNext){S.spins=Math.min(cap,S.spins+1);dirty=true;S.spinNext=S.spins<cap?Date.now()+SLOT_REGEN_MS:0;}}
+function doSpin(){if(S.spins<=0)return null;S.spins--;if(!S.spinNext)S.spinNext=Date.now()+SLOT_REGEN_MS;
+  const reels=[pickSlotSym(),pickSlotSym(),pickSlotSym()];
+  const combo=reels[0].id===reels[1].id&&reels[1].id===reels[2].id;const mul=combo?4:1;
+  let coins=0,gems=0,crys=0,turboMin=0;
+  for(const s of reels){
+    if(s.k==='coin')coins+=Math.max(30,ipsBase*rnd(s.m*2,s.m*3.2));
+    else if(s.k==='gem')gems+=s.v;
+    else if(s.k==='crys')crys+=s.v;
+    else if(s.k==='turbo')turboMin+=s.v;
+    else if(s.k==='star'){coins+=Math.max(150,ipsBase*rnd(45,75));gems+=1;}
+  }
+  coins=Math.round(coins*mul);gems=Math.round(gems*mul);crys=Math.round(crys*mul);
+  if(coins)earn(coins);if(gems)S.gems+=gems;if(crys)S.crys+=crys;
+  if(turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:2,until:Date.now()+turboMin*60000*mul,slot:true,label:'Caça-Moedas'});dirty=true;}
+  dailyProg&&dailyProg('spin',1);save();
+  return {reels,coins,gems,crys,turboMin,combo};}
+function buySpin(){const cost=10;if(S.gems<cost||S.spins>=spinCap())return false;S.gems-=cost;S.spins=Math.min(spinCap(),S.spins+1);save();return true;}
+
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{

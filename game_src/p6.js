@@ -187,7 +187,7 @@ function update(dt){
   ipsT-=dt;if(ipsT<=0){ipsT=3;dirty=true;}
   saveT-=dt;if(saveT<=0){saveT=10;save();}
   lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0){lbSubmit(true);lbFetchRank();}}
-  maybeTriggerGoldenHour();maybeTriggerFlash();checkFlashProgress();
+  maybeTriggerGoldenHour();maybeTriggerFlash();checkFlashProgress();tickSpinRegen();
   devT-=dt;if(devT<=0){devT=2;updateDev();if(heatMode)computeHeat();}
   ctxT-=dt;if(ctxT<=0){ctxT=6;ctxTick();}
   agT-=dt;if(agT<=0){agT=5;syncAgents(false);}
@@ -204,6 +204,8 @@ function updHUD(){$('#coinTxt').textContent=fmt(dispCoins);const it=$('#ipsTxt')
   const carBtn=$('#carBtn');if(carBtn)carBtn.hidden=!adCar;
   const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady();wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
   const rankBtn=$('#rankBtn');if(rankBtn){const rt=$('#rankTxt');if(rt)rt.textContent=S.lbRank?'#'+fmt(S.lbRank):'Rank';}
+  const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=S.spins+'/'+spinCap();
+  const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=S.spins<=0;
   if(ev){const p=$('#evProg');if(p)p.style.width=(100*(1-ev.t/ev.dur))+'%';}
   if(sev){if(sev.pending){const s=$('#sevChip .sub');if(s)s.textContent='Toque para decidir · '+Math.ceil(sev.wait)+'s';}else if(sev.obj){const s=$('#sevSub');if(s)s.textContent=sev.obj.txt+': '+fmt(Math.max(0,sev.obj.prog))+'/'+fmt(sev.obj.need);const p=$('#sevProg');if(p)p.style.width=(100*clamp((sev.obj.until-TIME)/sev.obj.dur,0,1))+'%';}}
   stripRender();if(sheetMode)refreshButtons();
@@ -426,7 +428,8 @@ function boot(){resize();const src=load();afterLoad();
     forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;},
     map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true),
     update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;},
-    lbFetchRank,wheelReady,claimWheel,goldenHourOn,get flash(){return S.flash;}};}
+    lbFetchRank,wheelReady,claimWheel,goldenHourOn,get flash(){return S.flash;},
+    doSpin,buySpin,spinCap,get spins(){return S.spins;}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};
 if(window.CCNative){let started=false;const go=()=>{if(started)return;started=true;boot();};
