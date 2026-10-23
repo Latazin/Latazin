@@ -1194,7 +1194,7 @@ const SAVE_KEY='cartoonCityIdle_v1',BACK_KEY='cartoonCityIdle_v1_backup';
 function newState(){
   return {v:2,coins:100,gems:0,ess:0,unlocked:[0],buildings:[],nid:1,cu:{},run:0,life:0,
     cnt:{built:0,upg:0,bub:0,met:0,chest:0,pres:0,ev:0,deco:0,res:0,prjDone:0,tags:{}},ach:{},daily:null,cos:{own:[],eq:{}},
-    set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},
+    set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{}};
 }
@@ -1362,6 +1362,22 @@ function updateDev(initial){for(const d of S.unlocked){const s=devScore(d);const
 
 /* ---------- salvar ---------- */
 const NATIVE=!!window.CCNative;function native(msg){try{if(window.CCNative)window.CCNative.postMessage(msg);}catch(e){}}
+/* ---------- ranking global (Supabase) ---------- */
+const LB_URL='https://zjugvnmouuxvdffeopcx.supabase.co';
+const LB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWd2bm1vdXV4dmRmZmVvcGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NjM4MjksImV4cCI6MjEwODMzOTgyOX0.lWahuMhd5358RWtOGdN55D4jfNBY0E1GNTKb4s0b-_E';
+function deviceId(){try{let id=localStorage.getItem('cc_device_id');if(!id){id=(crypto.randomUUID?crypto.randomUUID():'d-'+Date.now()+'-'+Math.random().toString(36).slice(2));localStorage.setItem('cc_device_id',id);}return id;}catch(e){return 'anon';}}
+let lbCache=null,lbLoading=false,lbErr=false,lbMyRank=null;
+async function lbFetchTop(){if(lbLoading)return;lbLoading=true;lbErr=false;
+  try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?select=name,pop,life&order=pop.desc&limit=50',{headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY}});
+    if(!res.ok)throw 0;lbCache=await res.json();}
+  catch(e){lbErr=true;}
+  lbLoading=false;renderSheet(true);}
+async function lbSubmit(){const name=(S.lbName||'Jogador').slice(0,18)||'Jogador';
+  try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?on_conflict=device_id',{method:'POST',
+      headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+      body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
+    if(!res.ok)throw 0;toast('Pontuação enviada pro ranking global!','g');lbCache=null;lbFetchTop();}
+  catch(e){toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
@@ -1930,7 +1946,7 @@ function renderSheet(keep){
         h+=`<div class="row" style="margin-top:-4px;margin-left:16px"><div class="info"><h3 style="font-size:14px">Ruas: ${ROADS[ri2].n}</h3><p>${nxr?'Próximo estilo: '+nxr.n+' (+'+nxr.happy+' felicidade, +'+nxr.tour+' turismo)':'Estilo máximo!'}</p></div>${nxr?cBtn(nxr.cost,'road:'+d,'','w'):''}</div>`;
         if(S.dmg[d]>Date.now())h+=`<div class="row hot" style="margin-left:16px"><div class="info"><h3 style="font-size:14px">Estragos da tempestade</h3><p>Renda −30% aqui por mais ${fmtTime((S.dmg[d]-Date.now())/1000)}</p></div>${cBtn(cost(30),'repair:'+d,'Consertar','r')}</div>`;}}
   }
-  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['guide','Guia'],['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas']]);ensureDaily();
+  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['guide','Guia'],['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas'],['rank','Ranking']]);ensureDaily();
     if(sheetTab==='guide'){const left=GUIDE.filter(g=>!S.metas['gd_'+g.id]);
       h+=`<p class="note">Primeiros passos pra organizar sua cidade. Complete na ordem que quiser — cada um dá uma recompensa.</p>`;
       if(!left.length)h+=`<div class="qcard">${portrait('lucia')}<div class="info"><h3>Guia concluído!</h3><p>Você já sabe o essencial. De agora em diante, use Metas e Conquistas pra continuar evoluindo.</p></div></div>`;
@@ -1945,7 +1961,17 @@ function renderSheet(keep){
       const all=S.daily.list.every(m=>m.claimed);h+=`<div class="row"><div class="th"><div class="chest-ico"><i></i></div></div><div class="info"><h3>Baú do dia</h3><p>Complete e pegue as 3 missões</p></div>${S.daily.bonus?'<button class="btn off" disabled>Aberto</button>':all?'<button class="btn y" data-act="dbonus">Abrir</button>':'<button class="btn off" disabled>Trancado</button>'}</div>`;}
     else if(sheetTab==='metas'){let grp='';for(const m of METAS){if(m.grp!==grp){grp=m.grp;h+=`<div class="sec">${grp}</div>`;}const [a,bn]=m.p();const st=S.metas[m.id];
       h+=`<div class="row ${st||a>=bn?'':'locked'}"><div class="info"><h3>${m.n}</h3>${bar(a/bn,'b')}<p>${rewardTxt(m.r)}</p></div>${st?'<button class="btn off" disabled>Feito</button>':a>=bn?`<button class="btn y" data-act="mclaim:${m.id}">Pegar</button>`:''}</div>`;}}
-    else{for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
+    else if(sheetTab==='ach'){for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
+    else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Qualquer jogador do mundo pode aparecer aqui.</p>
+      <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||'').replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
+      <button class="btn y wide" data-act="lbsend">Enviar · ${fmt(S.pop)} habitantes</button>`;
+      if(lbLoading&&!lbCache)h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;
+      else if(lbErr)h+=`<div class="row"><div class="info"><p class="note">Não consegui carregar agora.</p></div><button class="btn" data-act="lbrefresh">Tentar de novo</button></div>`;
+      else{if(lbCache===null)lbFetchTop();
+        h+=`<div class="sec">Top jogadores do mundo</div>`;
+        if(lbCache&&lbCache.length){lbCache.forEach((r,i)=>{h+=`<div class="row"><div class="info"><h3>#${i+1} · ${(r.name||'Jogador').replace(/</g,'')}</h3><p>${fmt(r.pop)} habitantes</p></div></div>`;});}
+        else if(lbCache)h+=`<p class="note">Ninguém enviou pontuação ainda. Seja o primeiro!</p>`;
+        else h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;}}
   }
   else if(sheetMode==='more'){$('#sheetTitle').textContent='Mais';setTabs(null);
     h+=`<div class="tiles">
@@ -2006,6 +2032,8 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='unlock')unlockDistrict(+p1);
   else if(a==='go'){const gx=p1%GXN,gy=Math.floor(p1/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.1;sfx('click');}
   else if(a==='gocar'){const [wx,wy]=proj(CARSPOT.x+.5,CARSPOT.y+.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.3;sfx('click');}
+  else if(a==='lbsend'){const inp=$('#lbNameInput');const name=(inp?inp.value:'').trim().slice(0,18);S.lbName=name||'Jogador';save();sfx('click');lbSubmit();}
+  else if(a==='lbrefresh'){lbErr=false;lbFetchTop();renderSheet(true);}
   else if(a==='gob'){const bb=S.buildings.find(x=>x.id===+p1);if(bb){closeSheet();const [wx,wy]=bWorld(bb);camTo(wx,wy-30,1.4);}}
   else if(a==='rush'){const bb=S.buildings.find(x=>x.id===+p1);const gc=Math.max(1,Math.ceil((bb.ready-Date.now())/20000));if(S.gems>=gc){S.gems-=gc;bb.ready=Date.now();finishBuild(bb);renderSheet(true);}else{sfx('err');toast('Joias insuficientes','r');}}
   else if(a==='demo'){if(demoArm!==+p1){demoArm=+p1;sfx('click');renderSheet(true);setTimeout(()=>{if(demoArm===+p1){demoArm=null;if(sheetMode==='bld')renderSheet(true);}},4000);return;}demoArm=null;demolish(+p1);}

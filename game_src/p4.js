@@ -5,7 +5,7 @@ const SAVE_KEY='cartoonCityIdle_v1',BACK_KEY='cartoonCityIdle_v1_backup';
 function newState(){
   return {v:2,coins:100,gems:0,ess:0,unlocked:[0],buildings:[],nid:1,cu:{},run:0,life:0,
     cnt:{built:0,upg:0,bub:0,met:0,chest:0,pres:0,ev:0,deco:0,res:0,prjDone:0,tags:{}},ach:{},daily:null,cos:{own:[],eq:{}},
-    set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},
+    set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{}};
 }
@@ -173,6 +173,22 @@ function updateDev(initial){for(const d of S.unlocked){const s=devScore(d);const
 
 /* ---------- salvar ---------- */
 const NATIVE=!!window.CCNative;function native(msg){try{if(window.CCNative)window.CCNative.postMessage(msg);}catch(e){}}
+/* ---------- ranking global (Supabase) ---------- */
+const LB_URL='https://zjugvnmouuxvdffeopcx.supabase.co';
+const LB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdWd2bm1vdXV4dmRmZmVvcGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NjM4MjksImV4cCI6MjEwODMzOTgyOX0.lWahuMhd5358RWtOGdN55D4jfNBY0E1GNTKb4s0b-_E';
+function deviceId(){try{let id=localStorage.getItem('cc_device_id');if(!id){id=(crypto.randomUUID?crypto.randomUUID():'d-'+Date.now()+'-'+Math.random().toString(36).slice(2));localStorage.setItem('cc_device_id',id);}return id;}catch(e){return 'anon';}}
+let lbCache=null,lbLoading=false,lbErr=false,lbMyRank=null;
+async function lbFetchTop(){if(lbLoading)return;lbLoading=true;lbErr=false;
+  try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?select=name,pop,life&order=pop.desc&limit=50',{headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY}});
+    if(!res.ok)throw 0;lbCache=await res.json();}
+  catch(e){lbErr=true;}
+  lbLoading=false;renderSheet(true);}
+async function lbSubmit(){const name=(S.lbName||'Jogador').slice(0,18)||'Jogador';
+  try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?on_conflict=device_id',{method:'POST',
+      headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+      body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
+    if(!res.ok)throw 0;toast('Pontuação enviada pro ranking global!','g');lbCache=null;lbFetchTop();}
+  catch(e){toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
