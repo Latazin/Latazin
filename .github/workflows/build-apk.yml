@@ -76,6 +76,44 @@ jobs:
           print(s)
           PY
 
+      - name: Corrigir conflito de versão do WorkManager/Room (causa do crash ao abrir)
+        run: |
+          python3 - <<'PY'
+          import re
+          kts='android/build.gradle.kts'; gr='android/build.gradle'
+          import os
+          p = kts if os.path.exists(kts) else gr
+          s=open(p).read()
+          if 'work-runtime' not in s:
+              if p.endswith('.kts'):
+                  block='''
+          allprojects {
+              configurations.all {
+                  resolutionStrategy {
+                      force("androidx.work:work-runtime:2.9.1")
+                      force("androidx.sqlite:sqlite:2.4.0")
+                      force("androidx.sqlite:sqlite-framework:2.4.0")
+                  }
+              }
+          }
+          '''
+              else:
+                  block='''
+          allprojects {
+              configurations.all {
+                  resolutionStrategy {
+                      force 'androidx.work:work-runtime:2.9.1'
+                      force 'androidx.sqlite:sqlite:2.4.0'
+                      force 'androidx.sqlite:sqlite-framework:2.4.0'
+                  }
+              }
+          }
+          '''
+              s += block
+              open(p,'w').write(s)
+          print(s)
+          PY
+
       - run: flutter pub get
       - run: dart run flutter_launcher_icons
       - name: Build APK
