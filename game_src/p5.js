@@ -375,7 +375,7 @@ function renderSheet(keep){
     else{h+=`<p class="note">Joias são ganhas jogando: missões, conquistas, pedidos, meteoros e baús.</p>`;
       const adBoostReady=!(S.adCdBoost>Date.now()),adChestReady=!(S.adCdChest>Date.now());
       h+=`<div class="sec">Assista e ganhe</div>`;
-      h+=`<div class="row"><div class="info"><h3>Turbo 2× por 30 min</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      h+=`<div class="row"><div class="info"><h3>Turbo 3× por 30 min + moedas</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="row"><div class="info"><h3>Baú bônus</h3><p>${adChestReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdChest-Date.now())/1000)}</p></div>${adChestReady?'<button class="btn y" data-act="ad:chest">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       const carReady=!(S.adCdCar>Date.now());h+=`<div class="row"><div class="info"><h3>Carro dourado</h3><p>${carReady?'Estacionado perto da prefeitura — toque nele no mapa':'Já passou por hoje · volta em '+fmtTime((S.adCdCar-Date.now())/1000)}</p></div>${carReady?'<button class="btn y" data-act="gocar">Ir até lá</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="sec">Comprar com joias</div>`;
@@ -638,7 +638,7 @@ function rolFlyDrop(){
   an.onfinish=()=>d.remove();}
 function rolShowWin(seg,r){
   const big=seg.id==='jackpot'||seg.id==='rain'||seg.id==='crys';
-  const parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal'+(r.crys>1?'is':''));if(r.turboMin)parts.push('Produção 2× por '+r.turboMin+' min');
+  const parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal'+(r.crys>1?'is':''));if(r.turboMin)parts.push('Produção 3× por '+r.turboMin+' min');
   const w=$('#rolWin');if(!w)return;
   w.innerHTML=`<div class="rw-rays" style="--c:${seg.col}"></div><div class="rw-box"><svg viewBox="0 0 64 64" class="rw-ic">${SLOT_ICON[seg.id]}</svg><h3>${seg.t}</h3><p>${parts.join('<br>')}</p><small>toque pra continuar</small></div>`;
   w.hidden=false;w.classList.remove('show');void w.offsetWidth;w.classList.add('show');

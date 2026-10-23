@@ -1391,7 +1391,7 @@ function recalc(){
     if(b.skin){m*=1.1;why.push(['Estilo '+SKINS[b.skin].n,1.1]);}
     if(M.cat[t.cat]){m*=M.cat[t.cat];why.push(['Evento',M.cat[t.cat]]);}if(M.dist[d]){m*=M.dist[d];why.push(['Evento no bairro',M.dist[d]]);}
     b._inc=base*m;b._why=why;rev+=b._inc;if(ev&&ev.k==='golden'&&ev.bid===b.id)goldX+=b._inc*6;}
-  const p=pref();const gmB=(1+.05*((p?p.lvl:1)-1))*(1+.05*S.ess)*(1+.1*completedCount())*happyM*M.inc*(tk('fut4')?2:1)*(prjDone('elev')?3:1);
+  const p=pref();const gmB=ECO.inc*(1+.05*((p?p.lvl:1)-1))*(1+.05*S.ess)*(1+.1*completedCount())*happyM*M.inc*(tk('fut4')?2:1)*(prjDone('elev')?3:1);
   let gm=gmB*(1+sessionBonus());if(gemBoostOn())gm*=2;if(ev&&ev.k==='rush')gm*=3;
   const ups=up*(tk('aut2')?.7:1);
   ips=(rev+goldX)*gm-ups;ipsBase=rev*gmB-ups;
@@ -1399,18 +1399,22 @@ function recalc(){
     rp:rp*(tk('fut2')?1.5:1)*(prjDone('campus')?2:1)*M.rp,crys,cov:{edu:cEdu,health:cHealth,safe:cSafe},eduQ,up:ups,rev,transit,mpop:M.pop,tour,hp});
   dirty=false;
 }
+/* ---------- Ajustes de economia (mais difícil: anúncio e roleta compensam mais) ---------- */
+const ECO={inc:0.72,off:0.6,cnt:1.18,upG:1.14};
+function ecoCost(c){return c*(1+0.6*clamp(Math.log10(Math.max(1,c)/200)/2,0,1));}
+function rewardBase(){return Math.max(0,ipsBase)/ECO.inc;}
 function bIncome(b){let v=(b._inc||0)*C.gm;if(ev&&ev.k==='golden'&&ev.bid===b.id)v*=7;return v;}
-function upCost(b){const T=TYPES[b.t];if(b.t==='pref')return{c0:60,g:2.05};return{c0:T.cost*0.55*(T.cat==='pub'&&!T.inc?1.4:1),g:1.12};}
+function upCost(b){const T=TYPES[b.t];if(b.t==='pref')return{c0:60,g:2.05};return{c0:ecoCost(T.cost)*0.55*(T.cat==='pub'&&!T.inc?1.4:1),g:ECO.upG};}
 function bulkCost(b,n){const {c0,g}=upCost(b);const base=c0*Math.pow(g,b.lvl-1);return base*(Math.pow(g,n)-1)/(g-1);}
 function maxAfford(b,coins){const {c0,g}=upCost(b);const base=c0*Math.pow(g,b.lvl-1);if(coins<base)return 0;return Math.max(1,Math.floor(Math.log(coins*(g-1)/base+1)/Math.log(g)));}
-function buildCost(t){const T=TYPES[t];return T.cost*Math.pow(T.cat==='deco'?1.07:1.15,countType(t))*(tk('arq2')?.9:1);}
+function buildCost(t){const T=TYPES[t];return ecoCost(T.cost)*Math.pow(T.cat==='deco'?1.07:ECO.cnt,countType(t))*(tk('arq2')?.9:1);}
 function buildTime(t){const c=TYPES[t].cost;if(c<1000||Date.now()<S.instUntil)return 0;return clamp(Math.round(Math.log10(c)*2.6),0,40);}
 function typeLock(t){const T=TYPES[t];if(T.cat==='hidden')return 'Indisponível';if(T.ess&&S.ess<T.ess)return `Requer ${T.ess} de Essência Urbana`;
   if(!S.unlocked.includes(T.d))return `Requer o bairro ${DIST[T.d].n}`;if(T.only!==undefined&&!S.unlocked.includes(T.only))return `Exclusivo: ${DIST[T.only].n}`;
   if(cityRank()<T.rk)return `Cidade precisa ser ${RANKS[T.rk][1]} (${fmt(RANKS[T.rk][0])} hab.)`;if(T.req&&!tk(T.req))return `Pesquise: ${TECHM[T.req].n}`;return null;}
 function spend(c){if(!(c>=0)||S.coins<c)return false;S.coins=Math.max(0,S.coins-c);return true;}
 function earn(v){if(!(v>0)||!isFinite(v))return;S.coins+=v;S.run+=v;S.life+=v;dailyProg('earn',v);}
-function offRate(){return (S.ess>=1?0.75:0.5)+(hasCU('banco')?0.25:0);}
+function offRate(){return ((S.ess>=1?0.75:0.5)+(hasCU('banco')?0.25:0))*ECO.off;}
 function offCap(){return (S.ess>=10?8:4)*3600;}
 
 /* ---------- nível dos bairros ---------- */
@@ -1489,29 +1493,29 @@ function checkFlashProgress(){if(!S.flash)return;
 // não recarrega sozinho e não pode ser comprado: de propósito, pra ser difícil.
 const OIL_CAP=5;
 const ROL_SEGS=[
-  {id:'c1',  w:24,col:'#ffd23f',lb:'MOEDAS', t:'Moedas!',           f:()=>({coins:Math.max(30,ipsBase*rnd(10,18))})},
-  {id:'c2',  w:18,col:'#2fd08a',lb:'PILHA',  t:'Pilha de moedas!',  f:()=>({coins:Math.max(90,ipsBase*rnd(28,46))})},
-  {id:'gem', w:16,col:'#5aa9ff',lb:'JOIAS',  t:'Joias!',            f:()=>({gems:ri(2,4)})},
-  {id:'turbo',w:13,col:'#ff9f1c',lb:'TURBO', t:'Turbo 2×!',         f:()=>({turboMin:10})},
-  {id:'c3',  w:11,col:'#ff5d9e',lb:'BOLADA', t:'Bolada!',           f:()=>({coins:Math.max(320,ipsBase*rnd(130,210))})},
-  {id:'crys',w:9, col:'#9b5de5',lb:'CRISTAL',t:'Cristal raro!',     f:()=>({crys:1,gems:ri(3,6)})},
-  {id:'rain',w:6, col:'#00b8c4',lb:'CHUVA',  t:'Chuva de prêmios!', f:()=>({coins:Math.max(600,ipsBase*rnd(260,420)),gems:ri(5,9)})},
-  {id:'jackpot',w:3,col:'#ff4757',lb:'JACKPOT',t:'JACKPOT!!!',      f:()=>({coins:Math.max(1500,ipsBase*rnd(600,950)),gems:ri(14,22),crys:2})},
+  {id:'c1',  w:24,col:'#ffd23f',lb:'MOEDAS', t:'Moedas!',           f:()=>({coins:Math.max(120,rewardBase()*rnd(60,100))})},
+  {id:'c2',  w:18,col:'#2fd08a',lb:'PILHA',  t:'Pilha de moedas!',  f:()=>({coins:Math.max(250,rewardBase()*rnd(150,240))})},
+  {id:'gem', w:16,col:'#5aa9ff',lb:'JOIAS',  t:'Joias!',            f:()=>({gems:ri(4,7)})},
+  {id:'turbo',w:13,col:'#ff9f1c',lb:'TURBO', t:'Turbo 3×!',         f:()=>({turboMin:15})},
+  {id:'c3',  w:11,col:'#ff5d9e',lb:'BOLADA', t:'Bolada!',           f:()=>({coins:Math.max(800,rewardBase()*rnd(500,800))})},
+  {id:'crys',w:9, col:'#9b5de5',lb:'CRISTAL',t:'Cristal raro!',     f:()=>({crys:1,gems:ri(6,10)})},
+  {id:'rain',w:6, col:'#00b8c4',lb:'CHUVA',  t:'Chuva de prêmios!', f:()=>({coins:Math.max(2000,rewardBase()*rnd(1200,1800)),gems:ri(10,16)})},
+  {id:'jackpot',w:3,col:'#ff4757',lb:'JACKPOT',t:'JACKPOT!!!',      f:()=>({coins:Math.max(5000,rewardBase()*rnd(3000,4500)),gems:ri(25,40),crys:3})},
 ];
 function pickRolSeg(){const tot=ROL_SEGS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(let i=0;i<ROL_SEGS.length;i++){const s=ROL_SEGS[i];if(r<s.w)return i;r-=s.w;}return 0;}
 function spinRoleta(){if(S.oil<=0)return null;S.oil--;
   const idx=pickRolSeg(),seg=ROL_SEGS[idx],r=seg.f();
   if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;
-  if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:2,until:Date.now()+r.turboMin*60000,slot:true,label:'Roleta do Petróleo'});dirty=true;}
+  if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:3,until:Date.now()+r.turboMin*60000,slot:true,label:'Turbo da roleta'});dirty=true;}
   dailyProg&&dailyProg('spin',1);save();
   return {idx,seg,r};}
 
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
-  if(kind==='boost'){S.adCdBoost=Date.now()+15*60000;S.gemBoost=Math.max(Date.now(),S.gemBoost)+30*60000;dirty=true;toast('Anúncio assistido: +100% de renda por 30 min!','g');sfx('unlock');vib([20,30,20]);screenConfetti(40);}
+  if(kind==='boost'){S.adCdBoost=Date.now()+15*60000;S.mods=S.mods.filter(m=>m.k!=='inc'||!m.ad);S.mods.push({k:'inc',v:3,until:Date.now()+30*60000,ad:true,label:'Turbo do anúncio'});const v=Math.max(200,rewardBase()*rnd(120,180));earn(v);dirty=true;toast('Anúncio assistido: renda 3× por 30 min e +'+fmt(v)+' moedas!','g');sfx('unlock');vib([20,30,20]);screenConfetti(40);}
   else if(kind==='chest'){S.adCdChest=Date.now()+15*60000;grantChest('ad');}
-  else if(kind==='car'){S.adCdCar=Date.now()+rnd(18,26)*60000;const v=Math.max(300,ipsBase*rnd(260,420));earn(v);const g=ri(4,9);S.gems+=g;dirty=true;
+  else if(kind==='car'){S.adCdCar=Date.now()+rnd(18,26)*60000;const v=Math.max(600,rewardBase()*rnd(600,900));earn(v);const g=ri(6,12);S.gems+=g;dirty=true;
     if(adCar){sparkle(adCar.x,adCar.y-14,26);adCar=null;}adCarAnnounced=false;
     toast('Carro dourado: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
   save();refreshPanel();};
@@ -1642,7 +1646,7 @@ function collectBubble(b,auto){const v=b.bub;b.bub=0;b.nextBub=ev&&ev.k==='golde
   const val=v*mult;earn(val);S.cnt.bub++;dailyProg('bub',1);const [wx,wy]=bWorld(b);const top=b._top||30;
   floatText(wx,wy-top-24,'+'+fmt(val)+(combo.n>1&&!auto?' ×'+(1+Math.min(2,combo.n*0.1)).toFixed(1):''),combo.n>5?'#ff8fab':'#ffd23f',combo.n>5?19:16);
   const [sx,sy]=w2s(wx,wy-top-14);flyCoins(sx,sy,auto?2:6);if(!auto){sfx('coin');vib(8);}b._bounce=TIME;if(S.tut===0){S.tut=1;tutRender();}}
-function grantChest(src){const base=Math.max(50,ipsBase*rnd(60,180));const g=ri(2,6)+(src==='super'?6:0);const L=[];
+function grantChest(src){const base=src==='ad'?Math.max(400,rewardBase()*rnd(300,480)):Math.max(50,ipsBase*rnd(60,180));const g=ri(2,6)+(src==='super'?6:0)+(src==='ad'?5:0);const L=[];
   const coins=src==='super'?base*3:base;earn(coins);S.gems+=g;L.push(['coin',fmt(coins)+' moedas']);L.push(['gem',g+' joias']);
   if(Math.random()<.25||src==='super'){const rp=Math.max(10,Math.round(C.rp*90));S.rp+=rp;L.push(['rp',rp+' de pesquisa']);}
   if(src==='super'&&Math.random()<.5){S.crys+=1;L.push(['cry','1 Cristal']);}
@@ -2133,7 +2137,7 @@ function renderSheet(keep){
     else{h+=`<p class="note">Joias são ganhas jogando: missões, conquistas, pedidos, meteoros e baús.</p>`;
       const adBoostReady=!(S.adCdBoost>Date.now()),adChestReady=!(S.adCdChest>Date.now());
       h+=`<div class="sec">Assista e ganhe</div>`;
-      h+=`<div class="row"><div class="info"><h3>Turbo 2× por 30 min</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      h+=`<div class="row"><div class="info"><h3>Turbo 3× por 30 min + moedas</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="row"><div class="info"><h3>Baú bônus</h3><p>${adChestReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdChest-Date.now())/1000)}</p></div>${adChestReady?'<button class="btn y" data-act="ad:chest">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       const carReady=!(S.adCdCar>Date.now());h+=`<div class="row"><div class="info"><h3>Carro dourado</h3><p>${carReady?'Estacionado perto da prefeitura — toque nele no mapa':'Já passou por hoje · volta em '+fmtTime((S.adCdCar-Date.now())/1000)}</p></div>${carReady?'<button class="btn y" data-act="gocar">Ir até lá</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="sec">Comprar com joias</div>`;
@@ -2396,7 +2400,7 @@ function rolFlyDrop(){
   an.onfinish=()=>d.remove();}
 function rolShowWin(seg,r){
   const big=seg.id==='jackpot'||seg.id==='rain'||seg.id==='crys';
-  const parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal'+(r.crys>1?'is':''));if(r.turboMin)parts.push('Produção 2× por '+r.turboMin+' min');
+  const parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal'+(r.crys>1?'is':''));if(r.turboMin)parts.push('Produção 3× por '+r.turboMin+' min');
   const w=$('#rolWin');if(!w)return;
   w.innerHTML=`<div class="rw-rays" style="--c:${seg.col}"></div><div class="rw-box"><svg viewBox="0 0 64 64" class="rw-ic">${SLOT_ICON[seg.id]}</svg><h3>${seg.t}</h3><p>${parts.join('<br>')}</p><small>toque pra continuar</small></div>`;
   w.hidden=false;w.classList.remove('show');void w.offsetWidth;w.classList.add('show');
