@@ -218,10 +218,10 @@ function updHUD(){$('#coinTxt').textContent=fmt(dispCoins);const it=$('#ipsTxt')
   if(S.flash)bh+=`<div class="boost" style="background:#ff8fab;box-shadow:0 2px 0 #d9567f">⚡ ${fmt(Math.max(0,S.flash.goal-(S.run-S.flash.startRun)))} · ${fmtTime((S.flash.until-Date.now())/1000)}</div>`;
   $('#boosts').innerHTML=bh;
   const carBtn=$('#carBtn');if(carBtn)carBtn.hidden=!adCar;
-  const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady();wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
+  const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady()&&S.tut>=4;wheelBtn.hidden=!rdy;wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
   const rankBtn=$('#rankBtn');if(rankBtn){const rt=$('#rankTxt');if(rt)rt.textContent=S.lbRank?'#'+fmt(S.lbRank):'Rank';}
   const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=S.oil+'/'+OIL_CAP;
-  const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=S.oil<=0;
+  const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=true;
   if(ev){const p=$('#evProg');if(p)p.style.width=(100*(1-ev.t/ev.dur))+'%';}
   if(sev){if(sev.pending){const s=$('#sevChip .sub');if(s)s.textContent='Toque para decidir · '+Math.ceil(sev.wait)+'s';}else if(sev.obj){const s=$('#sevSub');if(s)s.textContent=sev.obj.txt+': '+fmt(Math.max(0,sev.obj.prog))+'/'+fmt(sev.obj.need);const p=$('#sevProg');if(p)p.style.width=(100*clamp((sev.obj.until-TIME)/sev.obj.dur,0,1))+'%';}}
   stripRender();if(sheetMode)refreshButtons();

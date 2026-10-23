@@ -500,7 +500,6 @@ $('#btnStats').addEventListener('click',()=>{audioInit();sfx('click');openStats(
 $('#btnSettings').addEventListener('click',()=>{audioInit();sfx('click');openSettings();});
 $('#carBtn').addEventListener('click',()=>{audioInit();if(!adCar)return;const [wx,wy]=[adCar.x,adCar.y];cam.tx=wx;cam.ty=wy-20;cam.tz=1.3;sfx('click');requestAd('car');});
 $('#wheelBtn').addEventListener('click',()=>{audioInit();sfx('click');openWheel();});
-$('#rankBtn').addEventListener('click',()=>{audioInit();sfx('click');openSheet('missions','rank');});
 $('#slotBtn').addEventListener('click',()=>{audioInit();sfx('click');openSlot();});
 function openWheel(){const ready=wheelReady();
   openModal(`<h2>Baú misterioso diário</h2>
