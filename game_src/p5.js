@@ -336,9 +336,9 @@ function renderSheet(keep){
     else if(sheetTab==='metas'){let grp='';for(const m of METAS){if(m.grp!==grp){grp=m.grp;h+=`<div class="sec">${grp}</div>`;}const [a,bn]=m.p();const st=S.metas[m.id];
       h+=`<div class="row ${st||a>=bn?'':'locked'}"><div class="info"><h3>${m.n}</h3>${bar(a/bn,'b')}<p>${rewardTxt(m.r)}</p></div>${st?'<button class="btn off" disabled>Feito</button>':a>=bn?`<button class="btn y" data-act="mclaim:${m.id}">Pegar</button>`:''}</div>`;}}
     else if(sheetTab==='ach'){for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
-    else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Qualquer jogador do mundo pode aparecer aqui.</p>
-      <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||'').replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
-      <button class="btn y wide" data-act="lbsend">Enviar · ${fmt(S.pop)} habitantes</button>`;
+    else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Sua pontuação (${fmt(S.pop)} habitantes) é enviada sozinha de tempos em tempos — não precisa fazer nada.</p>
+      <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||lbDefaultName()).replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
+      <button class="btn y wide" data-act="lbsend">Salvar nome e atualizar agora</button>`;
       if(lbLoading&&!lbCache)h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;
       else if(lbErr)h+=`<div class="row"><div class="info"><p class="note">Não consegui carregar agora.</p></div><button class="btn" data-act="lbrefresh">Tentar de novo</button></div>`;
       else{if(lbCache===null)lbFetchTop();

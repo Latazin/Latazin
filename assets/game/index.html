@@ -1372,12 +1372,13 @@ async function lbFetchTop(){if(lbLoading)return;lbLoading=true;lbErr=false;
     if(!res.ok)throw 0;lbCache=await res.json();}
   catch(e){lbErr=true;}
   lbLoading=false;renderSheet(true);}
-async function lbSubmit(){const name=(S.lbName||'Jogador').slice(0,18)||'Jogador';
+function lbDefaultName(){return 'Prefeito'+deviceId().replace(/[^a-zA-Z0-9]/g,'').slice(0,4).toUpperCase();}
+async function lbSubmit(silent){if(!S.lbName){S.lbName=lbDefaultName();save();}const name=S.lbName.slice(0,18)||'Jogador';
   try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?on_conflict=device_id',{method:'POST',
       headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
       body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
-    if(!res.ok)throw 0;toast('Pontuação enviada pro ranking global!','g');lbCache=null;lbFetchTop();}
-  catch(e){toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
+    if(!res.ok)throw 0;if(!silent)toast('Pontuação enviada pro ranking global!','g');lbCache=null;if(!silent)lbFetchTop();}
+  catch(e){if(!silent)toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
@@ -1962,9 +1963,9 @@ function renderSheet(keep){
     else if(sheetTab==='metas'){let grp='';for(const m of METAS){if(m.grp!==grp){grp=m.grp;h+=`<div class="sec">${grp}</div>`;}const [a,bn]=m.p();const st=S.metas[m.id];
       h+=`<div class="row ${st||a>=bn?'':'locked'}"><div class="info"><h3>${m.n}</h3>${bar(a/bn,'b')}<p>${rewardTxt(m.r)}</p></div>${st?'<button class="btn off" disabled>Feito</button>':a>=bn?`<button class="btn y" data-act="mclaim:${m.id}">Pegar</button>`:''}</div>`;}}
     else if(sheetTab==='ach'){for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
-    else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Qualquer jogador do mundo pode aparecer aqui.</p>
-      <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||'').replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
-      <button class="btn y wide" data-act="lbsend">Enviar · ${fmt(S.pop)} habitantes</button>`;
+    else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Sua pontuação (${fmt(S.pop)} habitantes) é enviada sozinha de tempos em tempos — não precisa fazer nada.</p>
+      <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||lbDefaultName()).replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
+      <button class="btn y wide" data-act="lbsend">Salvar nome e atualizar agora</button>`;
       if(lbLoading&&!lbCache)h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;
       else if(lbErr)h+=`<div class="row"><div class="info"><p class="note">Não consegui carregar agora.</p></div><button class="btn" data-act="lbrefresh">Tentar de novo</button></div>`;
       else{if(lbCache===null)lbFetchTop();
@@ -2299,7 +2300,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
 /* =====================================================================
    SIMULAÇÃO DE TEMPO
    ===================================================================== */
-let dispCoins=0,uiT=0,saveT=0,ipsT=0,achT=0,devT=0,ctxT=6,agT=5,histT=0;
+let dispCoins=0,uiT=0,saveT=0,ipsT=0,achT=0,devT=0,ctxT=6,agT=5,histT=0,lbT=20;
 function econ(dt){
   if(dirty)recalc();
   const tgt=C.hcap*(.5+.5*S.happy/100)*C.mpop;S.pop+=(tgt-S.pop)*Math.min(1,dt*.06);if(!(S.pop>=0))S.pop=0;
@@ -2331,6 +2332,7 @@ function update(dt){
   uiT-=dt;if(uiT<=0){uiT=.25;updHUD();}
   ipsT-=dt;if(ipsT<=0){ipsT=.5;dirty=true;}
   saveT-=dt;if(saveT<=0){saveT=10;save();}
+  lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0)lbSubmit(true);}
   devT-=dt;if(devT<=0){devT=2;updateDev();if(heatMode)computeHeat();}
   ctxT-=dt;if(ctxT<=0){ctxT=6;ctxTick();}
   agT-=dt;if(agT<=0){agT=5;syncAgents(false);}

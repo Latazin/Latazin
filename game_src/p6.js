@@ -154,7 +154,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
 /* =====================================================================
    SIMULAÇÃO DE TEMPO
    ===================================================================== */
-let dispCoins=0,uiT=0,saveT=0,ipsT=0,achT=0,devT=0,ctxT=6,agT=5,histT=0;
+let dispCoins=0,uiT=0,saveT=0,ipsT=0,achT=0,devT=0,ctxT=6,agT=5,histT=0,lbT=20;
 function econ(dt){
   if(dirty)recalc();
   const tgt=C.hcap*(.5+.5*S.happy/100)*C.mpop;S.pop+=(tgt-S.pop)*Math.min(1,dt*.06);if(!(S.pop>=0))S.pop=0;
@@ -186,6 +186,7 @@ function update(dt){
   uiT-=dt;if(uiT<=0){uiT=.25;updHUD();}
   ipsT-=dt;if(ipsT<=0){ipsT=.5;dirty=true;}
   saveT-=dt;if(saveT<=0){saveT=10;save();}
+  lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0)lbSubmit(true);}
   devT-=dt;if(devT<=0){devT=2;updateDev();if(heatMode)computeHeat();}
   ctxT-=dt;if(ctxT<=0){ctxT=6;ctxTick();}
   agT-=dt;if(agT<=0){agT=5;syncAgents(false);}

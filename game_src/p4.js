@@ -183,12 +183,13 @@ async function lbFetchTop(){if(lbLoading)return;lbLoading=true;lbErr=false;
     if(!res.ok)throw 0;lbCache=await res.json();}
   catch(e){lbErr=true;}
   lbLoading=false;renderSheet(true);}
-async function lbSubmit(){const name=(S.lbName||'Jogador').slice(0,18)||'Jogador';
+function lbDefaultName(){return 'Prefeito'+deviceId().replace(/[^a-zA-Z0-9]/g,'').slice(0,4).toUpperCase();}
+async function lbSubmit(silent){if(!S.lbName){S.lbName=lbDefaultName();save();}const name=S.lbName.slice(0,18)||'Jogador';
   try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?on_conflict=device_id',{method:'POST',
       headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
       body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
-    if(!res.ok)throw 0;toast('Pontuação enviada pro ranking global!','g');lbCache=null;lbFetchTop();}
-  catch(e){toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
+    if(!res.ok)throw 0;if(!silent)toast('Pontuação enviada pro ranking global!','g');lbCache=null;if(!silent)lbFetchTop();}
+  catch(e){if(!silent)toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
