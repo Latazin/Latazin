@@ -107,3 +107,39 @@ jobs:
           name: Log de erro (build ${{ github.run_number }})
           body: Build falhou. Veja build_log.txt.
           files: /tmp/build_log.txt
+
+      - name: Habilitar KVM (emulador)
+        if: success()
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Abrir o app num emulador e capturar o log de crash
+        if: success()
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            adb logcat -c
+            adb install -r build/app/outputs/flutter-apk/app-release.apk
+            adb shell monkey -p com.cartooncity.cartoon_city -c android.intent.category.LAUNCHER 1
+            sleep 12
+            adb logcat -d > /tmp/full_logcat.txt
+            adb logcat -d -b crash > /tmp/crash_buffer.txt || true
+            grep -A 60 "FATAL EXCEPTION\|AndroidRuntime" /tmp/full_logcat.txt > /tmp/crash_log.txt || echo "Nenhum FATAL EXCEPTION encontrado no logcat" > /tmp/crash_log.txt
+            cat /tmp/crash_buffer.txt >> /tmp/crash_log.txt
+
+      - name: Publicar log de crash do emulador
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: crash-log-${{ github.run_number }}
+          name: Log de crash (build ${{ github.run_number }})
+          body: Log do emulador ao abrir o app. Veja crash_log.txt e full_logcat.txt.
+          files: |
+            /tmp/crash_log.txt
+            /tmp/full_logcat.txt
