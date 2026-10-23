@@ -541,15 +541,22 @@ function animateReel(stripEl,finalId,delay){return new Promise(res=>{
   stripEl.style.transition='none';stripEl.style.transform='translateY(0px)';
   void stripEl.offsetHeight;
   const targetY=-(ids.length-1)*cellH;
-  setTimeout(()=>{stripEl.style.transition='transform 900ms cubic-bezier(.15,.68,.28,1.05)';stripEl.style.transform='translateY('+targetY+'px)';sfx('click');},delay);
+  setTimeout(()=>{stripEl.classList.add('spinning');stripEl.style.transition='transform 900ms cubic-bezier(.15,.68,.28,1.05)';stripEl.style.transform='translateY('+targetY+'px)';sfx('click');
+    setTimeout(()=>stripEl.classList.remove('spinning'),620);},delay);
   setTimeout(res,delay+940);});}
 function openSlot(){
   openModal(`<div id="slotCab" class="slot-cab">
   <div class="marquee">${Array(9).fill('<i></i>').join('')}</div>
   <h2>CAÇA-MOEDAS</h2>
   <p class="note" style="text-align:center;margin-top:0">Gaste 1 giro e combine 3 símbolos iguais pra um prêmio x4. Os giros recarregam sozinhos.</p>
-  <div id="slotReels" style="display:flex;gap:10px;justify-content:center;margin:14px 0">
-    ${[0,1,2].map(()=>`<div class="reelWin"><div class="reelStrip">${`<div style="height:84px;display:flex;align-items:center;justify-content:center">${schip('c1')}</div>`}</div><div class="shine"></div></div>`).join('')}
+  <div class="slot-machine" style="margin:14px 0">
+    <div class="reel-panel"><i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
+      <div class="payline"></div>
+      <div id="slotReels" style="display:flex;gap:7px">
+        ${[0,1,2].map(()=>`<div class="reelWin"><div class="reelStrip">${`<div style="height:84px;display:flex;align-items:center;justify-content:center">${schip('c1')}</div>`}</div><div class="shine"></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="slot-lever" id="slotLever"><div class="base"></div><div class="arm"><div class="rod"></div><div class="knob"></div></div></div>
   </div>
   <div id="slotResult" style="text-align:center;min-height:30px"></div>
   <div id="slotCountWrap">${slotRow()}</div>
@@ -561,11 +568,12 @@ function openSlot(){
   clearInterval(openSlot._t);
   openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=slotRow();
     const go=$('#slotGo'),buy=$('#slotBuy');if(go&&!spinning)go.disabled=S.spins<=0;if(buy)buy.disabled=S.spins>=spinCap();},1000);
-  $('#slotGo').addEventListener('click',async()=>{
+  async function doSpinSequence(){
     if(spinning||S.spins<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
     const res=doSpin();if(!res){spinning=false;$('#slotGo').disabled=S.spins<=0;return;}
+    const lever=$('#slotLever');if(lever){lever.classList.add('pulled');setTimeout(()=>lever.classList.remove('pulled'),260);}
     const strips=document.querySelectorAll('#slotReels .reelStrip');
-    sfx('click');
+    sfx('click');vib([12]);
     await Promise.all([animateReel(strips[0],res.reels[0].id,0),animateReel(strips[1],res.reels[1].id,180),animateReel(strips[2],res.reels[2].id,360)]);
     spinning=false;
     const parts=[];if(res.coins)parts.push('+'+fmt(res.coins)+' moedas');if(res.gems)parts.push('+'+res.gems+' joias');if(res.crys)parts.push('+'+res.crys+' Cristal');if(res.turboMin)parts.push('Turbo 2× por '+Math.round(res.turboMin)+' min');
@@ -574,7 +582,9 @@ function openSlot(){
     $('#slotGo').disabled=S.spins<=0;
     const cab=$('#slotCab');if(res.combo&&cab){cab.classList.add('winGlow');setTimeout(()=>cab.classList.remove('winGlow'),1500);}
     screenConfetti(res.combo?120:35);sfx(res.combo?'unlock':'coin');vib(res.combo?[20,30,20,30,20]:[15]);
-  });
+  }
+  $('#slotGo').addEventListener('click',doSpinSequence);
+  $('#slotLever').addEventListener('click',doSpinSequence);
   $('#slotBuy').addEventListener('click',()=>{if(buySpin()){sfx('up');const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();$('#slotGo').disabled=S.spins<=0;$('#slotBuy').disabled=S.spins>=spinCap();}else{sfx('err');toast('Joias insuficientes ou giros no máximo','r');}});
 }
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}

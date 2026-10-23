@@ -94,9 +94,21 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 .marquee i{width:6px;height:6px;border-radius:50%;background:#ffd65c;box-shadow:0 0 6px #ffd65c,0 0 2px #fff;animation:bulbBlink 1.2s infinite}
 .marquee i:nth-child(3n+1){animation-delay:.2s}.marquee i:nth-child(3n+2){animation-delay:.5s}.marquee i:nth-child(3n){animation-delay:.8s}
 @keyframes bulbBlink{0%,100%{opacity:1}50%{opacity:.2}}
-.reelWin{width:84px;height:84px;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(180deg,#0c0c14,#05050a);border:3px solid #caa43a;box-shadow:inset 0 0 16px rgba(0,0,0,.85)}
-.reelWin .shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 26%,transparent 74%,rgba(0,0,0,.45));pointer-events:none}
-.reelStrip{display:flex;flex-direction:column}
+.reel-panel{display:flex;gap:7px;justify-content:center;padding:10px;border-radius:16px;position:relative;background:linear-gradient(180deg,#e2e8ee,#9099a3 10%,#5c636c 50%,#9099a3 90%,#e2e8ee);box-shadow:inset 0 2px 3px rgba(255,255,255,.6),inset 0 -3px 7px rgba(0,0,0,.55),0 5px 12px rgba(0,0,0,.45)}
+.reel-panel .rivet{position:absolute;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8a919a 70%);box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.reel-panel .rivet.tl{top:5px;left:6px}.reel-panel .rivet.tr{top:5px;right:6px}.reel-panel .rivet.bl{bottom:5px;left:6px}.reel-panel .rivet.br{bottom:5px;right:6px}
+.payline{position:absolute;left:8px;right:8px;top:50%;height:2px;background:linear-gradient(90deg,transparent,#ff3b3b 15%,#ff3b3b 85%,transparent);transform:translateY(-1px);box-shadow:0 0 7px #ff3b3b;z-index:3;pointer-events:none;opacity:.85}
+.reelWin{width:82px;height:84px;border-radius:9px;overflow:hidden;position:relative;background:linear-gradient(180deg,#0c0c14,#05050a);border:2px solid #1a1a22;box-shadow:inset 0 0 16px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.15)}
+.reelWin .shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 26%,transparent 74%,rgba(0,0,0,.5));pointer-events:none;z-index:2}
+.reelStrip{display:flex;flex-direction:column;transition:filter .2s}
+.reelStrip.spinning{filter:blur(5px)}
+.slot-machine{position:relative;padding-right:40px}
+.slot-lever{position:absolute;top:2px;right:-2px;width:36px;height:150px;z-index:4;cursor:pointer}
+.slot-lever .base{position:absolute;right:6px;bottom:6px;width:18px;height:40px;border-radius:6px;background:linear-gradient(90deg,#8a929b,#e2e8ee 45%,#8a929b);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.slot-lever .arm{position:absolute;right:10px;bottom:40px;width:22px;height:100px;transform-origin:bottom center;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+.slot-lever .arm .rod{position:absolute;right:7.5px;bottom:0;width:7px;height:76px;border-radius:4px;background:linear-gradient(90deg,#9aa0a8,#f0f3f6 45%,#9aa0a8);box-shadow:0 0 3px rgba(0,0,0,.4)}
+.slot-lever .arm .knob{position:absolute;right:0;bottom:72px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a7a,#c21f3a 75%);box-shadow:0 3px 5px rgba(0,0,0,.55),0 0 10px rgba(255,80,80,.5)}
+.slot-lever.pulled .arm{transform:rotate(34deg);transition:transform .18s ease-in}
 .schip{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2b2b38,#0e0e16 72%);display:flex;align-items:center;justify-content:center;flex:none}
 .schip svg{width:60%;height:60%}
 .slot-cab.winGlow{animation:winPulse 1.5s ease-in-out}
@@ -2268,15 +2280,22 @@ function animateReel(stripEl,finalId,delay){return new Promise(res=>{
   stripEl.style.transition='none';stripEl.style.transform='translateY(0px)';
   void stripEl.offsetHeight;
   const targetY=-(ids.length-1)*cellH;
-  setTimeout(()=>{stripEl.style.transition='transform 900ms cubic-bezier(.15,.68,.28,1.05)';stripEl.style.transform='translateY('+targetY+'px)';sfx('click');},delay);
+  setTimeout(()=>{stripEl.classList.add('spinning');stripEl.style.transition='transform 900ms cubic-bezier(.15,.68,.28,1.05)';stripEl.style.transform='translateY('+targetY+'px)';sfx('click');
+    setTimeout(()=>stripEl.classList.remove('spinning'),620);},delay);
   setTimeout(res,delay+940);});}
 function openSlot(){
   openModal(`<div id="slotCab" class="slot-cab">
   <div class="marquee">${Array(9).fill('<i></i>').join('')}</div>
   <h2>CAÇA-MOEDAS</h2>
   <p class="note" style="text-align:center;margin-top:0">Gaste 1 giro e combine 3 símbolos iguais pra um prêmio x4. Os giros recarregam sozinhos.</p>
-  <div id="slotReels" style="display:flex;gap:10px;justify-content:center;margin:14px 0">
-    ${[0,1,2].map(()=>`<div class="reelWin"><div class="reelStrip">${`<div style="height:84px;display:flex;align-items:center;justify-content:center">${schip('c1')}</div>`}</div><div class="shine"></div></div>`).join('')}
+  <div class="slot-machine" style="margin:14px 0">
+    <div class="reel-panel"><i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
+      <div class="payline"></div>
+      <div id="slotReels" style="display:flex;gap:7px">
+        ${[0,1,2].map(()=>`<div class="reelWin"><div class="reelStrip">${`<div style="height:84px;display:flex;align-items:center;justify-content:center">${schip('c1')}</div>`}</div><div class="shine"></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="slot-lever" id="slotLever"><div class="base"></div><div class="arm"><div class="rod"></div><div class="knob"></div></div></div>
   </div>
   <div id="slotResult" style="text-align:center;min-height:30px"></div>
   <div id="slotCountWrap">${slotRow()}</div>
@@ -2288,11 +2307,12 @@ function openSlot(){
   clearInterval(openSlot._t);
   openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=slotRow();
     const go=$('#slotGo'),buy=$('#slotBuy');if(go&&!spinning)go.disabled=S.spins<=0;if(buy)buy.disabled=S.spins>=spinCap();},1000);
-  $('#slotGo').addEventListener('click',async()=>{
+  async function doSpinSequence(){
     if(spinning||S.spins<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
     const res=doSpin();if(!res){spinning=false;$('#slotGo').disabled=S.spins<=0;return;}
+    const lever=$('#slotLever');if(lever){lever.classList.add('pulled');setTimeout(()=>lever.classList.remove('pulled'),260);}
     const strips=document.querySelectorAll('#slotReels .reelStrip');
-    sfx('click');
+    sfx('click');vib([12]);
     await Promise.all([animateReel(strips[0],res.reels[0].id,0),animateReel(strips[1],res.reels[1].id,180),animateReel(strips[2],res.reels[2].id,360)]);
     spinning=false;
     const parts=[];if(res.coins)parts.push('+'+fmt(res.coins)+' moedas');if(res.gems)parts.push('+'+res.gems+' joias');if(res.crys)parts.push('+'+res.crys+' Cristal');if(res.turboMin)parts.push('Turbo 2× por '+Math.round(res.turboMin)+' min');
@@ -2301,7 +2321,9 @@ function openSlot(){
     $('#slotGo').disabled=S.spins<=0;
     const cab=$('#slotCab');if(res.combo&&cab){cab.classList.add('winGlow');setTimeout(()=>cab.classList.remove('winGlow'),1500);}
     screenConfetti(res.combo?120:35);sfx(res.combo?'unlock':'coin');vib(res.combo?[20,30,20,30,20]:[15]);
-  });
+  }
+  $('#slotGo').addEventListener('click',doSpinSequence);
+  $('#slotLever').addEventListener('click',doSpinSequence);
   $('#slotBuy').addEventListener('click',()=>{if(buySpin()){sfx('up');const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();$('#slotGo').disabled=S.spins<=0;$('#slotBuy').disabled=S.spins>=spinCap();}else{sfx('err');toast('Joias insuficientes ou giros no máximo','r');}});
 }
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
