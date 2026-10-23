@@ -60,7 +60,7 @@ function edgeOK(ax,ay,bx,by){if(ay===by){const ix=Math.min(ax,bx);return distUnl
 function buildEdges(){EDGES=[];for(let y=0;y<=GYN;y++)for(let x=0;x<=GXN;x++){if(x<GXN&&edgeOK(x,y,x+1,y))EDGES.push([x,y,x+1,y]);if(y<GYN&&edgeOK(x,y,x,y+1))EDGES.push([x,y,x,y+1]);}}
 const CARC=['#ff5d6c','#5aa9ff','#ffd23f','#2fd08a','#ff9f43','#ffffff','#9b5de5'];
 function newAgent(k){const e=pick(EDGES);if(!e)return null;const rev=Math.random()<.5;const car=k!=='ped'&&k!=='vip';
-  return {k,car,fx:rev?e[2]:e[0],fy:rev?e[3]:e[1],tx:rev?e[0]:e[2],ty:rev?e[1]:e[3],p:Math.random(),sp:car?(k==='truck'?rnd(.7,1):k==='bus'?rnd(.6,.9):rnd(.9,1.6)):rnd(.25,.45)*(k==='vip'?.7:1),c:pick(CARC),sk:pick(['#ffd7b5','#e0ac69','#8d5524','#f1c27d']),sh:pick(CARC),id:aid++,born:TIME};}
+  return {k,car,fx:rev?e[2]:e[0],fy:rev?e[3]:e[1],tx:rev?e[0]:e[2],ty:rev?e[1]:e[3],p:Math.random(),sp:car?(k==='truck'?rnd(.7,1):k==='bus'?rnd(.6,.9):rnd(.9,1.6)):rnd(.25,.45)*(k==='vip'?.7:1),c:pick(CARC),sk:pick(['#ffd7b5','#e0ac69','#8d5524','#f1c27d']),sh:pick(CARC),id:aid++,_born:TIME};}
 function agentTargets(){const n=S.unlocked.length;return {car:clamp(Math.round(4+n*2+C.trafD*.5),6,34),bus:(tk('tra2')||countType('onibus'))?clamp(2+C.transit*2,0,8):0,truck:clamp(Math.round(C.deliv/6),0,10),ped:clamp(Math.round(8+S.pop/25+C.V/20),8,60)};}
 function syncAgents(force){if(force){buildEdges();agents=agents.filter(a=>a.k==='vip');}if(!EDGES.length)buildEdges();const tg=agentTargets();
   for(const k in tg){const cur=agents.filter(a=>a.k===k);let diff=tg[k]-cur.length;if(!force)diff=clamp(diff,-2,2);
@@ -69,7 +69,7 @@ function spawnVip(){const a=newAgent('vip');if(a)agents.push(a);}
 function stepAgents(dt){const slow=1/(1+C.cg*1.5);for(const a of agents){a.p+=a.sp*dt/DS*(a.car?slow:1);
   if(a.p>=1){a.p-=1;const nx=a.tx,ny=a.ty;const opts=[];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x2=nx+dx,y2=ny+dy;if(x2<0||y2<0||x2>GXN||y2>GYN)continue;if(x2===a.fx&&y2===a.fy)continue;if(edgeOK(nx,ny,x2,y2))opts.push([x2,y2]);}
     if(!opts.length)opts.push([a.fx,a.fy]);const o=pick(opts);a.fx=nx;a.fy=ny;a.tx=o[0];a.ty=o[1];}}
-  agents=agents.filter(a=>a.k!=='vip'||TIME-a.born<45);}
+  agents=agents.filter(a=>a.k!=='vip'||TIME-a._born<45);}
 function agentPos(a){const dx=a.tx-a.fx,dy=a.ty-a.fy;let u=(a.fx+dx*a.p)*DS+.5,v=(a.fy+dy*a.p)*DS+.5;const lane=a.car?.2:.42;const side=(a.id%2?1:-1);
   if(dx!==0)v+=a.car?lane*Math.sign(dx):lane*side;else u-=a.car?lane*Math.sign(dy):lane*side;return [u,v,dx,dy];}
 function drawCar(a,u,v,dx,dy){const [x,y]=proj(u,v);const cs=S.cos.eq.car;let c=a.c;if(cs==='car_gold')c='#ffc21a';else if(cs==='car_rainbow')c=CARC[(a.id+Math.floor(TIME*2))%CARC.length];
@@ -143,7 +143,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
   if(hit){
     if(ev&&ev.k==='mega'&&ev.bid===hit.id){hit.lvl+=10;S.maxLv=Math.max(S.maxLv,hit.lvl);dirty=true;const [cx,cy]=bWorld(hit);burst(cx,cy-30,50);floatText(cx,cy-70,'+10 níveis!','#c9a8ff',20);showBanner('Mega Upgrade!',TYPES[hit.t].n);sfx('unlock');eventTap();endEvent();checkAch();return;}
     if(ev&&ev.k==='golden'&&ev.bid===hit.id&&TIME-(ev.lt||0)>.35){ev.lt=TIME;const v=Math.max(20,bIncome(hit)*2);earn(v);const [cx,cy]=bWorld(hit);floatText(cx,cy-(hit._top||30)-20,'+'+fmt(v),'#ffd23f',18);flyCoins(...w2s(cx,cy-30),6);sfx('coin');if(!ev.tapped){ev.tapped=1;eventTap();}}
-    hit.bounce=TIME;sfx('click');openBuilding(hit);return;}
+    hit._bounce=TIME;sfx('click');openBuilding(hit);return;}
   const u=Math.floor((wx/HW+wy/HH)/2),v=Math.floor((wy/HH-wx/HW)/2);const d=distOf(u,v);
   if(d>=0&&d<=10&&!isRoad(u,v)){if(!S.unlocked.includes(d)){sfx('click');openSheet('districts');return;}if(plotFree(u,v)){targetPlot=[u,v];sfx('click');openSheet('build');return;}}
   targetPlot=null;}
@@ -339,8 +339,8 @@ function crane(cx,cy){const [kx,ky]=off(cx,cy,.3,-.3);line(kx,ky-3,kx,ky-56,'#ff
 function drawBuilding(b,cx,cy){
   const T=TYPES[b.t];const now=Date.now();const busy=b.ready>now;const tier=tierOf(b.lvl);const hf=1+.09*Math.min(tier,6);
   if(T.cat!=='deco')ell(cx,cy+2,26,13,'rgba(43,35,80,.16)',false);
-  X.save();const bt=TIME-(b.bounce||-9);let sy=1,sx=1;if(bt<1){const k=Math.sin(bt*20)*Math.exp(-bt*6);sy=1+.2*k;sx=1-.12*k;}
-  const born=TIME-(b.born===undefined?-9:b.born);let drop=0;if(born<.5&&!busy)drop=(1-ease(born/.5))*120;
+  X.save();let bt=TIME-(b._bounce===undefined?-9:b._bounce);if(bt<0)bt=9;let sy=1,sx=1;if(bt<1){const k=Math.sin(bt*20)*Math.exp(-bt*6);sy=1+.2*k;sx=1-.12*k;}
+  let born=TIME-(b._born===undefined?-9:b._born);if(born<0)born=9;let drop=0;if(born<.5&&!busy)drop=(1-ease(born/.5))*120;
   X.translate(cx,cy);X.scale(sx,sy);X.translate(-cx,-cy-drop);
   const golden=ev&&ev.k==='golden'&&ev.bid===b.id;TINT=golden?gold:b.skin&&SKINS[b.skin]?SKINS[b.skin].r:(tier>=6&&b.t!=='dourada'&&Math.sin(TIME*1.5+b.id)>.96?gold:null);
   let top;const tot=Math.max(1,b.bt0||buildTime(b.t)||10);const prog=busy?1-clamp((b.ready-now)/1000/tot,0,1):1;
@@ -396,7 +396,8 @@ function boot(){resize();const src=load();afterLoad();
   function frame(now){const wall=Date.now();let wd=(wall-lastWall)/1000;lastWall=wall;if(wd<0)wd=0;if(wd>30)offlineGain(wd,false);else econ(Math.min(wd,5));
     let dt=(now-last)/1000;last=now;dt=clamp(dt,0,.1);update(dt);render();requestAnimationFrame(frame);}
   requestAnimationFrame(frame);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});window.addEventListener('pagehide',save);
+  window.__ccResume=()=>{groundDirty=true;for(const b of S.buildings){if(b._born>TIME)b._born=-9;if(b._bounce>TIME)b._bounce=-9;}};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else window.__ccResume();});window.addEventListener('pagehide',save);
   window.__cc={S:()=>S,C,build,upgrade,startEvent,unlockDistrict,tap,econ,recalc,doPrestige,essGain,research,startStage,openSheet,setTarget:p=>targetPlot=p,chooseEv,openEvent,
     forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});

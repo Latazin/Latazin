@@ -2,6 +2,10 @@ name: Gerar APK
 
 on:
   push:
+    paths-ignore:
+      - 'assets/game/**'
+      - 'game_src/**'
+      - 'build_game.sh'
   workflow_dispatch:
 
 permissions:
@@ -26,12 +30,24 @@ jobs:
       - name: Criar pastas Android e iOS
         run: flutter create . --org com.cartooncity --project-name cartoon_city --platforms android,ios
 
-      - name: Nome do app
-        run: sed -i 's/android:label="cartoon_city"/android:label="Cartoon City"/' android/app/src/main/AndroidManifest.xml
+      - name: Nome do app e acesso à internet (para atualizações)
+        run: |
+          python3 - <<'PY'
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p).read().replace('android:label="cartoon_city"','android:label="Cartoon City"')
+          if 'android.permission.INTERNET' not in s:
+              s=s.replace('<application','<uses-permission android:name="android.permission.INTERNET"/>\n    <application',1)
+          open(p,'w').write(s)
+          PY
+
+      - name: Assinatura fixa (permite atualizar por cima sem desinstalar)
+        run: |
+          mkdir -p ~/.android
+          cp android-keys/debug.keystore ~/.android/debug.keystore
 
       - run: flutter pub get
       - run: dart run flutter_launcher_icons
-      - run: flutter build apk --release
+      - run: flutter build apk --release --build-number=$((100 + ${{ github.run_number }}))
 
       - uses: actions/upload-artifact@v4
         with:

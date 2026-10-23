@@ -176,7 +176,7 @@ function sanitize(o){const d=newState();const wasV1=!o.v||o.v<2;
   for(const k in d)if(!(k in o)||o[k]===null&&d[k]!==null)o[k]=d[k];for(const k in d.cnt)if(!(k in o.cnt))o.cnt[k]=d.cnt[k];for(const k in d.set)if(!(k in o.set))o.set[k]=d.set[k];
   o.coins=isFinite(o.coins)?Math.max(0,o.coins):0;o.gems=Math.max(0,Math.floor(o.gems||0));o.rp=isFinite(o.rp)?Math.max(0,o.rp):0;o.crys=isFinite(o.crys)?Math.max(0,o.crys):0;
   o.pop=isFinite(o.pop)?Math.max(0,o.pop):0;o.happy=isFinite(o.happy)?clamp(o.happy,0,100):55;
-  o.buildings=o.buildings.filter(b=>TYPES[b.t]&&Number.isInteger(b.x)&&Number.isInteger(b.y)&&b.lvl>=1&&(b.t!=='prj'||PRJM[b.pid]));
+  for(const b of o.buildings){delete b.born;delete b.bounce;}o.buildings=o.buildings.filter(b=>TYPES[b.t]&&Number.isInteger(b.x)&&Number.isInteger(b.y)&&b.lvl>=1&&(b.t!=='prj'||PRJM[b.pid]));
   if(!o.unlocked.includes(0))o.unlocked.unshift(0);o.cos.own=o.cos.own||[];o.cos.eq=o.cos.eq||{};if(!Array.isArray(o.mods))o.mods=[];
   if(wasV1){o.v=2;o.seen2=false;if(!o.buildings.some(b=>b.t==='moinho')){const free=plotsOf(0).find(([x,y])=>!o.buildings.some(b=>b.x===x&&b.y===y));if(free)o.buildings.push({id:o.nid++,t:'moinho',x:free[0],y:free[1],lvl:1,ready:0});}
     o.pop=0;for(const b of o.buildings){const f=TYPES[b.t].f;if(f.pop)o.pop+=f.pop*(1+.1*(b.lvl-1))*.6;}}
@@ -246,7 +246,7 @@ function build(t){
   if(T.cry&&S.crys<T.cry){sfx('err');toast('Faltam Cristais ('+T.cry+')','r');return;}
   const c=buildCost(t);if(!spend(c)){sfx('err');toast('Moedas insuficientes','r');return;}
   if(T.cry)S.crys-=T.cry;
-  const bt=buildTime(t);const b={id:S.nid++,t,x:plot[0],y:plot[1],lvl:1,ready:Date.now()+bt*1000,born:TIME,bounce:0,bt0:bt};S.buildings.push(b);rebuildOcc();
+  const bt=buildTime(t);const b={id:S.nid++,t,x:plot[0],y:plot[1],lvl:1,ready:Date.now()+bt*1000,_born:TIME,_bounce:0,bt0:bt};S.buildings.push(b);rebuildOcc();
   if(T.cat==='deco'){S.cnt.deco++;dailyProg('deco',1);}else{S.cnt.built++;dailyProg('build',1);}
   for(const tg of T.tags)S.cnt.tags[tg]=(S.cnt.tags[tg]||0)+1;
   targetPlot=null;const [wx,wy]=bWorld(b);camTo(wx,wy-20);burst(wx,wy-10,18);sfx('build');vib(20);
@@ -254,7 +254,7 @@ function build(t){
   b.nextBub=rnd(8,18);dirty=true;if(S.tut===1&&(t==='cafe'||t==='padaria')){S.tut=2;tutRender();}
   refreshPanel();checkAch();save();}
 let ceremony=null;
-function finishBuild(b,silent){b._wasBusy=false;const [wx,wy]=bWorld(b);b.bounce=TIME;b.born=TIME;
+function finishBuild(b,silent){b._wasBusy=false;const [wx,wy]=bWorld(b);b._bounce=TIME;b._born=TIME;
   if(b.t==='prj'){const st=S.prj[b.pid];if(st){st.s++;const p=PRJM[b.pid];if(st.s>=3){S.cnt.prjDone++;startCeremony(b,p.n,true);showBanner(p.n,'Projeto concluído!');sfx('unlock');groundDirty=true;syncAgents(true);say(p.ch,'Conseguimos! '+p.n+' está pronto. '+p.fx+'.',6);}
     else{toast(p.n+': etapa "'+p.st[st.s-1].n+'" concluída','g');sparkle(wx,wy-30,16);sfx('up');}}dirty=true;refreshPanel();return;}
   S.seenT[b.t]=1;checkCollections();
@@ -269,7 +269,7 @@ function upgrade(b,n){
   if(n==='max')n=maxAfford(b,S.coins);if(!n){sfx('err');toast('Moedas insuficientes','r');return;}
   const c=bulkCost(b,n);if(!spend(c)){sfx('err');toast('Moedas insuficientes','r');return;}
   const before=bIncome(b);const t0=tierOf(b.lvl);b.lvl+=n;S.maxLv=Math.max(S.maxLv,b.lvl);S.cnt.upg+=n;dailyProg('upg',n);dirty=true;recalc();
-  const after=bIncome(b);const [wx,wy]=bWorld(b);b.bounce=TIME;sparkle(wx,wy-30,12);floatText(wx,wy-60,after>before?'+'+fmt(after-before)+'/s':'Nível '+b.lvl,'#7ef0b7',15);sfx('up');vib(15);
+  const after=bIncome(b);const [wx,wy]=bWorld(b);b._bounce=TIME;sparkle(wx,wy-30,12);floatText(wx,wy-60,after>before?'+'+fmt(after-before)+'/s':'Nível '+b.lvl,'#7ef0b7',15);sfx('up');vib(15);
   if(tierOf(b.lvl)>t0){const extra=b.t==='casa'&&tierOf(b.lvl)===2?' Virou sobrado!':b.t==='casa'&&tierOf(b.lvl)===4?' Virou casa grande!':'';showBanner('Marco nível '+prevMile(b.lvl)+'!'+extra,T.n);burst(wx,wy-30,30);sfx('unlock');}
   if(S.tut===2){S.tut=3;tutRender();}refreshPanel();checkAch();}
 function demolish(id){const b=S.buildings.find(x=>x.id===id);if(!b||b.t==='pref'||b.t==='prj')return;S.buildings=S.buildings.filter(x=>x.id!==id);rebuildOcc();dirty=true;sfx('build');closeSheet();toast('Construção removida');save();}
@@ -286,7 +286,7 @@ function collectBubble(b,auto){const v=b.bub;b.bub=0;b.nextBub=ev&&ev.k==='golde
   let mult=tk('aut3')?1.5:1;if(!auto){combo.n++;combo.t=2.6;mult*=1+Math.min(2,combo.n*0.1);}
   const val=v*mult;earn(val);S.cnt.bub++;dailyProg('bub',1);const [wx,wy]=bWorld(b);const top=b._top||30;
   floatText(wx,wy-top-24,'+'+fmt(val)+(combo.n>1&&!auto?' ×'+(1+Math.min(2,combo.n*0.1)).toFixed(1):''),combo.n>5?'#ff8fab':'#ffd23f',combo.n>5?19:16);
-  const [sx,sy]=w2s(wx,wy-top-14);flyCoins(sx,sy,auto?2:6);if(!auto){sfx('coin');vib(8);}b.bounce=TIME;if(S.tut===0){S.tut=1;tutRender();}}
+  const [sx,sy]=w2s(wx,wy-top-14);flyCoins(sx,sy,auto?2:6);if(!auto){sfx('coin');vib(8);}b._bounce=TIME;if(S.tut===0){S.tut=1;tutRender();}}
 function grantChest(src){const base=Math.max(50,ipsBase*rnd(60,180));const g=ri(2,6)+(src==='super'?6:0);const L=[];
   const coins=src==='super'?base*3:base;earn(coins);S.gems+=g;L.push(['coin',fmt(coins)+' moedas']);L.push(['gem',g+' joias']);
   if(Math.random()<.25||src==='super'){const rp=Math.max(10,Math.round(C.rp*90));S.rp+=rp;L.push(['rp',rp+' de pesquisa']);}
@@ -299,7 +299,7 @@ function research(id){const t=TECHM[id];if(!t||S.tech[id])return;if(!t.req.every
   if(S.rp<t.cost){sfx('err');toast('Pesquisa insuficiente','r');return;}if(t.cry&&S.crys<t.cry){sfx('err');toast('Faltam Cristais ('+t.cry+')','r');return;}
   S.rp-=t.cost;if(t.cry)S.crys-=t.cry;S.tech[id]=1;dirty=true;dailyProg('research',1);sfx('research');vib(20);showBanner(t.n,'Pesquisa concluída!');screenConfetti(40);
   if(id==='tra4'||id==='com1')groundDirty=true;if(id==='tra2')syncAgents(true);for(const k in thumbs)if(k==='onibus')delete thumbs[k];checkAch();save();refreshPanel();}
-function applySkin(b,sk){b.skin=sk||null;dirty=true;sfx('up');b.bounce=TIME;const [wx,wy]=bWorld(b);sparkle(wx,wy-30,16,[SKINS[sk]?SKINS[sk].acc:'#fff','#ffffff']);S.cnt.skin=(S.cnt.skin||0)+1;refreshPanel();save();}
+function applySkin(b,sk){b.skin=sk||null;dirty=true;sfx('up');b._bounce=TIME;const [wx,wy]=bWorld(b);sparkle(wx,wy-30,16,[SKINS[sk]?SKINS[sk].acc:'#fff','#ffffff']);S.cnt.skin=(S.cnt.skin||0)+1;refreshPanel();save();}
 function checkCollections(){for(const cat of CAT_ORDER){if(S.colDone[cat])continue;const all=Object.keys(TYPES).filter(k=>TYPES[k].cat===cat&&!TYPES[k].ess);if(all.length&&all.every(k=>S.seenT[k])){S.colDone[cat]=1;showBanner('Coleção '+CATS[cat]+' completa!','+15% renda da categoria');screenConfetti(80);sfx('unlock');}}}
 
 /* ---------- projetos ---------- */
@@ -316,7 +316,7 @@ function startStage(id){const p=PRJM[id],st=prjState(id);if(st.s>=3||prjBusy(id)
   let b=st.bid&&S.buildings.find(x=>x.id===st.bid);let plot=null;if(!b){plot=autoPlot('prj',{aero:6,metro:1,campus:5,jardins:3,fusao:2,elev:9}[id]);if(!plot){sfx('err');toast('Sem terreno livre para o projeto','r');return;}}
   if(!spend(g.cost)){sfx('err');toast('Moedas insuficientes','r');return;}if(g.cry)S.crys-=g.cry;if(g.rp)S.rp-=g.rp;
   const tt=Date.now()<S.instUntil?2:g.t;
-  if(!b){b={id:S.nid++,t:'prj',pid:id,x:plot[0],y:plot[1],lvl:1,ready:0,born:TIME,bt0:tt};S.buildings.push(b);st.bid=b.id;rebuildOcc();}
+  if(!b){b={id:S.nid++,t:'prj',pid:id,x:plot[0],y:plot[1],lvl:1,ready:0,_born:TIME,bt0:tt};S.buildings.push(b);st.bid=b.id;rebuildOcc();}
   b.ready=Date.now()+tt*1000;b.bt0=tt;b._wasBusy=true;const [wx,wy]=bWorld(b);camTo(wx,wy-20);burst(wx,wy-10,22);sfx('build');toast('Obra iniciada: '+g.n,'g');dirty=true;refreshPanel();save();}
 
 /* ---------- prestígio ---------- */

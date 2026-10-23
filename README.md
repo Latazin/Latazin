@@ -71,3 +71,12 @@ Depois de editar, gere o HTML do app de novo e rode:
 ./build_game.sh
 flutter run
 ```
+
+## Atualizações
+
+Tem dois tipos de atualização:
+
+1. **Só o jogo** (prédios, regras, visual, tudo em `game_src/`): rode `./build_game.sh`, aumente o número em `assets/game/version.txt` e envie para o branch `cartoon-city-app`. Quem tem o app recebe sozinho: ao abrir o app com internet, ele baixa a versão nova e mostra "Atualização do jogo baixada!". Não precisa reinstalar.
+2. **O app em si** (`lib/`, ícone, permissões): enviar para o branch gera um APK novo em Releases. Esse APK instala por cima do antigo sem perder o progresso, porque todos os APKs usam a mesma assinatura (`android-keys/debug.keystore`).
+
+A assinatura em `android-keys/` serve para distribuir o APK direto. Para publicar na Google Play, crie uma chave de upload própria e guarde-a fora do repositório.

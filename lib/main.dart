@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -39,6 +41,10 @@ class CartoonCityApp extends StatelessWidget {
 ///   save:<json>    → o app grava o progresso no aparelho
 ///   vib:<ms>       → vibração nativa
 ///   copy:<texto>   → copia para a área de transferência
+///
+/// Atualização automática do jogo: ao abrir, o app confere se existe uma versão
+/// nova do jogo no GitHub (assets/game/version.txt). Se existir, baixa e oferece
+/// para aplicar; na próxima abertura ela já entra sozinha. Não precisa reinstalar.
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
 
@@ -48,6 +54,13 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   static const _saveKey = 'cartoon_city_save_v1';
+  static const _remoteBase =
+      'https://raw.githubusercontent.com/Latazin/Latazin/cartoon-city-app/assets/game/';
+  static const _baseUrl = 'https://app.cartooncity.local/';
+
+  int _gameVersion = 0;
+  String? _pendingHtml;
+  int _pendingVersion = 0;
 
   late final WebViewController _web;
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -72,11 +85,88 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         },
         onNavigationRequest: (req) {
           final u = req.url;
-          final local = u.startsWith('file:') || u.startsWith('about:') || u.startsWith('data:');
+          final local = u.startsWith(_baseUrl) ||
+              u.startsWith('file:') ||
+              u.startsWith('about:') ||
+              u.startsWith('data:');
           return local ? NavigationDecision.navigate : NavigationDecision.prevent;
         },
-      ))
-      ..loadFlutterAsset('assets/game/index.html');
+      ));
+    _bootGame();
+  }
+
+  Future<File> _cacheFile(String name) async {
+    final dir = await getApplicationSupportDirectory();
+    return File('${dir.path}/$name');
+  }
+
+  /// Carrega o jogo: a versão baixada (se for mais nova) ou a que veio no APK.
+  Future<void> _bootGame() async {
+    final bundledVersion =
+        int.tryParse((await rootBundle.loadString('assets/game/version.txt')).trim()) ?? 0;
+    var html = await rootBundle.loadString('assets/game/index.html');
+    _gameVersion = bundledVersion;
+    try {
+      final f = await _cacheFile('game_index.html');
+      final vf = await _cacheFile('game_version.txt');
+      if (await f.exists() && await vf.exists()) {
+        final v = int.tryParse((await vf.readAsString()).trim()) ?? 0;
+        if (v > bundledVersion) {
+          html = await f.readAsString();
+          _gameVersion = v;
+        }
+      }
+    } catch (_) {}
+    await _web.loadHtmlString(html, baseUrl: _baseUrl);
+    Future.delayed(const Duration(seconds: 4), _checkForUpdate);
+  }
+
+  Future<String> _download(String url) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+    try {
+      final req = await client.getUrl(Uri.parse(url));
+      final res = await req.close().timeout(const Duration(seconds: 30));
+      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
+      return await res.transform(utf8.decoder).join();
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      final t = DateTime.now().millisecondsSinceEpoch;
+      final remote = int.tryParse(
+              (await _download('${_remoteBase}version.txt?t=$t')).trim()) ??
+          0;
+      if (remote <= _gameVersion) return;
+      final html = await _download('${_remoteBase}index.html?t=$t');
+      if (html.length < 100000 || !html.contains('__ccRestore')) return;
+      await (await _cacheFile('game_index.html')).writeAsString(html);
+      await (await _cacheFile('game_version.txt')).writeAsString('$remote');
+      _pendingHtml = html;
+      _pendingVersion = remote;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Atualização do jogo baixada!'),
+        duration: const Duration(seconds: 12),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(label: 'ATUALIZAR', onPressed: _applyUpdate),
+      ));
+    } catch (_) {
+      // sem internet: tenta de novo na próxima abertura
+    }
+  }
+
+  Future<void> _applyUpdate() async {
+    final html = _pendingHtml;
+    if (html == null) return;
+    await _web.runJavaScript('window.__ccSave && window.__ccSave();');
+    await Future.delayed(const Duration(milliseconds: 700));
+    if (mounted) setState(() => _loading = true);
+    _gameVersion = _pendingVersion;
+    _pendingHtml = null;
+    await _web.loadHtmlString(html, baseUrl: _baseUrl);
   }
 
   @override
@@ -94,6 +184,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     }
     if (state == AppLifecycleState.resumed) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      _web.runJavaScript('window.__ccResume && window.__ccResume();');
     }
   }
 
