@@ -76,7 +76,8 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 /* lateral: baú e boosts */
 #side{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(98px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;z-index:4}
 #side.low{top:calc(160px + env(safe-area-inset-top,0px))}
-.side-btn{width:54px;border-radius:16px;border:2px solid #fff;background:var(--cream);box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);padding:4px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.side-btn{position:relative;width:54px;border-radius:16px;border:2px solid #fff;background:var(--cream);box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);padding:4px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.dot-new{position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#ff5577;border:2px solid #fff;box-shadow:0 0 0 1px #c9304f;animation:pop 1s infinite}
 .side-btn span{font-weight:900;font-size:10px;line-height:1.1;font-variant-numeric:tabular-nums;text-align:center}
 .side-btn.ready{background:linear-gradient(180deg,#fff2b0,#ffd24a);animation:wiggle 1.6s infinite}
 @keyframes wiggle{0%,70%,100%{transform:rotate(0)}75%{transform:rotate(-8deg)}85%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}}
@@ -308,6 +309,9 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
   <div id="heatChip" hidden></div>
   <div id="side">
     <button class="side-btn" id="chestBtn" aria-label="Baú grátis"><div class="chest-ico"><i></i></div><span id="chestTxt">4:00</span></button>
+    <button class="side-btn ready" id="carBtn" aria-label="Carro dourado: toque para recompensa" hidden><div style="font-size:26px;line-height:1.1">🚗</div><span>Toque!</span></button>
+    <button class="side-btn" id="wheelBtn" aria-label="Baú misterioso diário"><i class="dot-new" id="wheelDot" hidden></i><div style="font-size:26px;line-height:1.1">🎁</div><span id="wheelTxt">Grátis!</span></button>
+    <button class="side-btn" id="rankBtn" aria-label="Ranking mundial"><div style="font-size:22px;line-height:1.1">🏆</div><span id="rankTxt">Rank</span></button>
     <div id="boosts" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
   <div id="zoomBtns">

@@ -85,7 +85,8 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 /* lateral: baú e boosts */
 #side{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(98px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px;z-index:4}
 #side.low{top:calc(160px + env(safe-area-inset-top,0px))}
-.side-btn{width:54px;border-radius:16px;border:2px solid #fff;background:var(--cream);box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);padding:4px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.side-btn{position:relative;width:54px;border-radius:16px;border:2px solid #fff;background:var(--cream);box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);padding:4px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.dot-new{position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#ff5577;border:2px solid #fff;box-shadow:0 0 0 1px #c9304f;animation:pop 1s infinite}
 .side-btn span{font-weight:900;font-size:10px;line-height:1.1;font-variant-numeric:tabular-nums;text-align:center}
 .side-btn.ready{background:linear-gradient(180deg,#fff2b0,#ffd24a);animation:wiggle 1.6s infinite}
 @keyframes wiggle{0%,70%,100%{transform:rotate(0)}75%{transform:rotate(-8deg)}85%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}}
@@ -317,6 +318,9 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
   <div id="heatChip" hidden></div>
   <div id="side">
     <button class="side-btn" id="chestBtn" aria-label="Baú grátis"><div class="chest-ico"><i></i></div><span id="chestTxt">4:00</span></button>
+    <button class="side-btn ready" id="carBtn" aria-label="Carro dourado: toque para recompensa" hidden><div style="font-size:26px;line-height:1.1">🚗</div><span>Toque!</span></button>
+    <button class="side-btn" id="wheelBtn" aria-label="Baú misterioso diário"><i class="dot-new" id="wheelDot" hidden></i><div style="font-size:26px;line-height:1.1">🎁</div><span id="wheelTxt">Grátis!</span></button>
+    <button class="side-btn" id="rankBtn" aria-label="Ranking mundial"><div style="font-size:22px;line-height:1.1">🏆</div><span id="rankTxt">Rank</span></button>
     <div id="boosts" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
   <div id="zoomBtns">
@@ -1196,7 +1200,8 @@ function newState(){
     cnt:{built:0,upg:0,bub:0,met:0,chest:0,pres:0,ev:0,deco:0,res:0,prjDone:0,tags:{}},ach:{},daily:null,cos:{own:[],eq:{}},
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
-    pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{}};
+    pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0};
 }
 let S=newState();
 function initCity(st){
@@ -1379,6 +1384,47 @@ async function lbSubmit(silent){if(!S.lbName){S.lbName=lbDefaultName();save();}c
       body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
     if(!res.ok)throw 0;if(!silent)toast('Pontuação enviada pro ranking global!','g');lbCache=null;if(!silent)lbFetchTop();}
   catch(e){if(!silent)toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
+async function lbFetchRank(){try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?select=device_id&pop=gt.'+Math.round(S.pop),
+    {headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,Prefer:'count=exact',Range:'0-0'}});
+    const cr=res.headers.get('content-range');if(cr){const total=+cr.split('/')[1];if(isFinite(total)){S.lbRank=total+1;if(sheetMode==='missions')renderSheet(true);}}}
+  catch(e){}}
+
+/* ---------- Roleta diária (3 baús misteriosos) ---------- */
+const WHEEL_PRIZES=[
+  {w:34,n:'Punhado de moedas',f:()=>({coins:Math.max(80,ipsBase*rnd(60,110))})},
+  {w:24,n:'Moedas + joias',f:()=>({coins:Math.max(150,ipsBase*rnd(140,220)),gems:ri(3,6)})},
+  {w:18,n:'Bolsa de joias',f:()=>({gems:ri(8,14)})},
+  {w:12,n:'Turbo 2× por 20 min',f:()=>({boostMin:20})},
+  {w:9,n:'Chuva de moedas',f:()=>({coins:Math.max(400,ipsBase*rnd(320,520)),gems:ri(4,8)})},
+  {w:3,n:'Prêmio raro: Cristal',f:()=>({crys:1,gems:ri(10,18)})},
+];
+function wheelReady(){return S.wheelDay!==today();}
+function pickWheelPrize(){const tot=WHEEL_PRIZES.reduce((a,p)=>a+p.w,0);let r=Math.random()*tot;for(const p of WHEEL_PRIZES){if(r<p.w)return p;r-=p.w;}return WHEEL_PRIZES[0];}
+function claimWheel(prizeIdx){if(!wheelReady())return null;S.wheelDay=today();const p=WHEEL_PRIZES[prizeIdx];const r=p.f();
+  if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;if(r.boostMin)S.gemBoost=Math.max(Date.now(),S.gemBoost)+r.boostMin*60000;
+  dirty=true;save();return {p,r};}
+
+/* ---------- Hora Dourada (produção em dobro, de surpresa) ---------- */
+function goldenHourOn(){return S.ghUntil>Date.now();}
+function armGoldenHour(){if(!S.ghNext)S.ghNext=Date.now()+rnd(4,7)*60000;}
+function maybeTriggerGoldenHour(){if(S.tut<4)return;if(!S.ghNext){armGoldenHour();return;}
+  if(Date.now()<S.ghNext||goldenHourOn())return;
+  S.ghUntil=Date.now()+90000;S.ghNext=Date.now()+rnd(10,16)*60000;
+  S.mods=S.mods.filter(m=>m.k!=='inc'||!m.gh);S.mods.push({k:'inc',v:2,until:S.ghUntil,gh:true,label:'Hora Dourada'});
+  dirty=true;showBanner('🌟 HORA DOURADA!','Produção em dobro por 90 segundos');screenConfetti(110);sfx('unlock');vib([20,30,20,30,20]);}
+
+/* ---------- Missão relâmpago (objetivo rápido com prêmio) ---------- */
+function maybeTriggerFlash(){if(S.tut<4||S.flash)return;
+  if(!S.flashNext){S.flashNext=Date.now()+rnd(3,6)*60000;return;}
+  if(Date.now()<S.flashNext)return;
+  const goal=Math.max(60,ipsBase*rnd(45,85));
+  S.flash={goal,startRun:S.run,until:Date.now()+100000,reward:{coins:Math.round(goal*0.9),gems:ri(3,6)}};
+  S.flashNext=Date.now()+rnd(6,10)*60000;
+  toast('⚡ Missão relâmpago: ganhe '+fmt(goal)+' moedas em 100s!','p');sfx('event');}
+function checkFlashProgress(){if(!S.flash)return;
+  if(S.run-S.flash.startRun>=S.flash.goal){const r=S.flash.reward;earn(r.coins);S.gems+=r.gems;
+    showBanner('⚡ Missão relâmpago!','+'+fmt(r.coins)+' moedas e +'+r.gems+' joias');screenConfetti(90);sfx('unlock');vib([20,30,20]);S.flash=null;save();return;}
+  if(Date.now()>S.flash.until)S.flash=null;}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
@@ -1389,7 +1435,8 @@ window.__ccAdReward=(kind)=>{
     toast('Carro dourado: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
   save();refreshPanel();};
 window.__ccAdFail=()=>{toast('Anúncio indisponível agora. Tente de novo em instantes.','r');};
-function save(){S.last=Date.now();const str=JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);
+function serializeState(){return JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);}
+function save(){S.last=Date.now();const str=serializeState();
   try{const prev=localStorage.getItem(SAVE_KEY);localStorage.setItem(SAVE_KEY,str);if(prev&&Math.random()<0.2)localStorage.setItem(BACK_KEY,prev);}catch(e){}
   native('save:'+str);return str;}
 window.__ccSave=()=>save();
@@ -1813,6 +1860,7 @@ const ICO={
  pol:'<svg viewBox="0 0 24 24"><circle cx="8" cy="14" r="5" fill="#b8b4c8" stroke="#2b2350" stroke-width="1.6"/><circle cx="15" cy="11" r="6" fill="#d9d2e8" stroke="#2b2350" stroke-width="1.6"/></svg>',
  svc:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="#8e5cff" stroke="#2b2350" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
+let _stripLast=null;
 function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<button class="rank" data-go="city">${RANKS[r][1]}</button>`;
   s+=`<button data-go="city">${ICO.pop}${fmt(S.pop)}</button>`;
   s+=`<button data-go="city:happy" class="${h<40?'warn':''}">${ICO.happy(h)}${h}%</button>`;
@@ -1821,7 +1869,7 @@ function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<bu
   if(C.cg>.05)s+=`<button data-go="city" class="warn">${ICO.traffic}${pct(C.trafD/C.trafC)}</button>`;
   s+=`<button data-go="research">${ICO.rp}${fmt(S.rp)}</button>`;if(S.crys>=0.05)s+=`<button data-go="research">${ICO.cry}${S.crys>=10?fmt(S.crys):S.crys.toFixed(1)}</button>`;
   if(C.V>=1)s+=`<button data-go="city">${ICO.tour}${fmt(C.V)}</button>`;
-  $('#strip').innerHTML=s;}
+  if(s!==_stripLast){_stripLast=s;$('#strip').innerHTML=s;}}
 $('#strip').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;sfx('click');const [m,t]=b.dataset.go.split(':');openSheet(m,t);});
 
 const DGOAL=[
@@ -1964,6 +2012,7 @@ function renderSheet(keep){
       h+=`<div class="row ${st||a>=bn?'':'locked'}"><div class="info"><h3>${m.n}</h3>${bar(a/bn,'b')}<p>${rewardTxt(m.r)}</p></div>${st?'<button class="btn off" disabled>Feito</button>':a>=bn?`<button class="btn y" data-act="mclaim:${m.id}">Pegar</button>`:''}</div>`;}}
     else if(sheetTab==='ach'){for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
     else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Sua pontuação (${fmt(S.pop)} habitantes) é enviada sozinha de tempos em tempos — não precisa fazer nada.</p>
+      ${S.lbRank?`<div class="qcard" style="justify-content:center"><div class="info" style="text-align:center"><h3>Sua posição mundial</h3><p style="font-size:22px;font-weight:900;color:var(--grape)">#${fmt(S.lbRank)}</p></div></div>`:''}
       <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||lbDefaultName()).replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
       <button class="btn y wide" data-act="lbsend">Salvar nome e atualizar agora</button>`;
       if(lbLoading&&!lbCache)h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;
@@ -2105,7 +2154,7 @@ function openStats(){const p=pref();recalc();openModal(`<h2>Estatísticas</h2>
   <div class="kv"><span>Multiplicador global</span><b>×${C.gm.toFixed(2)}</b></div><div class="kv"><span>Bolhas · meteoros · baús</span><b>${S.cnt.bub} · ${S.cnt.met} · ${S.cnt.chest}</b></div>
   <div class="kv"><span>Renascimentos</span><b>${S.cnt.pres}</b></div><div class="kv"><span>Tempo jogado</span><b>${fmtTime(S.played)}</b></div>
   <button class="btn big" data-m="close">Fechar</button>`);}
-function openSettings(){const str=save();
+function openSettings(){
   openModal(`<h2>Configurações</h2>
   <div class="toggle">Música<button class="sw ${S.set.music?'on':''}" data-m="sw" data-k="music" aria-label="Música"></button></div>
   <div class="toggle">Efeitos sonoros<button class="sw ${S.set.sfx?'on':''}" data-m="sw" data-k="sfx" aria-label="Efeitos"></button></div>
@@ -2118,9 +2167,33 @@ function openSettings(){const str=save();
   <button class="btn y" data-m="backup">Restaurar backup automático</button><button class="btn r" data-m="reset">Apagar tudo e recomeçar</button>
   <p class="note" style="text-align:center">Atalhos: WASD/setas movem, +/− zoom, H prefeitura, B construir, U melhorar, C cidade, P pesquisa.</p>
   <button class="btn big" data-m="close">Fechar</button>`);
-  setTimeout(()=>{try{const code=btoa(unescape(encodeURIComponent(str)));const ta=$('#saveTa');if(ta)ta.value=code;}catch(e){}},0);}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    try{const code=btoa(unescape(encodeURIComponent(serializeState())));const ta=$('#saveTa');if(ta)ta.value=code;}catch(e){}
+  }));}
 $('#btnStats').addEventListener('click',()=>{audioInit();sfx('click');openStats();});
 $('#btnSettings').addEventListener('click',()=>{audioInit();sfx('click');openSettings();});
+$('#carBtn').addEventListener('click',()=>{audioInit();if(!adCar)return;const [wx,wy]=[adCar.x,adCar.y];cam.tx=wx;cam.ty=wy-20;cam.tz=1.3;sfx('click');requestAd('car');});
+$('#wheelBtn').addEventListener('click',()=>{audioInit();sfx('click');openWheel();});
+$('#rankBtn').addEventListener('click',()=>{audioInit();sfx('click');openSheet('missions','rank');});
+function openWheel(){const ready=wheelReady();
+  openModal(`<h2>Baú misterioso diário</h2>
+  <p class="note" style="text-align:center">${ready?'Escolha um dos 3 baús. Um prêmio surpresa te espera!':'Você já abriu hoje. Volte amanhã para um novo prêmio!'}</p>
+  <div id="wheelRow" style="display:flex;gap:10px;justify-content:center;margin:14px 0">
+    ${[0,1,2].map(i=>`<button class="wbox" data-wi="${i}" ${ready?'':'disabled'} style="flex:1;max-width:100px;aspect-ratio:1;border-radius:16px;border:2px solid #fff;background:linear-gradient(180deg,#ffe27a,#ffb703);box-shadow:0 4px 0 #b97a00;font-size:34px;cursor:${ready?'pointer':'default'};opacity:${ready?1:.5}">🎁</button>`).join('')}
+  </div>
+  <div id="wheelResult" style="text-align:center;min-height:50px"></div>
+  <button class="btn big" data-m="close">Fechar</button>`);
+  if(!ready)return;
+  document.querySelectorAll('#wheelRow .wbox').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#wheelRow .wbox').forEach(b=>b.disabled=true);
+      const res=claimWheel(+btn.dataset.wi);if(!res)return;
+      btn.textContent='✨';btn.style.transform='scale(1.15)';
+      const parts=[];if(res.r.coins)parts.push('+'+fmt(res.r.coins)+' moedas');if(res.r.gems)parts.push('+'+res.r.gems+' joias');if(res.r.crys)parts.push('+'+res.r.crys+' Cristal');if(res.r.boostMin)parts.push('Turbo 2× por '+res.r.boostMin+' min');
+      $('#wheelResult').innerHTML=`<b style="font-size:16px;color:var(--mint-d)">${res.p.n}</b><br><span class="note">${parts.join(' · ')}</span>`;
+      screenConfetti(100);sfx('unlock');vib([20,30,20]);
+    });
+  });}
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
 function newComplex(cp,d){showBanner(cp.n,'Complexo formado em '+DIST[d].n);screenConfetti(90);sfx('unlock');const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);burst(wx,wy-20,40);toast(cp.fx,'p');}
 function v2Intro(){openModal(`<div class="speaker">${portrait('lucia','talk')}<div><small style="color:${CHARS.lucia.col}">Prefeita Lúcia</small><h2 style="text-align:left;font-size:22px">A cidade ganhou vida!</h2></div></div>
@@ -2330,9 +2403,10 @@ function update(dt){
   if(adCar)adCar.t+=dt;
   dispCoins=S.coins<dispCoins?S.coins:lerp(dispCoins,S.coins,1-Math.pow(.0005,dt));if(Math.abs(dispCoins-S.coins)<1)dispCoins=S.coins;
   uiT-=dt;if(uiT<=0){uiT=.25;updHUD();}
-  ipsT-=dt;if(ipsT<=0){ipsT=.5;dirty=true;}
+  ipsT-=dt;if(ipsT<=0){ipsT=3;dirty=true;}
   saveT-=dt;if(saveT<=0){saveT=10;save();}
-  lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0)lbSubmit(true);}
+  lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0){lbSubmit(true);lbFetchRank();}}
+  maybeTriggerGoldenHour();maybeTriggerFlash();checkFlashProgress();
   devT-=dt;if(devT<=0){devT=2;updateDev();if(heatMode)computeHeat();}
   ctxT-=dt;if(ctxT<=0){ctxT=6;ctxTick();}
   agT-=dt;if(agT<=0){agT=5;syncAgents(false);}
@@ -2342,7 +2416,13 @@ function update(dt){
     if(!S.seen2&&$('#modal').hidden)v2Intro();}}
 function updHUD(){$('#coinTxt').textContent=fmt(dispCoins);const it=$('#ipsTxt');it.textContent=(ips>=0?'+':'')+fmt(ips)+'/s'+(combo.n>1?'  combo ×'+(1+Math.min(2,combo.n*.1)).toFixed(1):'');it.classList.toggle('neg',ips<0);$('#gemTxt').textContent=S.gems;
   const cb=$('#chestBtn');if(S.chestT<=0){cb.classList.add('ready');$('#chestTxt').textContent='Abrir!';}else{cb.classList.remove('ready');$('#chestTxt').textContent=fmtTime(S.chestT);}
-  let bh='';if(gemBoostOn())bh+=`<div class="boost">2× ${fmtTime((S.gemBoost-Date.now())/1000)}</div>`;if(sessionBonus()>0)bh+=`<div class="boost" style="background:#2fd08a;box-shadow:0 2px 0 #179a62">+${Math.round(sessionBonus()*100)}%</div>`;$('#boosts').innerHTML=bh;
+  let bh='';if(gemBoostOn())bh+=`<div class="boost">2× ${fmtTime((S.gemBoost-Date.now())/1000)}</div>`;if(sessionBonus()>0)bh+=`<div class="boost" style="background:#2fd08a;box-shadow:0 2px 0 #179a62">+${Math.round(sessionBonus()*100)}%</div>`;
+  if(goldenHourOn())bh+=`<div class="boost" style="background:linear-gradient(180deg,#ffe27a,#ffb703);color:#5a3a00;box-shadow:0 2px 0 #b97a00">🌟 2× ${fmtTime((S.ghUntil-Date.now())/1000)}</div>`;
+  if(S.flash)bh+=`<div class="boost" style="background:#ff8fab;box-shadow:0 2px 0 #d9567f">⚡ ${fmt(Math.max(0,S.flash.goal-(S.run-S.flash.startRun)))} · ${fmtTime((S.flash.until-Date.now())/1000)}</div>`;
+  $('#boosts').innerHTML=bh;
+  const carBtn=$('#carBtn');if(carBtn)carBtn.hidden=!adCar;
+  const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady();wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
+  const rankBtn=$('#rankBtn');if(rankBtn){const rt=$('#rankTxt');if(rt)rt.textContent=S.lbRank?'#'+fmt(S.lbRank):'Rank';}
   if(ev){const p=$('#evProg');if(p)p.style.width=(100*(1-ev.t/ev.dur))+'%';}
   if(sev){if(sev.pending){const s=$('#sevChip .sub');if(s)s.textContent='Toque para decidir · '+Math.ceil(sev.wait)+'s';}else if(sev.obj){const s=$('#sevSub');if(s)s.textContent=sev.obj.txt+': '+fmt(Math.max(0,sev.obj.prog))+'/'+fmt(sev.obj.need);const p=$('#sevProg');if(p)p.style.width=(100*clamp((sev.obj.until-TIME)/sev.obj.dur,0,1))+'%';}}
   stripRender();if(sheetMode)refreshButtons();
@@ -2405,11 +2485,14 @@ function render(){
   if(superChest){const s2=superChest;const b2=Math.abs(Math.sin(TIME*4))*6;glow(s2.x,s2.y-14,40,'rgba(200,150,255,.7)');ell(s2.x,s2.y,14,7,'rgba(43,35,80,.25)',false);
     X.save();X.translate(s2.x,s2.y-b2);X.rotate(Math.sin(TIME*8)*.08);box(0,0,.42,.32,12,'#b25cff');box(0,0,.44,.34,6,'#d6a3ff',12);ell(0,-14,3,3,'#ffd23f');X.restore();
     if(Math.random()<.3)parts.push({k:'spark',x:s2.x+rnd(-14,14),y:s2.y-rnd(10,30),vx:0,vy:-20,t:0,life:.7,c:'#e9d6ff'});}
-  if(adCar){const ac=adCar;glow(ac.x,ac.y-6,38,'rgba(255,210,60,.55)');ell(ac.x,ac.y,13,6,'rgba(43,35,80,.22)',false);
+  if(adCar){const ac=adCar;const pulse=.5+.5*Math.sin(ac.t*3.2);
+    glow(ac.x,ac.y-6,58+pulse*14,'rgba(255,210,60,'+(.45+pulse*.25)+')');ell(ac.x,ac.y,13,6,'rgba(43,35,80,.22)',false);
     box(ac.x,ac.y,.44,.22,6,'#ffc21a',1.5);box(ac.x,ac.y,.26,.18,5,'#fff6cf',6.5);
     ball(ac.x-9,ac.y+3,3,'#2b2350');ball(ac.x+9,ac.y+3,3,'#2b2350');
-    const bob=Math.sin(ac.t*3)*3;drawCoin(ac.x,ac.y-22+bob,9,TIME*4);
-    if(Math.random()<.25)parts.push({k:'spark',x:ac.x+rnd(-12,12),y:ac.y-rnd(4,16),vx:0,vy:-14,t:0,life:.6,c:'#fff3a8'});}
+    const bob=Math.sin(ac.t*3)*4;drawCoin(ac.x,ac.y-24+bob,9+pulse*2,TIME*4);
+    X.save();X.font='bold 15px "Lilita One",sans-serif';X.textAlign='center';X.fillStyle='#fff';X.strokeStyle='#2b2350';X.lineWidth=4;
+    X.translate(ac.x,ac.y-42+bob*1.4);X.scale(1+pulse*.08,1+pulse*.08);X.strokeText('TOQUE!',0,0);X.fillText('TOQUE!',0,0);X.restore();
+    if(Math.random()<.4)parts.push({k:'spark',x:ac.x+rnd(-14,14),y:ac.y-rnd(4,20),vx:0,vy:-16,t:0,life:.6,c:'#fff3a8'});}
   if(ceremony){const b=ceremony.b;const [cx,cy]=bWorld(b);const t=TIME-ceremony.t0;const A=P(cx,cy,-.45,.45,0),B=P(cx,cy,.45,.45,0);line(A[0],A[1],A[0],A[1]-14,'#ffd23f',2);line(B[0],B[1],B[0],B[1]-14,'#ffd23f',2);
     if(t<1.2){X.beginPath();X.moveTo(A[0],A[1]-11);X.quadraticCurveTo((A[0]+B[0])/2,(A[1]+B[1])/2-6,B[0],B[1]-11);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.stroke();ell((A[0]+B[0])/2,(A[1]+B[1])/2-9,4,3,'#ff3b5c');}
     else{const f=Math.min(1,(t-1.2)*1.5);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.beginPath();X.moveTo(A[0],A[1]-11);X.lineTo(lerp(A[0],(A[0]+B[0])/2,.6),lerp(A[1]-11,(A[1]+B[1])/2+4,f));X.moveTo(B[0],B[1]-11);X.lineTo(lerp(B[0],(A[0]+B[0])/2,.6),lerp(B[1]-11,(A[1]+B[1])/2+4,f));X.stroke();}}
@@ -2561,7 +2644,8 @@ function boot(){resize();const src=load();afterLoad();
   window.__cc={S:()=>S,C,build,upgrade,startEvent,unlockDistrict,tap,econ,recalc,doPrestige,essGain,research,startStage,openSheet,setTarget:p=>targetPlot=p,chooseEv,openEvent,
     forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;},
     map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true),
-    update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;}};}
+    update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;},
+    lbFetchRank,wheelReady,claimWheel,goldenHourOn,get flash(){return S.flash;}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};
 if(window.CCNative){let started=false;const go=()=>{if(started)return;started=true;boot();};

@@ -7,7 +7,8 @@ function newState(){
     cnt:{built:0,upg:0,bub:0,met:0,chest:0,pres:0,ev:0,deco:0,res:0,prjDone:0,tags:{}},ach:{},daily:null,cos:{own:[],eq:{}},
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
-    pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{}};
+    pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0};
 }
 let S=newState();
 function initCity(st){
@@ -190,6 +191,47 @@ async function lbSubmit(silent){if(!S.lbName){S.lbName=lbDefaultName();save();}c
       body:JSON.stringify({device_id:deviceId(),name,pop:Math.round(S.pop),life:Math.round(S.life)})});
     if(!res.ok)throw 0;if(!silent)toast('Pontuação enviada pro ranking global!','g');lbCache=null;if(!silent)lbFetchTop();}
   catch(e){if(!silent)toast('Não consegui enviar. Veja sua internet e tente de novo.','r');}}
+async function lbFetchRank(){try{const res=await fetch(LB_URL+'/rest/v1/leaderboard?select=device_id&pop=gt.'+Math.round(S.pop),
+    {headers:{apikey:LB_KEY,Authorization:'Bearer '+LB_KEY,Prefer:'count=exact',Range:'0-0'}});
+    const cr=res.headers.get('content-range');if(cr){const total=+cr.split('/')[1];if(isFinite(total)){S.lbRank=total+1;if(sheetMode==='missions')renderSheet(true);}}}
+  catch(e){}}
+
+/* ---------- Roleta diária (3 baús misteriosos) ---------- */
+const WHEEL_PRIZES=[
+  {w:34,n:'Punhado de moedas',f:()=>({coins:Math.max(80,ipsBase*rnd(60,110))})},
+  {w:24,n:'Moedas + joias',f:()=>({coins:Math.max(150,ipsBase*rnd(140,220)),gems:ri(3,6)})},
+  {w:18,n:'Bolsa de joias',f:()=>({gems:ri(8,14)})},
+  {w:12,n:'Turbo 2× por 20 min',f:()=>({boostMin:20})},
+  {w:9,n:'Chuva de moedas',f:()=>({coins:Math.max(400,ipsBase*rnd(320,520)),gems:ri(4,8)})},
+  {w:3,n:'Prêmio raro: Cristal',f:()=>({crys:1,gems:ri(10,18)})},
+];
+function wheelReady(){return S.wheelDay!==today();}
+function pickWheelPrize(){const tot=WHEEL_PRIZES.reduce((a,p)=>a+p.w,0);let r=Math.random()*tot;for(const p of WHEEL_PRIZES){if(r<p.w)return p;r-=p.w;}return WHEEL_PRIZES[0];}
+function claimWheel(prizeIdx){if(!wheelReady())return null;S.wheelDay=today();const p=WHEEL_PRIZES[prizeIdx];const r=p.f();
+  if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;if(r.boostMin)S.gemBoost=Math.max(Date.now(),S.gemBoost)+r.boostMin*60000;
+  dirty=true;save();return {p,r};}
+
+/* ---------- Hora Dourada (produção em dobro, de surpresa) ---------- */
+function goldenHourOn(){return S.ghUntil>Date.now();}
+function armGoldenHour(){if(!S.ghNext)S.ghNext=Date.now()+rnd(4,7)*60000;}
+function maybeTriggerGoldenHour(){if(S.tut<4)return;if(!S.ghNext){armGoldenHour();return;}
+  if(Date.now()<S.ghNext||goldenHourOn())return;
+  S.ghUntil=Date.now()+90000;S.ghNext=Date.now()+rnd(10,16)*60000;
+  S.mods=S.mods.filter(m=>m.k!=='inc'||!m.gh);S.mods.push({k:'inc',v:2,until:S.ghUntil,gh:true,label:'Hora Dourada'});
+  dirty=true;showBanner('🌟 HORA DOURADA!','Produção em dobro por 90 segundos');screenConfetti(110);sfx('unlock');vib([20,30,20,30,20]);}
+
+/* ---------- Missão relâmpago (objetivo rápido com prêmio) ---------- */
+function maybeTriggerFlash(){if(S.tut<4||S.flash)return;
+  if(!S.flashNext){S.flashNext=Date.now()+rnd(3,6)*60000;return;}
+  if(Date.now()<S.flashNext)return;
+  const goal=Math.max(60,ipsBase*rnd(45,85));
+  S.flash={goal,startRun:S.run,until:Date.now()+100000,reward:{coins:Math.round(goal*0.9),gems:ri(3,6)}};
+  S.flashNext=Date.now()+rnd(6,10)*60000;
+  toast('⚡ Missão relâmpago: ganhe '+fmt(goal)+' moedas em 100s!','p');sfx('event');}
+function checkFlashProgress(){if(!S.flash)return;
+  if(S.run-S.flash.startRun>=S.flash.goal){const r=S.flash.reward;earn(r.coins);S.gems+=r.gems;
+    showBanner('⚡ Missão relâmpago!','+'+fmt(r.coins)+' moedas e +'+r.gems+' joias');screenConfetti(90);sfx('unlock');vib([20,30,20]);S.flash=null;save();return;}
+  if(Date.now()>S.flash.until)S.flash=null;}
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
@@ -200,7 +242,8 @@ window.__ccAdReward=(kind)=>{
     toast('Carro dourado: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
   save();refreshPanel();};
 window.__ccAdFail=()=>{toast('Anúncio indisponível agora. Tente de novo em instantes.','r');};
-function save(){S.last=Date.now();const str=JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);
+function serializeState(){return JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);}
+function save(){S.last=Date.now();const str=serializeState();
   try{const prev=localStorage.getItem(SAVE_KEY);localStorage.setItem(SAVE_KEY,str);if(prev&&Math.random()<0.2)localStorage.setItem(BACK_KEY,prev);}catch(e){}
   native('save:'+str);return str;}
 window.__ccSave=()=>save();

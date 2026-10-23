@@ -186,6 +186,7 @@ const ICO={
  pol:'<svg viewBox="0 0 24 24"><circle cx="8" cy="14" r="5" fill="#b8b4c8" stroke="#2b2350" stroke-width="1.6"/><circle cx="15" cy="11" r="6" fill="#d9d2e8" stroke="#2b2350" stroke-width="1.6"/></svg>',
  svc:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="#8e5cff" stroke="#2b2350" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
+let _stripLast=null;
 function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<button class="rank" data-go="city">${RANKS[r][1]}</button>`;
   s+=`<button data-go="city">${ICO.pop}${fmt(S.pop)}</button>`;
   s+=`<button data-go="city:happy" class="${h<40?'warn':''}">${ICO.happy(h)}${h}%</button>`;
@@ -194,7 +195,7 @@ function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<bu
   if(C.cg>.05)s+=`<button data-go="city" class="warn">${ICO.traffic}${pct(C.trafD/C.trafC)}</button>`;
   s+=`<button data-go="research">${ICO.rp}${fmt(S.rp)}</button>`;if(S.crys>=0.05)s+=`<button data-go="research">${ICO.cry}${S.crys>=10?fmt(S.crys):S.crys.toFixed(1)}</button>`;
   if(C.V>=1)s+=`<button data-go="city">${ICO.tour}${fmt(C.V)}</button>`;
-  $('#strip').innerHTML=s;}
+  if(s!==_stripLast){_stripLast=s;$('#strip').innerHTML=s;}}
 $('#strip').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;sfx('click');const [m,t]=b.dataset.go.split(':');openSheet(m,t);});
 
 const DGOAL=[
@@ -337,6 +338,7 @@ function renderSheet(keep){
       h+=`<div class="row ${st||a>=bn?'':'locked'}"><div class="info"><h3>${m.n}</h3>${bar(a/bn,'b')}<p>${rewardTxt(m.r)}</p></div>${st?'<button class="btn off" disabled>Feito</button>':a>=bn?`<button class="btn y" data-act="mclaim:${m.id}">Pegar</button>`:''}</div>`;}}
     else if(sheetTab==='ach'){for(const a of ACH){const s=S.ach[a.id];const c=a.cos?COS.find(x=>x.id===a.cos):null;h+=`<div class="row ${s?'':'locked'}"><div class="info"><h3>${a.n}</h3><p>${a.d} · ${a.g} joias${c?' + '+c.n:''}</p></div>${s==='claimed'?'<button class="btn off" disabled>Feito</button>':s==='done'?`<button class="btn y" data-act="aclaim:${a.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
     else{h+=`<p class="note">Ranking mundial pela população da sua cidade. Sua pontuação (${fmt(S.pop)} habitantes) é enviada sozinha de tempos em tempos — não precisa fazer nada.</p>
+      ${S.lbRank?`<div class="qcard" style="justify-content:center"><div class="info" style="text-align:center"><h3>Sua posição mundial</h3><p style="font-size:22px;font-weight:900;color:var(--grape)">#${fmt(S.lbRank)}</p></div></div>`:''}
       <div class="row"><div class="info"><h3>Seu nome no ranking</h3><input id="lbNameInput" maxlength="18" value="${(S.lbName||lbDefaultName()).replace(/"/g,'&quot;')}" placeholder="Como quer aparecer?" style="width:100%;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);padding:8px;font-family:var(--body);font-size:14px;color:var(--ink)"></div></div>
       <button class="btn y wide" data-act="lbsend">Salvar nome e atualizar agora</button>`;
       if(lbLoading&&!lbCache)h+=`<p class="note" style="text-align:center">Carregando ranking…</p>`;
@@ -478,7 +480,7 @@ function openStats(){const p=pref();recalc();openModal(`<h2>Estatísticas</h2>
   <div class="kv"><span>Multiplicador global</span><b>×${C.gm.toFixed(2)}</b></div><div class="kv"><span>Bolhas · meteoros · baús</span><b>${S.cnt.bub} · ${S.cnt.met} · ${S.cnt.chest}</b></div>
   <div class="kv"><span>Renascimentos</span><b>${S.cnt.pres}</b></div><div class="kv"><span>Tempo jogado</span><b>${fmtTime(S.played)}</b></div>
   <button class="btn big" data-m="close">Fechar</button>`);}
-function openSettings(){const str=save();
+function openSettings(){
   openModal(`<h2>Configurações</h2>
   <div class="toggle">Música<button class="sw ${S.set.music?'on':''}" data-m="sw" data-k="music" aria-label="Música"></button></div>
   <div class="toggle">Efeitos sonoros<button class="sw ${S.set.sfx?'on':''}" data-m="sw" data-k="sfx" aria-label="Efeitos"></button></div>
@@ -491,9 +493,33 @@ function openSettings(){const str=save();
   <button class="btn y" data-m="backup">Restaurar backup automático</button><button class="btn r" data-m="reset">Apagar tudo e recomeçar</button>
   <p class="note" style="text-align:center">Atalhos: WASD/setas movem, +/− zoom, H prefeitura, B construir, U melhorar, C cidade, P pesquisa.</p>
   <button class="btn big" data-m="close">Fechar</button>`);
-  setTimeout(()=>{try{const code=btoa(unescape(encodeURIComponent(str)));const ta=$('#saveTa');if(ta)ta.value=code;}catch(e){}},0);}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    try{const code=btoa(unescape(encodeURIComponent(serializeState())));const ta=$('#saveTa');if(ta)ta.value=code;}catch(e){}
+  }));}
 $('#btnStats').addEventListener('click',()=>{audioInit();sfx('click');openStats();});
 $('#btnSettings').addEventListener('click',()=>{audioInit();sfx('click');openSettings();});
+$('#carBtn').addEventListener('click',()=>{audioInit();if(!adCar)return;const [wx,wy]=[adCar.x,adCar.y];cam.tx=wx;cam.ty=wy-20;cam.tz=1.3;sfx('click');requestAd('car');});
+$('#wheelBtn').addEventListener('click',()=>{audioInit();sfx('click');openWheel();});
+$('#rankBtn').addEventListener('click',()=>{audioInit();sfx('click');openSheet('missions','rank');});
+function openWheel(){const ready=wheelReady();
+  openModal(`<h2>Baú misterioso diário</h2>
+  <p class="note" style="text-align:center">${ready?'Escolha um dos 3 baús. Um prêmio surpresa te espera!':'Você já abriu hoje. Volte amanhã para um novo prêmio!'}</p>
+  <div id="wheelRow" style="display:flex;gap:10px;justify-content:center;margin:14px 0">
+    ${[0,1,2].map(i=>`<button class="wbox" data-wi="${i}" ${ready?'':'disabled'} style="flex:1;max-width:100px;aspect-ratio:1;border-radius:16px;border:2px solid #fff;background:linear-gradient(180deg,#ffe27a,#ffb703);box-shadow:0 4px 0 #b97a00;font-size:34px;cursor:${ready?'pointer':'default'};opacity:${ready?1:.5}">🎁</button>`).join('')}
+  </div>
+  <div id="wheelResult" style="text-align:center;min-height:50px"></div>
+  <button class="btn big" data-m="close">Fechar</button>`);
+  if(!ready)return;
+  document.querySelectorAll('#wheelRow .wbox').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#wheelRow .wbox').forEach(b=>b.disabled=true);
+      const res=claimWheel(+btn.dataset.wi);if(!res)return;
+      btn.textContent='✨';btn.style.transform='scale(1.15)';
+      const parts=[];if(res.r.coins)parts.push('+'+fmt(res.r.coins)+' moedas');if(res.r.gems)parts.push('+'+res.r.gems+' joias');if(res.r.crys)parts.push('+'+res.r.crys+' Cristal');if(res.r.boostMin)parts.push('Turbo 2× por '+res.r.boostMin+' min');
+      $('#wheelResult').innerHTML=`<b style="font-size:16px;color:var(--mint-d)">${res.p.n}</b><br><span class="note">${parts.join(' · ')}</span>`;
+      screenConfetti(100);sfx('unlock');vib([20,30,20]);
+    });
+  });}
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
 function newComplex(cp,d){showBanner(cp.n,'Complexo formado em '+DIST[d].n);screenConfetti(90);sfx('unlock');const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);burst(wx,wy-20,40);toast(cp.fx,'p');}
 function v2Intro(){openModal(`<div class="speaker">${portrait('lucia','talk')}<div><small style="color:${CHARS.lucia.col}">Prefeita Lúcia</small><h2 style="text-align:left;font-size:22px">A cidade ganhou vida!</h2></div></div>
