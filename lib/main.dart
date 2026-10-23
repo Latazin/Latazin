@@ -5,12 +5,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import 'ad_ids.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  unawaited(MobileAds.instance.initialize());
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -68,10 +72,66 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   bool _loading = true;
   DateTime _lastVib = DateTime.fromMillisecondsSinceEpoch(0);
 
+  RewardedAd? _adBoost;
+  RewardedAd? _adChest;
+
+  void _loadAd(String kind) {
+    final unitId = kind == 'boost' ? AdIds.rewardedBoost : AdIds.rewardedChest;
+    RewardedAd.load(
+      adUnitId: unitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          if (kind == 'boost') {
+            _adBoost = ad;
+          } else {
+            _adChest = ad;
+          }
+        },
+        onAdFailedToLoad: (_) {
+          // sem internet ou sem anúncio disponível agora; tenta de novo mais tarde
+          Future.delayed(const Duration(seconds: 30), () {
+            if (mounted) _loadAd(kind);
+          });
+        },
+      ),
+    );
+  }
+
+  void _showAd(String kind) {
+    final ad = kind == 'boost' ? _adBoost : _adChest;
+    if (ad == null) {
+      _web.runJavaScript("window.__ccAdFail && window.__ccAdFail('$kind');");
+      _loadAd(kind);
+      return;
+    }
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (a) {
+        a.dispose();
+        _loadAd(kind);
+      },
+      onAdFailedToShowFullScreenContent: (a, _) {
+        a.dispose();
+        _loadAd(kind);
+        _web.runJavaScript("window.__ccAdFail && window.__ccAdFail('$kind');");
+      },
+    );
+    ad.show(onUserEarnedReward: (_, __) {
+      _web.runJavaScript("window.__ccAdReward && window.__ccAdReward('$kind');");
+    });
+    if (kind == 'boost') {
+      _adBoost = null;
+    } else {
+      _adChest = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadAd('boost');
+    _loadAd('chest');
     _web = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF79CFFF))
@@ -173,6 +233,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _adBoost?.dispose();
+    _adChest?.dispose();
     super.dispose();
   }
 
@@ -212,6 +274,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       }
     } else if (m.startsWith('copy:')) {
       await Clipboard.setData(ClipboardData(text: m.substring(5)));
+    } else if (m == 'ad:boost' || m == 'ad:chest') {
+      _showAd(m.substring(3));
     }
   }
 

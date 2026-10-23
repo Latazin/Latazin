@@ -361,6 +361,11 @@ function renderSheet(keep){
       for(const cat of CAT_ORDER){const all=Object.keys(TYPES).filter(k=>TYPES[k].cat===cat&&!TYPES[k].ess);const got=all.filter(k=>S.seenT[k]);
         h+=`<div class="row"><div class="info"><h3>${CATS[cat]} ${S.colDone[cat]?'<span class="tag g">completa · +15%</span>':''}</h3>${bar(got.length/all.length,'y')}<div class="fx" style="margin-top:6px">${all.map(k=>`<span style="opacity:${S.seenT[k]?1:.4}"><img src="${thumb(k)}" alt="" style="width:22px;height:22px">${S.seenT[k]?TYPES[k].n:'???'}</span>`).join('')}</div></div></div>`;}}
     else{h+=`<p class="note">Joias são ganhas jogando: missões, conquistas, pedidos, meteoros e baús.</p>`;
+      const adBoostReady=!(S.adCdBoost>Date.now()),adChestReady=!(S.adCdChest>Date.now());
+      h+=`<div class="sec">Assista e ganhe</div>`;
+      h+=`<div class="row"><div class="info"><h3>Turbo 2× por 30 min</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      h+=`<div class="row"><div class="info"><h3>Baú bônus</h3><p>${adChestReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdChest-Date.now())/1000)}</p></div>${adChestReady?'<button class="btn y" data-act="ad:chest">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      h+=`<div class="sec">Comprar com joias</div>`;
       h+=`<div class="row"><div class="info"><h3>Turbo 2× por 15 min</h3><p>${gemBoostOn()?'Ativo: '+fmtTime((S.gemBoost-Date.now())/1000)+' restantes (compra soma tempo)':'Dobra toda a produção'}</p></div>${gBtn(20,'g:boost','Usar')}</div>`;
       h+=`<div class="row"><div class="info"><h3>City Rush agora</h3><p>3× por 20 segundos</p></div>${ev?'<button class="btn off" disabled>Evento ativo</button>':gBtn(15,'g:rush','Usar')}</div>`;
       h+=`<div class="row"><div class="info"><h3>Baú de Joias</h3><p>Moedas, joias e chance de item</p></div>${gBtn(30,'g:chest','Abrir')}</div>`;
@@ -397,6 +402,7 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='dbonus'){if(!S.daily.bonus){S.daily.bonus=true;grantChest('daily');updateDots();renderSheet(true);}}
   else if(a==='aclaim'){const ac=ACH.find(x=>x.id===p1);if(S.ach[p1]==='done'){S.ach[p1]='claimed';S.gems+=ac.g;let msg='+'+ac.g+' joias';if(ac.cos&&!S.cos.own.includes(ac.cos)){S.cos.own.push(ac.cos);msg+=' + '+COS.find(x=>x.id===ac.cos).n;}sfx('chest');toast(msg,'p');updateDots();renderSheet(true);}}
   else if(a==='mclaim'){const m=METAS.find(x=>x.id===p1);if(m&&!S.metas[p1]){const [x,y]=m.p();if(x>=y){S.metas[p1]=1;giveReward(m.r,m.n);updateDots();renderSheet(true);}}}
+  else if(a==='ad'){if(p1==='boost'&&S.adCdBoost>Date.now())return;if(p1==='chest'&&S.adCdChest>Date.now())return;sfx('click');requestAd(p1);}
   else if(a==='gclaim'){const g=GUIDE.find(x=>x.id===p1);if(g&&!S.metas['gd_'+p1]&&g.c()){S.metas['gd_'+p1]=1;giveReward(g.g,g.n);updateDots();renderSheet(true);}}
   else if(a==='sclaim')claimStory(p1);else if(a==='cclaim')claimCtx(p1);
   else if(a==='dgoal'){const g=DGOAL[+p1];const [x,y]=g.p(+p1);if(x>=y&&!S.dgoal[p1]){S.dgoal[p1]=1;S.gems+=20;dirty=true;showBanner('Meta concluída!',DIST[p1].n);screenConfetti(60);sfx('unlock');renderSheet(true);}}

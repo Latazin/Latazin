@@ -6,7 +6,7 @@ function newState(){
   return {v:2,coins:100,gems:0,ess:0,unlocked:[0],buildings:[],nid:1,cu:{},run:0,life:0,
     cnt:{built:0,upg:0,bub:0,met:0,chest:0,pres:0,ev:0,deco:0,res:0,prjDone:0,tags:{}},ach:{},daily:null,cos:{own:[],eq:{}},
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},
-    gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],
+    gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{}};
 }
 let S=newState();
@@ -173,6 +173,13 @@ function updateDev(initial){for(const d of S.unlocked){const s=devScore(d);const
 
 /* ---------- salvar ---------- */
 const NATIVE=!!window.CCNative;function native(msg){try{if(window.CCNative)window.CCNative.postMessage(msg);}catch(e){}}
+/* ---------- anúncios (AdMob, via app nativo) ---------- */
+function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
+window.__ccAdReward=(kind)=>{
+  if(kind==='boost'){S.adCdBoost=Date.now()+15*60000;S.gemBoost=Math.max(Date.now(),S.gemBoost)+30*60000;dirty=true;toast('Anúncio assistido: +100% de renda por 30 min!','g');sfx('unlock');vib([20,30,20]);screenConfetti(40);}
+  else if(kind==='chest'){S.adCdChest=Date.now()+15*60000;grantChest('ad');}
+  save();refreshPanel();};
+window.__ccAdFail=()=>{toast('Anúncio indisponível agora. Tente de novo em instantes.','r');};
 function save(){S.last=Date.now();const str=JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);
   try{const prev=localStorage.getItem(SAVE_KEY);localStorage.setItem(SAVE_KEY,str);if(prev&&Math.random()<0.2)localStorage.setItem(BACK_KEY,prev);}catch(e){}
   native('save:'+str);}
