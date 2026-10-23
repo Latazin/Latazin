@@ -456,7 +456,7 @@ function boot(){resize();const src=load();afterLoad();
     map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true),
     update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;},
     lbFetchRank,wheelReady,claimWheel,goldenHourOn,get flash(){return S.flash;},
-    spinRoleta,get oil(){return S.oil;},get oilDrop(){return oilDrop;},
+    spinSlot,get oil(){return S.oil;},get oilDrop(){return oilDrop;},
     forceOil:()=>{const [wx,wy]=proj(CARSPOT.x+.5,CARSPOT.y+3.5);oilDrop={x:wx,y:wy,t:0};}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};

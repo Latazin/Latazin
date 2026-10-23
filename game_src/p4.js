@@ -241,23 +241,33 @@ function checkFlashProgress(){if(!S.flash)return;
 // Petróleo é coletado em gotas raras espalhadas pela cidade (ver oilDrop em p6.js) —
 // não recarrega sozinho e não pode ser comprado: de propósito, pra ser difícil.
 const OIL_CAP=5;
-const ROL_SEGS=[
-  {id:'c1',  w:24,col:'#ffd23f',lb:'MOEDAS', t:'Moedas!',           f:()=>({coins:Math.max(120,rewardBase()*rnd(60,100))})},
-  {id:'c2',  w:18,col:'#2fd08a',lb:'PILHA',  t:'Pilha de moedas!',  f:()=>({coins:Math.max(250,rewardBase()*rnd(150,240))})},
-  {id:'gem', w:16,col:'#5aa9ff',lb:'JOIAS',  t:'Joias!',            f:()=>({gems:ri(4,7)})},
-  {id:'turbo',w:13,col:'#ff9f1c',lb:'TURBO', t:'Turbo 3×!',         f:()=>({turboMin:15})},
-  {id:'c3',  w:11,col:'#ff5d9e',lb:'BOLADA', t:'Bolada!',           f:()=>({coins:Math.max(800,rewardBase()*rnd(500,800))})},
-  {id:'crys',w:9, col:'#9b5de5',lb:'CRISTAL',t:'Cristal raro!',     f:()=>({crys:1,gems:ri(6,10)})},
-  {id:'rain',w:6, col:'#00b8c4',lb:'CHUVA',  t:'Chuva de prêmios!', f:()=>({coins:Math.max(2000,rewardBase()*rnd(1200,1800)),gems:ri(10,16)})},
-  {id:'jackpot',w:3,col:'#ff4757',lb:'JACKPOT',t:'JACKPOT!!!',      f:()=>({coins:Math.max(5000,rewardBase()*rnd(3000,4500)),gems:ri(25,40),crys:3})},
-];
-function pickRolSeg(){const tot=ROL_SEGS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(let i=0;i<ROL_SEGS.length;i++){const s=ROL_SEGS[i];if(r<s.w)return i;r-=s.w;}return 0;}
-function spinRoleta(){if(S.oil<=0)return null;S.oil--;
-  const idx=pickRolSeg(),seg=ROL_SEGS[idx],r=seg.f();
+const SLOT_SYMS=['c1','c2','c3','gem','turbo','crys','jackpot'];
+const SLOT_OUT=[{k:'jackpot',n:3,w:2},{k:'crys',n:3,w:4},{k:'c3',n:3,w:7},{k:'gem',n:3,w:8},{k:'turbo',n:3,w:8},{k:'c2',n:3,w:10},{k:'c1',n:3,w:13},{k:'pair',n:2,w:30},{k:'none',n:0,w:18}];
+const SLOT_PAIR=[{k:'c1',w:30},{k:'c2',w:22},{k:'gem',w:16},{k:'turbo',w:12},{k:'c3',w:10},{k:'crys',w:6},{k:'jackpot',w:4}];
+const SLOT_PRIZE={
+  c1:{t:'Moedas!',f:m=>({coins:Math.max(120,rewardBase()*rnd(80,120))*m})},
+  c2:{t:'Pilha de moedas!',f:m=>({coins:Math.max(250,rewardBase()*rnd(180,280))*m})},
+  c3:{t:'Bolada!',f:m=>({coins:Math.max(800,rewardBase()*rnd(550,850))*m})},
+  gem:{t:'Joias!',f:m=>({gems:Math.max(2,Math.round(ri(6,10)*m))})},
+  turbo:{t:'Turbo 3×!',f:m=>({turboMin:m<1?5:15})},
+  crys:{t:'Cristal raro!',f:m=>m<1?({gems:ri(3,5)}):({crys:1,gems:ri(6,10)})},
+  jackpot:{t:'JACKPOT!!!',f:m=>m<1?({coins:Math.max(600,rewardBase()*rnd(300,420))}):({coins:Math.max(5000,rewardBase()*rnd(3000,4500)),gems:ri(25,40),crys:3})},
+};
+function wpick(arr){const tot=arr.reduce((a,x)=>a+x.w,0);let r=Math.random()*tot;for(const x of arr){if(r<x.w)return x;r-=x.w;}return arr[0];}
+function spinSlot(){if(S.oil<=0)return null;S.oil--;
+  const o=wpick(SLOT_OUT),other=ex=>{const p=SLOT_SYMS.filter(x=>!ex.includes(x));return p[Math.floor(Math.random()*p.length)];};
+  let mid,sym=null,mult=1,cells=[];
+  if(o.n===3){sym=o.k;mid=[sym,sym,sym];cells=[0,1,2];}
+  else if(o.k==='pair'){sym=wpick(SLOT_PAIR).k;const odd=ri(0,2);mid=[sym,sym,sym];mid[odd]=other([sym]);cells=[0,1,2].filter(i=>i!==odd);mult=.3;}
+  else{const a=other([]),b=other([a]),c=other([a,b]);mid=[a,b,c];}
+  let r,title;
+  if(sym){r=SLOT_PRIZE[sym].f(mult);title=SLOT_PRIZE[sym].t;if(mult<1)title=sym==='jackpot'?'Quase o jackpot!':sym==='crys'?'Quase um cristal!':title;}
+  else{r={coins:Math.max(40,rewardBase()*rnd(15,30))};title='Quase!';}
+  if(r.coins)r.coins=Math.round(r.coins);
   if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;
-  if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:3,until:Date.now()+r.turboMin*60000,slot:true,label:'Turbo da roleta'});dirty=true;}
+  if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:3,until:Date.now()+r.turboMin*60000,slot:true,label:'Turbo do caça-níquel'});dirty=true;}
   dailyProg&&dailyProg('spin',1);save();
-  return {idx,seg,r};}
+  return {mid,cells,sym,triple:o.n===3,r,title};}
 
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
@@ -314,6 +324,7 @@ const SFX={
   click(){tone(rnd(520,620),.06,'triangle',.12);},
   tick(){const n=performance.now();if(n-(AU.lastTick||0)<38)return;AU.lastTick=n;tone(rnd(1900,2200),.022,'square',.028);tone(900,.03,'triangle',.05);},
   glug(){tone(260,.16,'sine',.2,0,.45);tone(190,.16,'sine',.16,.12,.5);tone(140,.18,'sine',.12,.24,.6);},
+  reel(){tone(150,.08,'square',.05);tone(75,.16,'sine',.24,0,.6);},
   fanfare(){[523.3,659.3,784,1046.5].forEach((f,i)=>tone(f,.24,'triangle',.13,i*.09));tone(1568,.5,'sine',.08,.36);},
   coin(){const n=performance.now();if(n-AU.lastCoin<45)return;AU.lastCoin=n;const f=rnd(1300,1700);tone(f,.07,'square',.035);tone(f*1.5,.12,'sine',.09,.035);},
   build(){tone(180,.18,'triangle',.3,0,.5);tone(330,.1,'square',.05,.06);tone(880,.15,'sine',.12,.14);tone(1320,.18,'sine',.08,.2);},
