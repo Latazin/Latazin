@@ -522,70 +522,81 @@ function openWheel(){const ready=wheelReady();
     });
   });}
 const SLOT_ICON={
-  c1:{ring:'#f6c343',svg:'<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="25" fill="#f6c343" stroke="#8a5a00" stroke-width="3"/><circle cx="32" cy="32" r="17" fill="none" stroke="#8a5a00" stroke-width="2.4" opacity=".55"/><text x="32" y="39" font-size="19" font-weight="900" text-anchor="middle" fill="#8a5a00" font-family="Arial,sans-serif">$</text></svg>'},
-  c2:{ring:'#ffd65c',svg:'<svg viewBox="0 0 64 64"><circle cx="21" cy="39" r="14" fill="#e8ab1f" stroke="#7a4e00" stroke-width="2.4"/><circle cx="36" cy="33" r="14" fill="#f6c343" stroke="#7a4e00" stroke-width="2.4"/><circle cx="30" cy="20" r="14" fill="#ffe9ac" stroke="#7a4e00" stroke-width="2.4"/></svg>'},
-  c3:{ring:'#ffd65c',svg:'<svg viewBox="0 0 64 64"><path d="M19 9h26v5a13 13 0 01-26 0V9z" fill="#ffd65c" stroke="#7a4e00" stroke-width="2.6"/><path d="M19 12c-7-1-9 9 1 13M45 12c7-1 9 9-1 13" fill="none" stroke="#7a4e00" stroke-width="2.6" stroke-linecap="round"/><rect x="28" y="27" width="8" height="12" fill="#ffd65c" stroke="#7a4e00" stroke-width="2.4"/><rect x="18" y="43" width="28" height="7" rx="2.5" fill="#ffd65c" stroke="#7a4e00" stroke-width="2.4"/></svg>'},
-  gem:{ring:'#5fe0ff',svg:'<svg viewBox="0 0 64 64"><polygon points="32,9 49,24 40,55 24,55 15,24" fill="#5fe0ff" stroke="#0b6a8c" stroke-width="2.6"/><polygon points="32,9 49,24 32,31 15,24" fill="#c7f4ff" stroke="#0b6a8c" stroke-width="1.6"/></svg>'},
-  turbo:{ring:'#ffe169',svg:'<svg viewBox="0 0 64 64"><polygon points="35,5 15,36 28,36 21,59 50,27 36,27" fill="#ffe169" stroke="#8a6a00" stroke-width="2.6" stroke-linejoin="round"/></svg>'},
-  crys:{ring:'#c9a6ff',svg:'<svg viewBox="0 0 64 64"><polygon points="32,6 51,21 44,55 20,55 13,21" fill="#c9a6ff" stroke="#5a2fb0" stroke-width="2.6" stroke-linejoin="round"/><line x1="32" y1="6" x2="32" y2="55" stroke="#5a2fb0" stroke-width="1.6" opacity=".55"/></svg>'},
-  star:{ring:'#fff6cf',svg:'<svg viewBox="0 0 64 64"><polygon points="32,5 39,24 60,24 43,36 49,57 32,45 15,57 21,36 4,24 25,24" fill="#fff6cf" stroke="#b8860b" stroke-width="2.6" stroke-linejoin="round"/></svg>'},
+  c1:{svg:'<circle cx="32" cy="32" r="25" fill="#fff6d8" stroke="#8a5a00" stroke-width="3"/><circle cx="32" cy="32" r="17" fill="none" stroke="#8a5a00" stroke-width="2.4" opacity=".55"/><text x="32" y="39" font-size="19" font-weight="900" text-anchor="middle" fill="#8a5a00" font-family="Arial,sans-serif">$</text>'},
+  c2:{svg:'<circle cx="21" cy="39" r="14" fill="#1c3a2e" stroke="#083322" stroke-width="2.4"/><circle cx="36" cy="33" r="14" fill="#fff6d8" stroke="#8a5a00" stroke-width="2.4"/><circle cx="30" cy="20" r="14" fill="#1c3a2e" stroke="#083322" stroke-width="2.4"/>'},
+  c3:{svg:'<path d="M19 9h26v5a13 13 0 01-26 0V9z" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.6"/><path d="M19 12c-7-1-9 9 1 13M45 12c7-1 9 9-1 13" fill="none" stroke="#1b6b3f" stroke-width="2.6" stroke-linecap="round"/><rect x="28" y="27" width="8" height="12" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.4"/><rect x="18" y="43" width="28" height="7" rx="2.5" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.4"/>'},
+  gem:{svg:'<polygon points="32,9 49,24 40,55 24,55 15,24" fill="#eafcff" stroke="#0b4a60" stroke-width="2.6"/><polygon points="32,9 49,24 32,31 15,24" fill="#ffffff" stroke="#0b4a60" stroke-width="1.6"/>'},
+  turbo:{svg:'<polygon points="35,5 15,36 28,36 21,59 50,27 36,27" fill="#fffbe0" stroke="#7a3a00" stroke-width="2.6" stroke-linejoin="round"/>'},
+  crys:{svg:'<polygon points="32,6 51,21 44,55 20,55 13,21" fill="#f5ecff" stroke="#3a1a70" stroke-width="2.6" stroke-linejoin="round"/><line x1="32" y1="6" x2="32" y2="55" stroke="#3a1a70" stroke-width="1.6" opacity=".55"/>'},
+  rain:{svg:'<circle cx="22" cy="20" r="8" fill="#eaffed" stroke="#1b6b3f" stroke-width="2"/><circle cx="38" cy="16" r="7" fill="#fff6d8" stroke="#8a5a00" stroke-width="2"/><circle cx="30" cy="34" r="9" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.2"/><circle cx="46" cy="38" r="6" fill="#fff6d8" stroke="#8a5a00" stroke-width="1.8"/><circle cx="16" cy="42" r="6" fill="#f5ecff" stroke="#3a1a70" stroke-width="1.8"/>'},
+  jackpot:{svg:'<path d="M10 46 L16 20 L27 34 L32 14 L37 34 L48 20 L54 46 Z" fill="#fff0d8" stroke="#7a1a1a" stroke-width="2.6" stroke-linejoin="round"/><rect x="10" y="46" width="44" height="8" rx="2" fill="#fff0d8" stroke="#7a1a1a" stroke-width="2.4"/><circle cx="32" cy="14" r="4.4" fill="#fff"/><circle cx="16" cy="20" r="3.8" fill="#fff"/><circle cx="48" cy="20" r="3.8" fill="#fff"/>'},
 };
-function schip(symId){const s=SLOT_ICON[symId]||SLOT_ICON.c1;return `<div class="schip" style="border:3px solid ${s.ring};box-shadow:0 0 9px ${s.ring}66,inset 0 2px 4px rgba(255,255,255,.08)">${s.svg}</div>`;}
-function slotRow(){const n=S.spins,cap=spinCap();
-  let timeTxt='';if(n<cap&&S.spinNext)timeTxt=' · próximo giro em '+fmtTime(Math.max(0,(S.spinNext-Date.now())/1000));
-  return `<div id="slotCount" class="note" style="text-align:center">Giros: <b>${n}/${cap}</b>${timeTxt}</div>`;}
-function buildReelStrip(finalId){const n=10,ids=[];for(let i=0;i<n;i++)ids.push(SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)].id);ids.push(finalId);return ids;}
-function animateReel(stripEl,finalId,delay){return new Promise(res=>{
-  const cellH=84,ids=buildReelStrip(finalId);
-  stripEl.innerHTML=ids.map(id=>`<div style="height:${cellH}px;display:flex;align-items:center;justify-content:center">${schip(id)}</div>`).join('');
-  stripEl.style.transition='none';stripEl.style.transform='translateY(0px)';
-  void stripEl.offsetHeight;
-  const targetY=-(ids.length-1)*cellH;
-  setTimeout(()=>{stripEl.classList.add('spinning');stripEl.style.transition='transform 900ms cubic-bezier(.15,.68,.28,1.05)';stripEl.style.transform='translateY('+targetY+'px)';sfx('click');
-    setTimeout(()=>stripEl.classList.remove('spinning'),620);},delay);
-  setTimeout(res,delay+940);});}
+function rolRow(){return `<div id="slotCount" class="note" style="text-align:center">🛢️ Petróleo: <b>${fmt(S.oil)}</b><br><span style="font-size:11px">Colete gotas de petróleo pela cidade pra ganhar giros</span></div>`;}
+function buildWheelSvg(){
+  const N=ROL_SEGS.length,per=360/N,cx=110,cy=110,r=100,D2R=Math.PI/180;
+  let segs='',icons='',bulbs='';
+  ROL_SEGS.forEach((s,i)=>{
+    const a0=i*per,a1=a0+per,am=a0+per/2;
+    const x0=(cx+r*Math.sin(a0*D2R)).toFixed(2),y0=(cy-r*Math.cos(a0*D2R)).toFixed(2);
+    const x1=(cx+r*Math.sin(a1*D2R)).toFixed(2),y1=(cy-r*Math.cos(a1*D2R)).toFixed(2);
+    segs+=`<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 0,1 ${x1},${y1} Z" fill="${s.col}" stroke="#1a1522" stroke-width="2"/>`;
+    const ric=r*0.62,icx=cx+ric*Math.sin(am*D2R),icy=cy-ric*Math.cos(am*D2R),ic=SLOT_ICON[s.id]||SLOT_ICON.c1;
+    icons+=`<g transform="rotate(${am.toFixed(2)} ${icx.toFixed(2)} ${icy.toFixed(2)})"><svg x="${(icx-15).toFixed(2)}" y="${(icy-15).toFixed(2)}" width="30" height="30" viewBox="0 0 64 64">${ic.svg}</svg></g>`;
+    const bx=(cx+108*Math.sin(a0*D2R)).toFixed(2),by=(cy-108*Math.cos(a0*D2R)).toFixed(2);
+    bulbs+=`<circle cx="${bx}" cy="${by}" r="3.2" fill="#ffd65c"/>`;
+  });
+  return `<svg viewBox="0 0 220 220" width="100%" height="100%">
+    <circle cx="110" cy="110" r="106" fill="#0c0c14"/>
+    ${bulbs}
+    <circle cx="110" cy="110" r="100" fill="none" stroke="#caa43a" stroke-width="5"/>
+    ${segs}
+    ${icons}
+    <circle cx="110" cy="110" r="18" fill="url(#rolHub)" stroke="#caa43a" stroke-width="3"/>
+    <defs><radialGradient id="rolHub" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#4a4160"/><stop offset="100%" stop-color="#15101f"/></radialGradient></defs>
+  </svg>`;}
+let rolRot=0;
+function spinWheelTo(idx){
+  const disc=$('#roletaDisc');if(!disc)return;
+  const per=360/ROL_SEGS.length,am=idx*per+per/2,jitter=rnd(-per*0.32,per*0.32);
+  const need=(((360-((am+jitter)%360))%360)+360)%360;
+  const spins=5+Math.floor(Math.random()*2);
+  const base=rolRot-(rolRot%360);
+  let target=base+spins*360+need;
+  while(target<=rolRot)target+=360;
+  rolRot=target;
+  disc.style.transform='rotate('+rolRot+'deg)';}
 function openSlot(){
+  rolRot=0;
   openModal(`<div id="slotCab" class="slot-cab">
   <div class="marquee">${Array(9).fill('<i></i>').join('')}</div>
-  <h2>CAÇA-MOEDAS</h2>
-  <p class="note" style="text-align:center;margin-top:0">Gaste 1 giro e combine 3 símbolos iguais pra um prêmio x4. Os giros recarregam sozinhos.</p>
-  <div class="slot-machine" style="margin:14px 0">
-    <div class="reel-panel"><i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
-      <div class="payline"></div>
-      <div id="slotReels" style="display:flex;gap:7px">
-        ${[0,1,2].map(()=>`<div class="reelWin"><div class="reelStrip">${`<div style="height:84px;display:flex;align-items:center;justify-content:center">${schip('c1')}</div>`}</div><div class="shine"></div></div>`).join('')}
-      </div>
-    </div>
-    <div class="slot-lever" id="slotLever"><div class="base"></div><div class="arm"><div class="rod"></div><div class="knob"></div></div></div>
-  </div>
+  <h2>ROLETA DO PETRÓLEO</h2>
+  <p class="note" style="text-align:center;margin-top:0">Gaste 1 petróleo e gire a roleta pra um prêmio. Quanto menor a fatia, maior o prêmio!</p>
+  <div class="roleta-wrap"><div class="roleta-pointer"></div><div class="roleta-disc" id="roletaDisc" style="transform:rotate(0deg)">${buildWheelSvg()}</div></div>
   <div id="slotResult" style="text-align:center;min-height:30px"></div>
-  <div id="slotCountWrap">${slotRow()}</div>
-  <button class="btn big slot-go" id="slotGo" ${S.spins<=0?'disabled':''}>GIRAR (1 giro)</button>
-  <button class="btn slot-buy" id="slotBuy" style="margin-top:8px" ${S.spins>=spinCap()?'disabled':''}>Giro extra · 💎10</button>
+  <div id="slotCountWrap">${rolRow()}</div>
+  <button class="btn big slot-go" id="slotGo" ${S.oil<=0?'disabled':''}>GIRAR (1 petróleo)</button>
   </div>
   <button class="btn big" data-m="close">Fechar</button>`);
   let spinning=false;
   clearInterval(openSlot._t);
-  openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=slotRow();
-    const go=$('#slotGo'),buy=$('#slotBuy');if(go&&!spinning)go.disabled=S.spins<=0;if(buy)buy.disabled=S.spins>=spinCap();},1000);
+  openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=rolRow();
+    const go=$('#slotGo');if(go&&!spinning)go.disabled=S.oil<=0;},1000);
   async function doSpinSequence(){
-    if(spinning||S.spins<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
-    const res=doSpin();if(!res){spinning=false;$('#slotGo').disabled=S.spins<=0;return;}
-    const lever=$('#slotLever');if(lever){lever.classList.add('pulled');setTimeout(()=>lever.classList.remove('pulled'),260);}
-    const strips=document.querySelectorAll('#slotReels .reelStrip');
+    if(spinning||S.oil<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
+    const res=spinRoleta();if(!res){spinning=false;$('#slotGo').disabled=S.oil<=0;return;}
     sfx('click');vib([12]);
-    await Promise.all([animateReel(strips[0],res.reels[0].id,0),animateReel(strips[1],res.reels[1].id,180),animateReel(strips[2],res.reels[2].id,360)]);
+    spinWheelTo(res.idx);
+    await new Promise(r=>setTimeout(r,3250));
     spinning=false;
-    const parts=[];if(res.coins)parts.push('+'+fmt(res.coins)+' moedas');if(res.gems)parts.push('+'+res.gems+' joias');if(res.crys)parts.push('+'+res.crys+' Cristal');if(res.turboMin)parts.push('Turbo 2× por '+Math.round(res.turboMin)+' min');
-      $('#slotResult').innerHTML=res.combo?`<b style="font-size:17px;color:#ffd65c;text-shadow:0 0 10px rgba(255,214,92,.6)">★ COMBO x4 ★</b><br><span class="note">${parts.join(' · ')}</span>`:`<span class="note">${parts.join(' · ')}</span>`;
-    const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();
-    $('#slotGo').disabled=S.spins<=0;
-    const cab=$('#slotCab');if(res.combo&&cab){cab.classList.add('winGlow');setTimeout(()=>cab.classList.remove('winGlow'),1500);}
-    screenConfetti(res.combo?120:35);sfx(res.combo?'unlock':'coin');vib(res.combo?[20,30,20,30,20]:[15]);
+    const r=res.r,parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal');if(r.turboMin)parts.push('Turbo 2× por '+Math.round(r.turboMin)+' min');
+    const big=res.seg.id==='jackpot'||res.seg.id==='rain';
+    $('#slotResult').innerHTML=big?`<b style="font-size:17px;color:#ffd65c;text-shadow:0 0 10px rgba(255,214,92,.6)">★ ${res.seg.id==='jackpot'?'JACKPOT!':'CHUVA DE PRÊMIOS!'} ★</b><br><span class="note">${parts.join(' · ')}</span>`:`<span class="note">${parts.join(' · ')}</span>`;
+    const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=rolRow();
+    $('#slotGo').disabled=S.oil<=0;
+    const cab=$('#slotCab');if(big&&cab){cab.classList.add('winGlow');setTimeout(()=>cab.classList.remove('winGlow'),1500);}
+    screenConfetti(big?130:40);sfx(big?'unlock':'coin');vib(big?[20,30,20,30,20]:[15]);
   }
   $('#slotGo').addEventListener('click',doSpinSequence);
-  $('#slotLever').addEventListener('click',doSpinSequence);
-  $('#slotBuy').addEventListener('click',()=>{if(buySpin()){sfx('up');const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=slotRow();$('#slotGo').disabled=S.spins<=0;$('#slotBuy').disabled=S.spins>=spinCap();}else{sfx('err');toast('Joias insuficientes ou giros no máximo','r');}});
 }
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
 function newComplex(cp,d){showBanner(cp.n,'Complexo formado em '+DIST[d].n);screenConfetti(90);sfx('unlock');const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);burst(wx,wy-20,40);toast(cp.fx,'p');}

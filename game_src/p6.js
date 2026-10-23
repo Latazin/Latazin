@@ -87,6 +87,18 @@ function drawPed(a,u,v){const [x,y]=proj(u,v);if(a.k==='vip'){const pg=TINT;TINT
    ===================================================================== */
 let evTimer=35,meteor=null,meteorT=50,superChest=null,adCar=null,adCarAnnounced=false;
 const CARSPOT={x:6,y:3};
+let oilDrop=null;
+function maybeSpawnOil(){
+  if(oilDrop||S.tut<4)return;
+  if(!S.oilNext){S.oilNext=Date.now()+rnd(9,17)*60000;return;}
+  if(Date.now()<S.oilNext)return;
+  const pool=[];for(const d of S.unlocked){if(d===11)continue;for(const p of plotsOf(d))pool.push(p);}
+  if(!pool.length){S.oilNext=Date.now()+rnd(9,17)*60000;return;}
+  const [tx,ty]=pool[Math.floor(Math.random()*pool.length)];
+  const [wx,wy]=proj(tx+.5,ty+.5);
+  oilDrop={x:wx,y:wy,t:0};
+  S.oilNext=Date.now()+rnd(9,17)*60000;
+  toast('🛢️ Uma gota de petróleo apareceu na cidade!','p');sfx('event');}
 const EVDEF={
   rain:{n:'Chuva de Moedas!',sub:'Toque nas moedas espalhadas pela cidade',dur:10,cls:''},
   golden:{n:'Prédio Dourado!',sub:'Um prédio produz 7× — toque nele',dur:30,cls:''},
@@ -142,6 +154,8 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
   if(ev&&ev.k==='rain'){for(let i=0;i<worldCoins.length;i++){const c=worldCoins[i];if(c.z<40&&Math.hypot(wx-c.x,wy-(c.y-8))<Math.max(R,16)){const v=Math.max(10,ipsBase*4);earn(v);floatText(c.x,c.y-20,'+'+fmt(v),'#ffd23f',15);flyCoins(...w2s(c.x,c.y-8),3);sfx('coin');worldCoins.splice(i,1);if(!ev.tapped){ev.tapped=1;eventTap();}return;}}}
   if(superChest&&Math.hypot(wx-superChest.x,wy-(superChest.y-14))<Math.max(R,26)){burst(superChest.x,superChest.y-14,40);superChest=null;eventTap();grantChest('super');endEvent();return;}
   if(adCar&&Math.hypot(wx-adCar.x,wy-(adCar.y-8))<Math.max(R,30)){sfx('click');requestAd('car');return;}
+  if(oilDrop&&Math.hypot(wx-oilDrop.x,wy-(oilDrop.y-6))<Math.max(R,28)){const amt=Math.random()<.15?2:1;S.oil+=amt;dirty=true;
+    floatText(oilDrop.x,oilDrop.y-26,'+'+amt+' petróleo','#b7a1ff',17);burst(oilDrop.x,oilDrop.y-8,28);sfx('chest');vib([15,20]);oilDrop=null;save();return;}
   let hit=null,hd=-1;for(const b of S.buildings){const [cx,cy]=bWorld(b);const top=b._top||30;if(wx>cx-30&&wx<cx+30&&wy<cy+14&&wy>cy-top-6){const d=b.x+b.y;if(d>hd){hd=d;hit=b;}}}
   if(hit){
     if(ev&&ev.k==='mega'&&ev.bid===hit.id){hit.lvl+=10;S.maxLv=Math.max(S.maxLv,hit.lvl);dirty=true;const [cx,cy]=bWorld(hit);burst(cx,cy-30,50);floatText(cx,cy-70,'+10 níveis!','#c9a8ff',20);showBanner('Mega Upgrade!',TYPES[hit.t].n);sfx('unlock');eventTap();endEvent();checkAch();return;}
@@ -187,7 +201,8 @@ function update(dt){
   ipsT-=dt;if(ipsT<=0){ipsT=3;dirty=true;}
   saveT-=dt;if(saveT<=0){saveT=10;save();}
   lbT-=dt;if(lbT<=0){lbT=120;if(S.tut>=4&&S.pop>0){lbSubmit(true);lbFetchRank();}}
-  maybeTriggerGoldenHour();maybeTriggerFlash();checkFlashProgress();tickSpinRegen();
+  maybeTriggerGoldenHour();maybeTriggerFlash();checkFlashProgress();maybeSpawnOil();
+  if(oilDrop){oilDrop.t+=dt;if(oilDrop.t>55)oilDrop=null;}
   devT-=dt;if(devT<=0){devT=2;updateDev();if(heatMode)computeHeat();}
   ctxT-=dt;if(ctxT<=0){ctxT=6;ctxTick();}
   agT-=dt;if(agT<=0){agT=5;syncAgents(false);}
@@ -204,8 +219,8 @@ function updHUD(){$('#coinTxt').textContent=fmt(dispCoins);const it=$('#ipsTxt')
   const carBtn=$('#carBtn');if(carBtn)carBtn.hidden=!adCar;
   const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady();wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
   const rankBtn=$('#rankBtn');if(rankBtn){const rt=$('#rankTxt');if(rt)rt.textContent=S.lbRank?'#'+fmt(S.lbRank):'Rank';}
-  const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=S.spins+'/'+spinCap();
-  const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=S.spins<=0;
+  const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=fmt(S.oil);
+  const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=S.oil<=0;
   if(ev){const p=$('#evProg');if(p)p.style.width=(100*(1-ev.t/ev.dur))+'%';}
   if(sev){if(sev.pending){const s=$('#sevChip .sub');if(s)s.textContent='Toque para decidir · '+Math.ceil(sev.wait)+'s';}else if(sev.obj){const s=$('#sevSub');if(s)s.textContent=sev.obj.txt+': '+fmt(Math.max(0,sev.obj.prog))+'/'+fmt(sev.obj.need);const p=$('#sevProg');if(p)p.style.width=(100*clamp((sev.obj.until-TIME)/sev.obj.dur,0,1))+'%';}}
   stripRender();if(sheetMode)refreshButtons();
@@ -276,6 +291,17 @@ function render(){
     X.save();X.font='bold 15px "Lilita One",sans-serif';X.textAlign='center';X.fillStyle='#fff';X.strokeStyle='#2b2350';X.lineWidth=4;
     X.translate(ac.x,ac.y-42+bob*1.4);X.scale(1+pulse*.08,1+pulse*.08);X.strokeText('TOQUE!',0,0);X.fillText('TOQUE!',0,0);X.restore();
     if(Math.random()<.4)parts.push({k:'spark',x:ac.x+rnd(-14,14),y:ac.y-rnd(4,20),vx:0,vy:-16,t:0,life:.6,c:'#fff3a8'});}
+  if(oilDrop){const od=oilDrop;const bob=Math.sin(od.t*2.6)*4;const pulse=.5+.5*Math.sin(od.t*3.4);
+    glow(od.x,od.y-10+bob,40+pulse*10,'rgba(140,90,220,'+(.4+pulse*.25)+')');ell(od.x,od.y,11,5,'rgba(43,35,80,.22)',false);
+    X.save();X.translate(od.x,od.y-16+bob);
+    X.beginPath();X.moveTo(0,-19);X.quadraticCurveTo(10,0,0,11);X.quadraticCurveTo(-10,0,0,-19);X.closePath();
+    const gr=X.createRadialGradient(-3,-6,1,0,0,15);gr.addColorStop(0,'#4a4660');gr.addColorStop(.55,'#1c1826');gr.addColorStop(1,'#07050c');
+    X.fillStyle=gr;X.fill();X.strokeStyle='#caa43a';X.lineWidth=1.4;X.stroke();
+    X.beginPath();X.ellipse(-3.5,-5,2.6,4,-.5,0,Math.PI*2);X.fillStyle='rgba(255,255,255,.55)';X.fill();
+    X.restore();
+    X.save();X.font='bold 15px "Lilita One",sans-serif';X.textAlign='center';X.fillStyle='#fff';X.strokeStyle='#2b2350';X.lineWidth=4;
+    X.translate(od.x,od.y-46+bob*1.3);X.scale(1+pulse*.08,1+pulse*.08);X.strokeText('TOQUE!',0,0);X.fillText('TOQUE!',0,0);X.restore();
+    if(Math.random()<.35)parts.push({k:'spark',x:od.x+rnd(-10,10),y:od.y-rnd(0,16),vx:0,vy:-14,t:0,life:.55,c:'#c9a6ff'});}
   if(ceremony){const b=ceremony.b;const [cx,cy]=bWorld(b);const t=TIME-ceremony.t0;const A=P(cx,cy,-.45,.45,0),B=P(cx,cy,.45,.45,0);line(A[0],A[1],A[0],A[1]-14,'#ffd23f',2);line(B[0],B[1],B[0],B[1]-14,'#ffd23f',2);
     if(t<1.2){X.beginPath();X.moveTo(A[0],A[1]-11);X.quadraticCurveTo((A[0]+B[0])/2,(A[1]+B[1])/2-6,B[0],B[1]-11);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.stroke();ell((A[0]+B[0])/2,(A[1]+B[1])/2-9,4,3,'#ff3b5c');}
     else{const f=Math.min(1,(t-1.2)*1.5);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.beginPath();X.moveTo(A[0],A[1]-11);X.lineTo(lerp(A[0],(A[0]+B[0])/2,.6),lerp(A[1]-11,(A[1]+B[1])/2+4,f));X.moveTo(B[0],B[1]-11);X.lineTo(lerp(B[0],(A[0]+B[0])/2,.6),lerp(B[1]-11,(A[1]+B[1])/2+4,f));X.stroke();}}
@@ -429,7 +455,8 @@ function boot(){resize();const src=load();afterLoad();
     map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true),
     update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;},
     lbFetchRank,wheelReady,claimWheel,goldenHourOn,get flash(){return S.flash;},
-    doSpin,buySpin,spinCap,get spins(){return S.spins;}};}
+    spinRoleta,get oil(){return S.oil;},get oilDrop(){return oilDrop;},
+    forceOil:()=>{const [wx,wy]=proj(CARSPOT.x+.5,CARSPOT.y+3.5);oilDrop={x:wx,y:wy,t:0};}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};
 if(window.CCNative){let started=false;const go=()=>{if(started)return;started=true;boot();};

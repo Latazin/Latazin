@@ -8,7 +8,7 @@ function newState(){
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
-    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,spins:3,spinNext:0};
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,oil:0,oilNext:0};
 }
 let S=newState();
 function initCity(st){
@@ -233,40 +233,26 @@ function checkFlashProgress(){if(!S.flash)return;
     showBanner('⚡ Missão relâmpago!','+'+fmt(r.coins)+' moedas e +'+r.gems+' joias');screenConfetti(90);sfx('unlock');vib([20,30,20]);S.flash=null;save();return;}
   if(Date.now()>S.flash.until)S.flash=null;}
 
-/* ---------- Caça-Moedas (caça-níqueis permanente, estilo Coin Master) ---------- */
-const SLOT_REGEN_MS=12*60000;
-const SLOT_SYMS=[
-  {id:'c1',w:30,k:'coin',m:6},
-  {id:'c2',w:20,k:'coin',m:24},
-  {id:'c3',w:8, k:'coin',m:85},
-  {id:'gem',w:16,k:'gem',v:2},
-  {id:'turbo',w:14,k:'turbo',v:8},
-  {id:'crys',w:4, k:'crys',v:1},
-  {id:'star',w:8, k:'star'},
+/* ---------- Roleta do Petróleo (roda de prêmios, custa Petróleo pra girar) ---------- */
+// Petróleo é coletado em gotas raras espalhadas pela cidade (ver oilDrop em p6.js) —
+// não recarrega sozinho e não pode ser comprado: de propósito, pra ser difícil.
+const ROL_SEGS=[
+  {id:'c1',  w:24,col:'#f6c343',f:()=>({coins:Math.max(30,ipsBase*rnd(10,18))})},
+  {id:'c2',  w:18,col:'#2fd08a',f:()=>({coins:Math.max(90,ipsBase*rnd(28,46))})},
+  {id:'gem', w:16,col:'#5fe0ff',f:()=>({gems:ri(2,4)})},
+  {id:'turbo',w:13,col:'#ffe169',f:()=>({turboMin:10})},
+  {id:'c3',  w:11,col:'#ff8fab',f:()=>({coins:Math.max(320,ipsBase*rnd(130,210))})},
+  {id:'crys',w:9, col:'#c9a6ff',f:()=>({crys:1,gems:ri(3,6)})},
+  {id:'rain',w:6, col:'#8e5cff',f:()=>({coins:Math.max(600,ipsBase*rnd(260,420)),gems:ri(5,9)})},
+  {id:'jackpot',w:3,col:'#ff3b3b',f:()=>({coins:Math.max(1500,ipsBase*rnd(600,950)),gems:ri(14,22),crys:2})},
 ];
-function spinCap(){return Math.min(9,5+Math.floor(S.rank/2));}
-function pickSlotSym(){const tot=SLOT_SYMS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(const s of SLOT_SYMS){if(r<s.w)return s;r-=s.w;}return SLOT_SYMS[0];}
-function tickSpinRegen(){const cap=spinCap();
-  if(S.spins>=cap){S.spinNext=0;return;}
-  if(!S.spinNext){S.spinNext=Date.now()+SLOT_REGEN_MS;return;}
-  if(Date.now()>=S.spinNext){S.spins=Math.min(cap,S.spins+1);dirty=true;S.spinNext=S.spins<cap?Date.now()+SLOT_REGEN_MS:0;}}
-function doSpin(){if(S.spins<=0)return null;S.spins--;if(!S.spinNext)S.spinNext=Date.now()+SLOT_REGEN_MS;
-  const reels=[pickSlotSym(),pickSlotSym(),pickSlotSym()];
-  const combo=reels[0].id===reels[1].id&&reels[1].id===reels[2].id;const mul=combo?4:1;
-  let coins=0,gems=0,crys=0,turboMin=0;
-  for(const s of reels){
-    if(s.k==='coin')coins+=Math.max(30,ipsBase*rnd(s.m*2,s.m*3.2));
-    else if(s.k==='gem')gems+=s.v;
-    else if(s.k==='crys')crys+=s.v;
-    else if(s.k==='turbo')turboMin+=s.v;
-    else if(s.k==='star'){coins+=Math.max(150,ipsBase*rnd(45,75));gems+=1;}
-  }
-  coins=Math.round(coins*mul);gems=Math.round(gems*mul);crys=Math.round(crys*mul);
-  if(coins)earn(coins);if(gems)S.gems+=gems;if(crys)S.crys+=crys;
-  if(turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:2,until:Date.now()+turboMin*60000*mul,slot:true,label:'Caça-Moedas'});dirty=true;}
+function pickRolSeg(){const tot=ROL_SEGS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(let i=0;i<ROL_SEGS.length;i++){const s=ROL_SEGS[i];if(r<s.w)return i;r-=s.w;}return 0;}
+function spinRoleta(){if(S.oil<=0)return null;S.oil--;
+  const idx=pickRolSeg(),seg=ROL_SEGS[idx],r=seg.f();
+  if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;
+  if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:2,until:Date.now()+r.turboMin*60000,slot:true,label:'Roleta do Petróleo'});dirty=true;}
   dailyProg&&dailyProg('spin',1);save();
-  return {reels,coins,gems,crys,turboMin,combo};}
-function buySpin(){const cost=10;if(S.gems<cost||S.spins>=spinCap())return false;S.gems-=cost;S.spins=Math.min(spinCap(),S.spins+1);save();return true;}
+  return {idx,seg,r};}
 
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
