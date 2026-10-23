@@ -18,9 +18,9 @@
 // seus próprios IDs reais para pagar.
 // ============================================================
 class AdIds {
-  static const String admobAppId = 'ca-app-pub-3940256099942544~3347511713'; // TESTE
-  static const String rewardedBoost = 'ca-app-pub-3940256099942544/5224354917'; // TESTE
-  static const String rewardedChest = 'ca-app-pub-3940256099942544/5224354917'; // TESTE
+  static const String admobAppId = 'ca-app-pub-4705801610677571~7249815840';
+  static const String rewardedBoost = 'ca-app-pub-4705801610677571/2638945002';
+  static const String rewardedChest = 'ca-app-pub-4705801610677571/4590320926';
 
   static bool get isTest => admobAppId.contains('3940256099942544');
 }
