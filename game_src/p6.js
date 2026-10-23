@@ -89,7 +89,8 @@ let evTimer=35,meteor=null,meteorT=50,superChest=null,adCar=null,adCarAnnounced=
 const CARSPOT={x:6,y:3};
 let oilDrop=null;
 function maybeSpawnOil(){
-  if(oilDrop||S.tut<4)return;
+  if(!S.oilV2){S.oilV2=1;S.oil=Math.max(S.oil||0,OIL_CAP);dirty=true;}
+  if(oilDrop||S.tut<4||S.oil>=OIL_CAP)return;
   if(!S.oilNext){S.oilNext=Date.now()+rnd(9,17)*60000;return;}
   if(Date.now()<S.oilNext)return;
   const pool=[];for(const d of S.unlocked){if(d===11)continue;for(const p of plotsOf(d))pool.push(p);}
@@ -154,7 +155,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
   if(ev&&ev.k==='rain'){for(let i=0;i<worldCoins.length;i++){const c=worldCoins[i];if(c.z<40&&Math.hypot(wx-c.x,wy-(c.y-8))<Math.max(R,16)){const v=Math.max(10,ipsBase*4);earn(v);floatText(c.x,c.y-20,'+'+fmt(v),'#ffd23f',15);flyCoins(...w2s(c.x,c.y-8),3);sfx('coin');worldCoins.splice(i,1);if(!ev.tapped){ev.tapped=1;eventTap();}return;}}}
   if(superChest&&Math.hypot(wx-superChest.x,wy-(superChest.y-14))<Math.max(R,26)){burst(superChest.x,superChest.y-14,40);superChest=null;eventTap();grantChest('super');endEvent();return;}
   if(adCar&&Math.hypot(wx-adCar.x,wy-(adCar.y-8))<Math.max(R,30)){sfx('click');requestAd('car');return;}
-  if(oilDrop&&Math.hypot(wx-oilDrop.x,wy-(oilDrop.y-6))<Math.max(R,28)){const amt=Math.random()<.15?2:1;S.oil+=amt;dirty=true;
+  if(oilDrop&&Math.hypot(wx-oilDrop.x,wy-(oilDrop.y-6))<Math.max(R,28)){const amt=Math.min(OIL_CAP-S.oil,Math.random()<.15?2:1);S.oil=Math.min(OIL_CAP,S.oil+Math.max(1,amt));dirty=true;
     floatText(oilDrop.x,oilDrop.y-26,'+'+amt+' petróleo','#b7a1ff',17);burst(oilDrop.x,oilDrop.y-8,28);sfx('chest');vib([15,20]);oilDrop=null;save();return;}
   let hit=null,hd=-1;for(const b of S.buildings){const [cx,cy]=bWorld(b);const top=b._top||30;if(wx>cx-30&&wx<cx+30&&wy<cy+14&&wy>cy-top-6){const d=b.x+b.y;if(d>hd){hd=d;hit=b;}}}
   if(hit){
@@ -219,7 +220,7 @@ function updHUD(){$('#coinTxt').textContent=fmt(dispCoins);const it=$('#ipsTxt')
   const carBtn=$('#carBtn');if(carBtn)carBtn.hidden=!adCar;
   const wheelBtn=$('#wheelBtn');if(wheelBtn){const rdy=wheelReady();wheelBtn.classList.toggle('ready',rdy);const wt=$('#wheelTxt');if(wt)wt.textContent=rdy?'Grátis!':'Amanhã';const wd=$('#wheelDot');if(wd)wd.hidden=!rdy;}
   const rankBtn=$('#rankBtn');if(rankBtn){const rt=$('#rankTxt');if(rt)rt.textContent=S.lbRank?'#'+fmt(S.lbRank):'Rank';}
-  const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=fmt(S.oil);
+  const slotTxt=$('#slotTxt');if(slotTxt)slotTxt.textContent=S.oil+'/'+OIL_CAP;
   const slotDot=$('#slotDot');if(slotDot)slotDot.hidden=S.oil<=0;
   if(ev){const p=$('#evProg');if(p)p.style.width=(100*(1-ev.t/ev.dur))+'%';}
   if(sev){if(sev.pending){const s=$('#sevChip .sub');if(s)s.textContent='Toque para decidir · '+Math.ceil(sev.wait)+'s';}else if(sev.obj){const s=$('#sevSub');if(s)s.textContent=sev.obj.txt+': '+fmt(Math.max(0,sev.obj.prog))+'/'+fmt(sev.obj.need);const p=$('#sevProg');if(p)p.style.width=(100*clamp((sev.obj.until-TIME)/sev.obj.dur,0,1))+'%';}}

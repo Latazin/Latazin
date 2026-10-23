@@ -8,7 +8,7 @@ function newState(){
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
-    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,oil:0,oilNext:0};
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,oil:0,oilNext:0,oilV2:0};
 }
 let S=newState();
 function initCity(st){
@@ -236,15 +236,16 @@ function checkFlashProgress(){if(!S.flash)return;
 /* ---------- Roleta do Petróleo (roda de prêmios, custa Petróleo pra girar) ---------- */
 // Petróleo é coletado em gotas raras espalhadas pela cidade (ver oilDrop em p6.js) —
 // não recarrega sozinho e não pode ser comprado: de propósito, pra ser difícil.
+const OIL_CAP=5;
 const ROL_SEGS=[
-  {id:'c1',  w:24,col:'#f6c343',f:()=>({coins:Math.max(30,ipsBase*rnd(10,18))})},
-  {id:'c2',  w:18,col:'#2fd08a',f:()=>({coins:Math.max(90,ipsBase*rnd(28,46))})},
-  {id:'gem', w:16,col:'#5fe0ff',f:()=>({gems:ri(2,4)})},
-  {id:'turbo',w:13,col:'#ffe169',f:()=>({turboMin:10})},
-  {id:'c3',  w:11,col:'#ff8fab',f:()=>({coins:Math.max(320,ipsBase*rnd(130,210))})},
-  {id:'crys',w:9, col:'#c9a6ff',f:()=>({crys:1,gems:ri(3,6)})},
-  {id:'rain',w:6, col:'#8e5cff',f:()=>({coins:Math.max(600,ipsBase*rnd(260,420)),gems:ri(5,9)})},
-  {id:'jackpot',w:3,col:'#ff3b3b',f:()=>({coins:Math.max(1500,ipsBase*rnd(600,950)),gems:ri(14,22),crys:2})},
+  {id:'c1',  w:24,col:'#ffd23f',lb:'MOEDAS', t:'Moedas!',           f:()=>({coins:Math.max(30,ipsBase*rnd(10,18))})},
+  {id:'c2',  w:18,col:'#2fd08a',lb:'PILHA',  t:'Pilha de moedas!',  f:()=>({coins:Math.max(90,ipsBase*rnd(28,46))})},
+  {id:'gem', w:16,col:'#5aa9ff',lb:'JOIAS',  t:'Joias!',            f:()=>({gems:ri(2,4)})},
+  {id:'turbo',w:13,col:'#ff9f1c',lb:'TURBO', t:'Turbo 2×!',         f:()=>({turboMin:10})},
+  {id:'c3',  w:11,col:'#ff5d9e',lb:'BOLADA', t:'Bolada!',           f:()=>({coins:Math.max(320,ipsBase*rnd(130,210))})},
+  {id:'crys',w:9, col:'#9b5de5',lb:'CRISTAL',t:'Cristal raro!',     f:()=>({crys:1,gems:ri(3,6)})},
+  {id:'rain',w:6, col:'#00b8c4',lb:'CHUVA',  t:'Chuva de prêmios!', f:()=>({coins:Math.max(600,ipsBase*rnd(260,420)),gems:ri(5,9)})},
+  {id:'jackpot',w:3,col:'#ff4757',lb:'JACKPOT',t:'JACKPOT!!!',      f:()=>({coins:Math.max(1500,ipsBase*rnd(600,950)),gems:ri(14,22),crys:2})},
 ];
 function pickRolSeg(){const tot=ROL_SEGS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(let i=0;i<ROL_SEGS.length;i++){const s=ROL_SEGS[i];if(r<s.w)return i;r-=s.w;}return 0;}
 function spinRoleta(){if(S.oil<=0)return null;S.oil--;
@@ -307,6 +308,9 @@ function tone(f,dur,type,vol,when,slide,dest){if(!AU.c)return;const t=AU.c.curre
   g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||.2,t+.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(dest||AU.sfx);o.start(t);o.stop(t+dur+.05);}
 const SFX={
   click(){tone(rnd(520,620),.06,'triangle',.12);},
+  tick(){const n=performance.now();if(n-(AU.lastTick||0)<38)return;AU.lastTick=n;tone(rnd(1900,2200),.022,'square',.028);tone(900,.03,'triangle',.05);},
+  glug(){tone(260,.16,'sine',.2,0,.45);tone(190,.16,'sine',.16,.12,.5);tone(140,.18,'sine',.12,.24,.6);},
+  fanfare(){[523.3,659.3,784,1046.5].forEach((f,i)=>tone(f,.24,'triangle',.13,i*.09));tone(1568,.5,'sine',.08,.36);},
   coin(){const n=performance.now();if(n-AU.lastCoin<45)return;AU.lastCoin=n;const f=rnd(1300,1700);tone(f,.07,'square',.035);tone(f*1.5,.12,'sine',.09,.035);},
   build(){tone(180,.18,'triangle',.3,0,.5);tone(330,.1,'square',.05,.06);tone(880,.15,'sine',.12,.14);tone(1320,.18,'sine',.08,.2);},
   up(){[523,659,784,1047].forEach((f,i)=>tone(f*rnd(.99,1.01),.14,'triangle',.14,i*.05));tone(2093,.2,'sine',.05,.22);},

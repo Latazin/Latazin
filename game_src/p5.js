@@ -521,82 +521,168 @@ function openWheel(){const ready=wheelReady();
       screenConfetti(100);sfx('unlock');vib([20,30,20]);
     });
   });}
+/* ---------- Roleta da Sorte (UI cartoon) ---------- */
+const RK='#2b2350';
 const SLOT_ICON={
-  c1:{svg:'<circle cx="32" cy="32" r="25" fill="#fff6d8" stroke="#8a5a00" stroke-width="3"/><circle cx="32" cy="32" r="17" fill="none" stroke="#8a5a00" stroke-width="2.4" opacity=".55"/><text x="32" y="39" font-size="19" font-weight="900" text-anchor="middle" fill="#8a5a00" font-family="Arial,sans-serif">$</text>'},
-  c2:{svg:'<circle cx="21" cy="39" r="14" fill="#1c3a2e" stroke="#083322" stroke-width="2.4"/><circle cx="36" cy="33" r="14" fill="#fff6d8" stroke="#8a5a00" stroke-width="2.4"/><circle cx="30" cy="20" r="14" fill="#1c3a2e" stroke="#083322" stroke-width="2.4"/>'},
-  c3:{svg:'<path d="M19 9h26v5a13 13 0 01-26 0V9z" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.6"/><path d="M19 12c-7-1-9 9 1 13M45 12c7-1 9 9-1 13" fill="none" stroke="#1b6b3f" stroke-width="2.6" stroke-linecap="round"/><rect x="28" y="27" width="8" height="12" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.4"/><rect x="18" y="43" width="28" height="7" rx="2.5" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.4"/>'},
-  gem:{svg:'<polygon points="32,9 49,24 40,55 24,55 15,24" fill="#eafcff" stroke="#0b4a60" stroke-width="2.6"/><polygon points="32,9 49,24 32,31 15,24" fill="#ffffff" stroke="#0b4a60" stroke-width="1.6"/>'},
-  turbo:{svg:'<polygon points="35,5 15,36 28,36 21,59 50,27 36,27" fill="#fffbe0" stroke="#7a3a00" stroke-width="2.6" stroke-linejoin="round"/>'},
-  crys:{svg:'<polygon points="32,6 51,21 44,55 20,55 13,21" fill="#f5ecff" stroke="#3a1a70" stroke-width="2.6" stroke-linejoin="round"/><line x1="32" y1="6" x2="32" y2="55" stroke="#3a1a70" stroke-width="1.6" opacity=".55"/>'},
-  rain:{svg:'<circle cx="22" cy="20" r="8" fill="#eaffed" stroke="#1b6b3f" stroke-width="2"/><circle cx="38" cy="16" r="7" fill="#fff6d8" stroke="#8a5a00" stroke-width="2"/><circle cx="30" cy="34" r="9" fill="#eaffed" stroke="#1b6b3f" stroke-width="2.2"/><circle cx="46" cy="38" r="6" fill="#fff6d8" stroke="#8a5a00" stroke-width="1.8"/><circle cx="16" cy="42" r="6" fill="#f5ecff" stroke="#3a1a70" stroke-width="1.8"/>'},
-  jackpot:{svg:'<path d="M10 46 L16 20 L27 34 L32 14 L37 34 L48 20 L54 46 Z" fill="#fff0d8" stroke="#7a1a1a" stroke-width="2.6" stroke-linejoin="round"/><rect x="10" y="46" width="44" height="8" rx="2" fill="#fff0d8" stroke="#7a1a1a" stroke-width="2.4"/><circle cx="32" cy="14" r="4.4" fill="#fff"/><circle cx="16" cy="20" r="3.8" fill="#fff"/><circle cx="48" cy="20" r="3.8" fill="#fff"/>'},
+  c1:`<circle cx="32" cy="33" r="21" fill="${RK}"/><circle cx="32" cy="31" r="21" fill="#ffd23f" stroke="${RK}" stroke-width="3.5"/><circle cx="32" cy="31" r="14" fill="none" stroke="#e9a400" stroke-width="3"/><text x="32" y="39" font-size="22" text-anchor="middle" fill="#b97a00" font-family="Lilita One,sans-serif">$</text><ellipse cx="24" cy="22" rx="5" ry="3" fill="#fff" opacity=".75" transform="rotate(-30 24 22)"/>`,
+  c2:[46,37,28,19].map((y,i)=>`<ellipse cx="32" cy="${y+5}" rx="19" ry="7" fill="#e9a400" stroke="${RK}" stroke-width="3"/><ellipse cx="32" cy="${y}" rx="19" ry="7" fill="${i===3?'#ffe27a':'#ffd23f'}" stroke="${RK}" stroke-width="3"/>`).join('')+`<ellipse cx="25" cy="17" rx="5" ry="2" fill="#fff" opacity=".8"/>`,
+  gem:`<polygon points="14,25 23,13 41,13 50,25 32,53" fill="#b28cff" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><polygon points="14,25 23,13 32,25" fill="#e3d4ff"/><polygon points="32,25 41,13 50,25" fill="#9a6cff"/><polyline points="14,25 50,25" fill="none" stroke="${RK}" stroke-width="2.5"/><polyline points="23,13 32,25 41,13" fill="none" stroke="${RK}" stroke-width="2.5" stroke-linejoin="round"/><polyline points="32,25 32,53" stroke="${RK}" stroke-width="2" opacity=".5"/>`,
+  turbo:`<polygon points="38,5 15,36 29,36 23,59 49,25 35,25 42,5" fill="#ffe14d" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><polygon points="36,10 22,31 28,31" fill="#fff" opacity=".7"/>`,
+  c3:`<path d="M24 17 L19 8 L32 12 L45 8 L40 17" fill="#e0b47a" stroke="${RK}" stroke-width="3.2" stroke-linejoin="round"/><path d="M23 21 C12 30 10 54 32 56 C54 54 52 30 41 21 Z" fill="#e0b47a" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><rect x="22" y="16" width="20" height="7" rx="3.5" fill="#b07a3c" stroke="${RK}" stroke-width="3"/><text x="32" y="48" font-size="19" text-anchor="middle" fill="#1f8f57" font-family="Lilita One,sans-serif">$</text><ellipse cx="22" cy="34" rx="3" ry="7" fill="#fff" opacity=".5"/>`,
+  crys:`<polygon points="32,5 48,22 41,56 23,56 16,22" fill="#9ff3ff" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><polygon points="32,5 16,22 28,22" fill="#e6fcff"/><polyline points="16,22 48,22" fill="none" stroke="${RK}" stroke-width="2.5"/><polyline points="28,22 32,5 36,22" fill="none" stroke="${RK}" stroke-width="2.2"/><polyline points="28,22 32,56 36,22" fill="none" stroke="${RK}" stroke-width="2" opacity=".55"/>`,
+  rain:[[20,25,10],[32,18,13],[45,26,10],[32,29,11]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r+3.2}" fill="${RK}"/>`).join('')+`<rect x="17" y="24" width="30" height="16" rx="7" fill="${RK}"/>`+[[20,25,10],[32,18,13],[45,26,10],[32,29,11]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/>`).join('')+`<rect x="20" y="25" width="24" height="12" rx="6" fill="#fff"/>`+[[19,50],[32,56],[45,49]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6.5" fill="#ffd23f" stroke="${RK}" stroke-width="2.6"/>`).join(''),
+  jackpot:`<path d="M11 45 L8 18 L22 30 L32 11 L42 30 L56 18 L53 45 Z" fill="#ffd23f" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><path d="M15 40 L13 26 L22 34 Z" fill="#fff" opacity=".55"/><rect x="10" y="44" width="44" height="10" rx="4" fill="#ffb703" stroke="${RK}" stroke-width="3.2"/><circle cx="21" cy="49" r="3" fill="#ff4757"/><circle cx="32" cy="49" r="3.4" fill="#5aa9ff"/><circle cx="43" cy="49" r="3" fill="#ff4757"/><circle cx="8" cy="18" r="4.4" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/><circle cx="32" cy="11" r="4.8" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/><circle cx="56" cy="18" r="4.4" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/>`,
 };
-function rolRow(){return `<div id="slotCount" class="note" style="text-align:center">🛢️ Petróleo: <b>${fmt(S.oil)}</b><br><span style="font-size:11px">Colete gotas de petróleo pela cidade pra ganhar giros</span></div>`;}
-function buildWheelSvg(){
-  const N=ROL_SEGS.length,per=360/N,cx=110,cy=110,r=100,D2R=Math.PI/180;
-  let segs='',icons='',bulbs='';
-  ROL_SEGS.forEach((s,i)=>{
-    const a0=i*per,a1=a0+per,am=a0+per/2;
-    const x0=(cx+r*Math.sin(a0*D2R)).toFixed(2),y0=(cy-r*Math.cos(a0*D2R)).toFixed(2);
-    const x1=(cx+r*Math.sin(a1*D2R)).toFixed(2),y1=(cy-r*Math.cos(a1*D2R)).toFixed(2);
-    segs+=`<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 0,1 ${x1},${y1} Z" fill="${s.col}" stroke="#1a1522" stroke-width="2"/>`;
-    const ric=r*0.62,icx=cx+ric*Math.sin(am*D2R),icy=cy-ric*Math.cos(am*D2R),ic=SLOT_ICON[s.id]||SLOT_ICON.c1;
-    icons+=`<g transform="rotate(${am.toFixed(2)} ${icx.toFixed(2)} ${icy.toFixed(2)})"><svg x="${(icx-15).toFixed(2)}" y="${(icy-15).toFixed(2)}" width="30" height="30" viewBox="0 0 64 64">${ic.svg}</svg></g>`;
-    const bx=(cx+108*Math.sin(a0*D2R)).toFixed(2),by=(cy-108*Math.cos(a0*D2R)).toFixed(2);
-    bulbs+=`<circle cx="${bx}" cy="${by}" r="3.2" fill="#ffd65c"/>`;
-  });
-  return `<svg viewBox="0 0 220 220" width="100%" height="100%">
-    <circle cx="110" cy="110" r="106" fill="#0c0c14"/>
-    ${bulbs}
-    <circle cx="110" cy="110" r="100" fill="none" stroke="#caa43a" stroke-width="5"/>
-    ${segs}
-    ${icons}
-    <circle cx="110" cy="110" r="18" fill="url(#rolHub)" stroke="#caa43a" stroke-width="3"/>
-    <defs><radialGradient id="rolHub" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#4a4160"/><stop offset="100%" stop-color="#15101f"/></radialGradient></defs>
-  </svg>`;}
-let rolRot=0;
-function spinWheelTo(idx){
-  const disc=$('#roletaDisc');if(!disc)return;
-  const per=360/ROL_SEGS.length,am=idx*per+per/2,jitter=rnd(-per*0.32,per*0.32);
-  const need=(((360-((am+jitter)%360))%360)+360)%360;
-  const spins=5+Math.floor(Math.random()*2);
-  const base=rolRot-(rolRot%360);
-  let target=base+spins*360+need;
-  while(target<=rolRot)target+=360;
-  rolRot=target;
-  disc.style.transform='rotate('+rolRot+'deg)';}
+function rolSvg(){
+  const N=ROL_SEGS.length,per=360/N,half=per/2,C=150,R=124,D=Math.PI/180;
+  const px=a=>(C+R*Math.sin(a*D)).toFixed(2),py=a=>(C-R*Math.cos(a*D)).toFixed(2);
+  const wedge=`M${C},${C} L${px(-half)},${py(-half)} A${R},${R} 0 0,1 ${px(half)},${py(half)} Z`;
+  let segs='',pegs='',bulbs='';
+  ROL_SEGS.forEach((s,i)=>{const am=i*per+half;
+    segs+=`<g transform="rotate(${am} ${C} ${C})"><path d="${wedge}" fill="${s.col}" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="${wedge}" fill="url(#rolSegShade)"/>
+      <path class="rol-flash" id="rolFlash${i}" d="${wedge}" fill="#fff"/>
+      <text x="${C}" y="${C-R+25}" text-anchor="middle" class="rol-lb"${s.lb.length>6?' textLength="54" lengthAdjust="spacingAndGlyphs"':''}>${s.lb}</text>
+      <svg x="${C-23}" y="${C-R+31}" width="46" height="46" viewBox="0 0 64 64">${SLOT_ICON[s.id]}</svg></g>`;
+    const ba=i*per;pegs+=`<circle cx="${(C+(R-3)*Math.sin(ba*D)).toFixed(2)}" cy="${(C-(R-3)*Math.cos(ba*D)).toFixed(2)}" r="4.6" fill="#fff" stroke="${RK}" stroke-width="2.4"/>`;});
+  for(let k=0;k<16;k++){const a=k*22.5+11.25;bulbs+=`<circle class="rb${k%2?' odd':''}" cx="${(C+133*Math.sin(a*D)).toFixed(2)}" cy="${(C-133*Math.cos(a*D)).toFixed(2)}" r="4.8" stroke="${RK}" stroke-width="2"/>`;}
+  return `<svg viewBox="0 0 300 348" class="rol-svg">
+  <defs>
+    <linearGradient id="rolRim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset=".5" stop-color="#ffc21a"/><stop offset="1" stop-color="#f08c00"/></linearGradient>
+    <radialGradient id="rolSegShade" cx="150" cy="150" r="124" gradientUnits="userSpaceOnUse"><stop offset=".25" stop-color="#000" stop-opacity=".18"/><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset=".9" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
+    <radialGradient id="rolGloss" cx=".42" cy=".22" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="rolHubG" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#ff8a8f"/><stop offset=".6" stop-color="#ff4757"/><stop offset="1" stop-color="#c21f3a"/></radialGradient>
+  </defs>
+  <polygon points="114,226 186,226 216,330 84,330" fill="#8e5cff" stroke="${RK}" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="124,232 140,232 116,324 100,324" fill="#b28cff"/>
+  <rect x="58" y="320" width="184" height="24" rx="12" fill="#5c30c9" stroke="${RK}" stroke-width="4"/>
+  <rect x="72" y="325" width="70" height="6" rx="3" fill="#8e5cff"/>
+  <circle cx="150" cy="156" r="143" fill="${RK}"/>
+  <circle cx="150" cy="150" r="142" fill="url(#rolRim)" stroke="${RK}" stroke-width="4"/>
+  ${bulbs}
+  <g id="rolRot">${segs}${pegs}</g>
+  <circle cx="150" cy="150" r="125" fill="none" stroke="${RK}" stroke-width="4"/>
+  <circle cx="150" cy="150" r="124" fill="url(#rolGloss)" pointer-events="none"/>
+  <g id="rolHub" class="rol-hub">
+    <circle cx="150" cy="154" r="37" fill="${RK}"/>
+    <circle cx="150" cy="150" r="37" fill="url(#rolRim)" stroke="${RK}" stroke-width="4"/>
+    <circle cx="150" cy="150" r="28" fill="url(#rolHubG)" stroke="${RK}" stroke-width="3.5"/>
+    <ellipse cx="141" cy="138" rx="9" ry="5" fill="#fff" opacity=".55" transform="rotate(-25 141 138)"/>
+    <text id="rolHubTxt" x="150" y="156" text-anchor="middle" class="rol-hubtxt">GIRAR</text>
+  </g>
+  <g id="rolFlap" transform="translate(150,6)">
+    <path d="M0,46 C-7,32 -19,17 -19,4 A19,19 0 0 1 19,4 C19,17 7,32 0,46Z" fill="${RK}" transform="translate(0,3)"/>
+    <path d="M0,46 C-7,32 -19,17 -19,4 A19,19 0 0 1 19,4 C19,17 7,32 0,46Z" fill="#ff4757" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/>
+    <ellipse cx="-8" cy="0" rx="5" ry="3.2" fill="#fff" opacity=".7" transform="rotate(-30 -8 0)"/>
+    <circle cx="0" cy="4" r="6.5" fill="#ffd23f" stroke="${RK}" stroke-width="3"/>
+  </g>
+</svg>`;}
+function tankSvg(){
+  let bub='';for(let i=0;i<5;i++)bub+=`<circle class="bub" cx="${18+i*8}" cy="${120-(i%2)*10}" r="${1.6+(i%3)*.7}" fill="#8f7bd6" style="animation-delay:${(i*.55).toFixed(2)}s"/>`;
+  let ticks='';for(let k=1;k<OIL_CAP;k++){const y=(20+110*k/OIL_CAP).toFixed(1);ticks+=`<line x1="47" x2="57" y1="${y}" y2="${y}" stroke="${RK}" stroke-width="2.6" stroke-linecap="round" opacity=".45"/>`;}
+  return `<svg viewBox="0 0 70 150" class="tank-svg">
+  <defs><clipPath id="tankClip"><rect x="12" y="20" width="46" height="110" rx="9"/></clipPath>
+  <linearGradient id="oilG" x1="0" x2="1"><stop offset="0" stop-color="#120d1e"/><stop offset=".3" stop-color="#3d3160"/><stop offset=".55" stop-color="#1c1630"/><stop offset="1" stop-color="#07050c"/></linearGradient></defs>
+  <rect x="25" y="3" width="20" height="13" rx="4" fill="#8e5cff" stroke="${RK}" stroke-width="3"/>
+  <rect x="8" y="16" width="54" height="125" rx="13" fill="${RK}" transform="translate(0,3)"/>
+  <rect x="8" y="14" width="54" height="124" rx="13" fill="#f3efff" stroke="${RK}" stroke-width="3.5"/>
+  <g clip-path="url(#tankClip)"><g id="oilLiq" class="oil-liq">
+    <path class="oil-wave" d="M0 6 Q8.75 0 17.5 6 T35 6 T52.5 6 T70 6 T87.5 6 T105 6 T122.5 6 T140 6 V150 H0 Z" fill="url(#oilG)"/>
+    <path class="oil-wave" d="M0 8 Q8.75 4 17.5 8 T35 8 T52.5 8 T70 8 T87.5 8 T105 8 T122.5 8 T140 8" fill="none" stroke="#7d68c4" stroke-width="2" opacity=".7"/>
+    ${bub}
+  </g></g>
+  ${ticks}
+  <rect x="5" y="44" width="60" height="8" rx="4" fill="#8e5cff" stroke="${RK}" stroke-width="3"/>
+  <rect x="5" y="100" width="60" height="8" rx="4" fill="#8e5cff" stroke="${RK}" stroke-width="3"/>
+  <rect x="15" y="24" width="6" height="96" rx="3" fill="#fff" opacity=".5"/>
+</svg>`;}
+function rolLevelY(n){return n<=0?140:(20+110*(1-n/OIL_CAP)-5);}
+function rolRefresh(){
+  const liq=$('#oilLiq');if(liq)liq.style.transform='translateY('+rolLevelY(S.oil).toFixed(1)+'px)';
+  const lb=$('#tankLb');if(lb)lb.innerHTML=`<b>${S.oil}</b>/${OIL_CAP}`;
+  const empty=S.oil<=0;const hub=$('#rolHub');if(hub)hub.classList.toggle('empty',empty);
+  const ht=$('#rolHubTxt');if(ht)ht.textContent=empty?'VAZIO':'GIRAR';
+  const hint=$('#rolHint');if(hint)hint.innerHTML=empty?'<b>Tanque vazio!</b> Procure as <b>gotas pretas de petróleo</b> que aparecem pela cidade e toque nelas pra encher.':(S.oil>=OIL_CAP?'Tanque cheio! Cada giro gasta 1 petróleo.':'Cada giro gasta 1 petróleo. Gotas pretas pela cidade enchem o tanque.');
+  const go=$('#slotGo');if(go&&!rolBusy){go.disabled=empty;go.textContent=empty?'Tanque vazio':'GIRAR!';}}
+let rolAng=0,rolBusy=false;
+function rolSpinTo(idx,onDone){
+  const N=ROL_SEGS.length,per=360/N,am=idx*per+per/2,jit=rnd(-per*.3,per*.3);
+  const need=(((360-((am+jit)%360))%360)+360)%360,cur=((rolAng%360)+360)%360;
+  let delta=need-cur;if(delta<0)delta+=360;delta+=360*(5+ri(0,1));
+  const TW=280,TM=4400,TS=420,OV=5,BK=12,t0=performance.now(),startA=rolAng;
+  let lastPeg=Math.floor(startA/per),flap=0,lastT=t0;
+  const rot=$('#rolRot'),fl=$('#rolFlap'),card=$('#rolCard');if(card)card.classList.add('spinning');
+  function fr(now){
+    const t=now-t0,dt=Math.min(.05,(now-lastT)/1000);lastT=now;let a;
+    if(t<TW){a=startA-BK*Math.sin((t/TW)*Math.PI/2);}
+    else if(t<TW+TM){const p=(t-TW)/TM;a=startA-BK+(delta+BK+OV)*(1-Math.pow(1-p,4));}
+    else if(t<TW+TM+TS){const p=(t-TW-TM)/TS;a=startA+delta+OV-OV*(p*p*(3-2*p));}
+    else a=startA+delta;
+    const peg=Math.floor(a/per);if(peg!==lastPeg){const dir=peg>lastPeg?-1:1;lastPeg=peg;flap=26*dir;sfx('tick');}
+    flap+=(0-flap)*Math.min(1,dt*13);
+    if(rot)rot.setAttribute('transform',`rotate(${a.toFixed(2)} 150 150)`);
+    if(fl)fl.setAttribute('transform',`translate(150,6) rotate(${flap.toFixed(1)} 0 4)`);
+    const done=t>=TW+TM+TS||$('#modal').hidden;
+    if(done){rolAng=startA+delta;if(rot)rot.setAttribute('transform',`rotate(${rolAng.toFixed(2)} 150 150)`);if(fl)fl.setAttribute('transform','translate(150,6)');if(card)card.classList.remove('spinning');onDone();return;}
+    requestAnimationFrame(fr);}
+  requestAnimationFrame(fr);}
+function rolFlyDrop(){
+  const card=$('#rolCard'),tank=$('#tankWrap'),hub=$('#rolHub');if(!card||!tank||!hub)return;
+  const cr=card.getBoundingClientRect(),tr=tank.getBoundingClientRect(),hr=hub.getBoundingClientRect();
+  const d=document.createElement('div');d.className='oil-fly';
+  d.innerHTML=`<svg viewBox="0 0 30 40"><path d="M15 2 C22 14 27 20 27 27 A12 12 0 0 1 3 27 C3 20 8 14 15 2Z" fill="#1c1630" stroke="${RK}" stroke-width="3"/><ellipse cx="10" cy="26" rx="3" ry="5" fill="#fff" opacity=".55"/></svg>`;
+  card.appendChild(d);
+  const x0=tr.left-cr.left+tr.width/2-12,y0=tr.top-cr.top+10,x1=hr.left-cr.left+hr.width/2-12,y1=hr.top-cr.top+hr.height/2-16;
+  const xm=(x0+x1)/2,ym=Math.min(y0,y1)-60;
+  const an=d.animate([{transform:`translate(${x0}px,${y0}px) scale(.6)`},{transform:`translate(${xm}px,${ym}px) scale(1.25)`,offset:.5},{transform:`translate(${x1}px,${y1}px) scale(.5)`,opacity:.2}],{duration:520,easing:'cubic-bezier(.4,0,.6,1)'});
+  an.onfinish=()=>d.remove();}
+function rolShowWin(seg,r){
+  const big=seg.id==='jackpot'||seg.id==='rain'||seg.id==='crys';
+  const parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal'+(r.crys>1?'is':''));if(r.turboMin)parts.push('Produção 2× por '+r.turboMin+' min');
+  const w=$('#rolWin');if(!w)return;
+  w.innerHTML=`<div class="rw-rays" style="--c:${seg.col}"></div><div class="rw-box"><svg viewBox="0 0 64 64" class="rw-ic">${SLOT_ICON[seg.id]}</svg><h3>${seg.t}</h3><p>${parts.join('<br>')}</p><small>toque pra continuar</small></div>`;
+  w.hidden=false;w.classList.remove('show');void w.offsetWidth;w.classList.add('show');
+  clearTimeout(rolShowWin.t);rolShowWin.t=setTimeout(()=>{w.hidden=true;},big?3600:2600);
+  w.onclick=()=>{clearTimeout(rolShowWin.t);w.hidden=true;};}
 function openSlot(){
-  rolRot=0;
-  openModal(`<div id="slotCab" class="slot-cab">
-  <div class="marquee">${Array(9).fill('<i></i>').join('')}</div>
-  <h2>ROLETA DO PETRÓLEO</h2>
-  <p class="note" style="text-align:center;margin-top:0">Gaste 1 petróleo e gire a roleta pra um prêmio. Quanto menor a fatia, maior o prêmio!</p>
-  <div class="roleta-wrap"><div class="roleta-pointer"></div><div class="roleta-disc" id="roletaDisc" style="transform:rotate(0deg)">${buildWheelSvg()}</div></div>
-  <div id="slotResult" style="text-align:center;min-height:30px"></div>
-  <div id="slotCountWrap">${rolRow()}</div>
-  <button class="btn big slot-go" id="slotGo" ${S.oil<=0?'disabled':''}>GIRAR (1 petróleo)</button>
+  rolAng=0;rolBusy=false;
+  openModal(`<div id="rolCard" class="rol-card">
+    <div class="rol-sun"></div>
+    <div class="rol-ribbon"><span>ROLETA DA SORTE</span></div>
+    <div class="rol-stage">
+      <div class="rol-wheel">${rolSvg()}</div>
+      <div class="rol-tank" id="tankWrap">${tankSvg()}<div class="tank-lb" id="tankLb"></div><div class="tank-name">PETRÓLEO</div></div>
+    </div>
+    <div id="rolWin" class="rol-win" hidden></div>
+    <p class="rol-hint" id="rolHint"></p>
+    <button class="btn big rol-go" id="slotGo">GIRAR!</button>
   </div>
   <button class="btn big" data-m="close">Fechar</button>`);
-  let spinning=false;
+  const liq=$('#oilLiq');if(liq){liq.style.transition='none';liq.style.transform='translateY(140px)';void liq.getBoundingClientRect();liq.style.transition='';}
+  requestAnimationFrame(()=>requestAnimationFrame(rolRefresh));
   clearInterval(openSlot._t);
-  openSlot._t=setInterval(()=>{const wrap=$('#slotCountWrap');if(!wrap||$('#modal').hidden){clearInterval(openSlot._t);return;}wrap.innerHTML=rolRow();
-    const go=$('#slotGo');if(go&&!spinning)go.disabled=S.oil<=0;},1000);
-  async function doSpinSequence(){
-    if(spinning||S.oil<=0)return;spinning=true;$('#slotGo').disabled=true;$('#slotResult').innerHTML='';
-    const res=spinRoleta();if(!res){spinning=false;$('#slotGo').disabled=S.oil<=0;return;}
-    sfx('click');vib([12]);
-    spinWheelTo(res.idx);
-    await new Promise(r=>setTimeout(r,3250));
-    spinning=false;
-    const r=res.r,parts=[];if(r.coins)parts.push('+'+fmt(r.coins)+' moedas');if(r.gems)parts.push('+'+r.gems+' joias');if(r.crys)parts.push('+'+r.crys+' Cristal');if(r.turboMin)parts.push('Turbo 2× por '+Math.round(r.turboMin)+' min');
-    const big=res.seg.id==='jackpot'||res.seg.id==='rain';
-    $('#slotResult').innerHTML=big?`<b style="font-size:17px;color:#ffd65c;text-shadow:0 0 10px rgba(255,214,92,.6)">★ ${res.seg.id==='jackpot'?'JACKPOT!':'CHUVA DE PRÊMIOS!'} ★</b><br><span class="note">${parts.join(' · ')}</span>`:`<span class="note">${parts.join(' · ')}</span>`;
-    const wrap=$('#slotCountWrap');if(wrap)wrap.innerHTML=rolRow();
-    $('#slotGo').disabled=S.oil<=0;
-    const cab=$('#slotCab');if(big&&cab){cab.classList.add('winGlow');setTimeout(()=>cab.classList.remove('winGlow'),1500);}
-    screenConfetti(big?130:40);sfx(big?'unlock':'coin');vib(big?[20,30,20,30,20]:[15]);
-  }
-  $('#slotGo').addEventListener('click',doSpinSequence);
+  openSlot._t=setInterval(()=>{if(!$('#rolCard')||$('#modal').hidden){clearInterval(openSlot._t);return;}if(!rolBusy)rolRefresh();},1000);
+  function spin(){
+    if(rolBusy)return;if(S.oil<=0){sfx('err');const tw=$('#tankWrap');if(tw){tw.classList.remove('nope');void tw.offsetWidth;tw.classList.add('nope');}return;}
+    const res=spinRoleta();if(!res)return;rolBusy=true;const rc=$('#rolCard');if(rc)rc.classList.add('spinning');
+    const go=$('#slotGo');if(go){go.disabled=true;go.textContent='Girando...';}
+    const w=$('#rolWin');if(w)w.hidden=true;
+    const tw=$('#tankWrap');if(tw){tw.classList.remove('glug');void tw.offsetWidth;tw.classList.add('glug');}
+    sfx('glug');vib([12]);rolFlyDrop();
+    rolRefresh();
+    const hub=$('#rolHub');if(hub){hub.classList.remove('press');void hub.getBoundingClientRect();hub.classList.add('press');}
+    setTimeout(()=>rolSpinTo(res.idx,()=>{
+      rolBusy=false;
+      const f=$('#rolFlash'+res.idx);if(f){f.classList.remove('on');void f.getBoundingClientRect();f.classList.add('on');}
+      const big=res.seg.id==='jackpot'||res.seg.id==='rain'||res.seg.id==='crys';
+      const card=$('#rolCard');if(card){card.classList.remove('win');void card.offsetWidth;card.classList.add('win');}
+      sfx(big?'fanfare':'coin');if(big)setTimeout(()=>sfx('unlock'),300);
+      vib(big?[20,30,20,30,40]:[18]);screenConfetti(big?150:45);
+      setTimeout(()=>rolShowWin(res.seg,res.r),420);
+      rolRefresh();updHUD();
+    }),380);}
+  $('#slotGo').addEventListener('click',spin);
+  $('#rolHub').addEventListener('click',spin);
 }
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}
 function newComplex(cp,d){showBanner(cp.n,'Complexo formado em '+DIST[d].n);screenConfetti(90);sfx('unlock');const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);burst(wx,wy-20,40);toast(cp.fx,'p');}
