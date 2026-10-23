@@ -532,6 +532,37 @@ const SLOT_ICON={
   rain:[[20,25,10],[32,18,13],[45,26,10],[32,29,11]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r+3.2}" fill="${RK}"/>`).join('')+`<rect x="17" y="24" width="30" height="16" rx="7" fill="${RK}"/>`+[[20,25,10],[32,18,13],[45,26,10],[32,29,11]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/>`).join('')+`<rect x="20" y="25" width="24" height="12" rx="6" fill="#fff"/>`+[[19,50],[32,56],[45,49]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6.5" fill="#ffd23f" stroke="${RK}" stroke-width="2.6"/>`).join(''),
   jackpot:`<path d="M11 45 L8 18 L22 30 L32 11 L42 30 L56 18 L53 45 Z" fill="#ffd23f" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><path d="M15 40 L13 26 L22 34 Z" fill="#fff" opacity=".55"/><rect x="10" y="44" width="44" height="10" rx="4" fill="#ffb703" stroke="${RK}" stroke-width="3.2"/><circle cx="21" cy="49" r="3" fill="#ff4757"/><circle cx="32" cy="49" r="3.4" fill="#5aa9ff"/><circle cx="43" cy="49" r="3" fill="#ff4757"/><circle cx="8" cy="18" r="4.4" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/><circle cx="32" cy="11" r="4.8" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/><circle cx="56" cy="18" r="4.4" fill="#ff4757" stroke="${RK}" stroke-width="2.6"/>`,
 };
+SLOT_ICON.wallet=`<rect x="8" y="18" width="48" height="36" rx="8" fill="#b9733a" stroke="${RK}" stroke-width="3.5"/><path d="M8 26 Q8 14 22 14 L44 14 Q50 14 50 20 L50 26" fill="#d89150" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><rect x="38" y="31" width="18" height="14" rx="6" fill="#ffd23f" stroke="${RK}" stroke-width="3.2"/><circle cx="46" cy="38" r="2.8" fill="${RK}"/><ellipse cx="20" cy="26" rx="7" ry="3" fill="#fff" opacity=".35"/>`;
+SLOT_ICON.barrel=`<ellipse cx="32" cy="14" rx="19" ry="7" fill="#7a68c0" stroke="${RK}" stroke-width="3.5"/><path d="M13 14 V50 C13 56 51 56 51 50 V14 C51 20 13 20 13 14Z" fill="#5c30c9" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><path d="M13 27 C13 33 51 33 51 27 M13 40 C13 46 51 46 51 40" fill="none" stroke="${RK}" stroke-width="3"/><ellipse cx="22" cy="36" rx="3" ry="11" fill="#fff" opacity=".35"/><path d="M32 22 C36 29 38 31 38 34 A6 6 0 0 1 26 34 C26 31 28 29 32 22Z" fill="#140e22" stroke="${RK}" stroke-width="2"/>`;
+SLOT_ICON.gdrop=`<path d="M32 5 C44 22 51 31 51 41 A19 19 0 0 1 13 41 C13 31 20 22 32 5Z" fill="#ffd23f" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round"/><path d="M32 5 C44 22 51 31 51 41 A19 19 0 0 1 32 60 A19 19 0 0 0 40 41 C40 30 36 18 32 5Z" fill="#f5a800" opacity=".55"/><ellipse cx="23" cy="38" rx="4" ry="9" fill="#fff" opacity=".7" transform="rotate(12 23 38)"/><path d="M42 12 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z" fill="#fff" stroke="${RK}" stroke-width="1.4" stroke-linejoin="round"/>`;
+SLOT_ICON.tag=`<path d="M8 32 L30 8 H54 V32 L32 56 Z" fill="#ff5d9e" stroke="${RK}" stroke-width="3.5" stroke-linejoin="round" transform="rotate(0)"/><circle cx="42" cy="20" r="4.5" fill="#fff" stroke="${RK}" stroke-width="3"/><text x="30" y="40" font-size="19" text-anchor="middle" fill="#fff" stroke="${RK}" stroke-width="3" paint-order="stroke" font-family="Lilita One,sans-serif" transform="rotate(-45 30 40)">-20%</text>`;
+SLOT_ICON.clover=`${[[32,18],[46,32],[32,46],[18,32]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="12" fill="#2fd08a" stroke="${RK}" stroke-width="3.5"/>`).join('')}<circle cx="32" cy="32" r="9" fill="#2fd08a"/><path d="M32 40 C32 50 38 56 46 58" fill="none" stroke="${RK}" stroke-width="4" stroke-linecap="round"/><ellipse cx="27" cy="14" rx="4" ry="2.2" fill="#fff" opacity=".6"/>`;
+SLOT_ICON.play=`<rect x="6" y="12" width="52" height="38" rx="9" fill="#ff4757" stroke="${RK}" stroke-width="3.5"/><polygon points="26,21 26,41 44,31" fill="#fff" stroke="${RK}" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="52" width="24" height="6" rx="3" fill="${RK}"/><ellipse cx="16" cy="19" rx="5" ry="2.4" fill="#fff" opacity=".5"/>`;
+function cardHtml(c,opt){opt=opt||{};const have=(S.cards&&S.cards[c.id])||0,done=cardOn(c.id),R=CARD_RAR[c.rar];
+  const pct=done?100:Math.min(100,100*have/c.need),rdy=!done&&have>=c.need;
+  return `<div class="cd${done?' done':''}${rdy?' rdy':''}${!have&&!done&&!opt.big?' none':''}" style="--rc:${R.c}" data-id="${c.id}">
+    <div class="cd-rar">${'★'.repeat(c.rar+1)}</div>
+    <div class="cd-art"><svg viewBox="0 0 64 64">${SLOT_ICON[c.ic]}</svg></div>
+    <div class="cd-n">${c.n}</div>
+    ${opt.big?'':`<div class="cd-rw">${c.rw}</div>`}
+    <div class="cd-bar"><i style="width:${pct}%"></i><span>${done?'TROCADA':have+'/'+c.need}</span></div>
+    ${opt.big?'':(done?'<div class="cd-st">ATIVO</div>':`<button class="cd-btn" data-redeem="${c.id}" ${rdy?'':'disabled'}>${rdy?'TROCAR!':'Faltam '+(c.need-have)}</button>`)}
+  </div>`;}
+function renderAlbum(){const a=$('#ssAlbum');if(!a)return;
+  const ready=cardsReadyCount();
+  a.querySelector('.al-grid').innerHTML=CARDS.map(c=>cardHtml(c)).join('');
+  a.querySelector('.al-sub').innerHTML=ready?`<b>${ready} carta${ready>1?'s':''} pronta${ready>1?'s':''} pra trocar!</b>`:'Gire o caça-níquel pra ganhar cartas. Complete e troque por bônus permanentes!';
+  a.querySelectorAll('[data-redeem]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.redeem;if(redeemCard(id)){sfx('fanfare');vib([20,30,40]);screenConfetti(140);const c=CARDS.find(x=>x.id===id);
+    toast('Bônus ativado: '+c.rw,'g');showBanner(c.n,'Bônus permanente ativado!');renderAlbum();updHUD();slotRefresh();}else sfx('err');}));}
+function openAlbum(){const a=$('#ssAlbum');if(!a)return;renderAlbum();a.hidden=false;a.classList.remove('open');void a.offsetWidth;a.classList.add('open');sfx('click');}
+function showNewCards(list){const box=$('#ssCardPop');if(!box||!list||!list.length)return;let i=0;
+  const next=()=>{if(i>=list.length||$('#slotScreen').hidden){box.classList.remove('show');return;}
+    const g=list[i++],c=g.c,R=CARD_RAR[c.rar];
+    box.innerHTML=`<div class="cp-t">${g.dup?'CARTA REPETIDA':'NOVA CARTA!'}</div><div class="cp-flip">${cardHtml(c,{big:true})}</div><div class="cp-s">${g.dup?'Você já trocou essa! +4 joias':R.n+' · '+g.have+'/'+c.need}</div>`;
+    box.style.setProperty('--rc',R.c);box.classList.remove('show');void box.offsetWidth;box.classList.add('show');
+    sfx(c.rar>=3?'fanfare':'unlock');vib(c.rar>=3?[20,30,40]:[15]);if(c.rar>=3)screenConfetti(90);
+    clearTimeout(showNewCards.t);showNewCards.t=setTimeout(next,c.rar>=3?2400:1700);};
+  box.onclick=()=>{clearTimeout(showNewCards.t);next();};next();}
 let slotBusy=false,slotCur=null,slotCounting=false;
 const SS_DROP=`<svg viewBox="0 0 30 40" class="ss-drop"><path d="M15 2 C22 14 27 20 27 27 A12 12 0 0 1 3 27 C3 20 8 14 15 2Z" fill="#1c1630" stroke="${RK}" stroke-width="3"/><ellipse cx="10" cy="26" rx="3" ry="5.5" fill="#fff" opacity=".6"/></svg>`;
 function slotCell(id){return `<div class="sc" data-s="${id}"><svg viewBox="0 0 64 64">${SLOT_ICON[id]}</svg></div>`;}
@@ -560,12 +591,17 @@ function ensureSlotScreen(){
     </div>
     <button class="ss-go" id="ssGo"><span id="ssGoTxt">GIRAR</span></button>
   </div>
+  <button class="ss-cards" id="ssCards" aria-label="Cartas"><svg viewBox="0 0 48 56"><rect x="6" y="8" width="26" height="38" rx="5" fill="#9b5de5" stroke="${RK}" stroke-width="3.5" transform="rotate(-12 19 27)"/><rect x="16" y="8" width="26" height="38" rx="5" fill="#ffd23f" stroke="${RK}" stroke-width="3.5" transform="rotate(8 29 27)"/><path d="M29 20 l3 7 8 1 -6 5 2 8 -7 -4 -7 4 2 -8 -6 -5 8 -1z" fill="#ff4757" stroke="${RK}" stroke-width="2.4" stroke-linejoin="round" transform="translate(-5 -3) scale(.9)"/></svg><b>CARTAS</b><i class="ss-dot" id="ssCardDot" hidden></i></button>
+  <div class="ss-cardpop" id="ssCardPop"></div>
+  <div class="ss-album" id="ssAlbum" hidden><div class="al-head"><button class="ss-close" id="alClose" aria-label="Fechar álbum"><svg viewBox="0 0 24 24"><path d="M6 6L18 18M18 6L6 18" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></button><span>ÁLBUM DE CARTAS</span></div><div class="al-sub"></div><div class="al-grid"></div></div>
   <div class="ss-win" id="ssWin"></div>`;
   document.body.appendChild(el);
   slotCur=[0,1,2].map(()=>[slotRand(),slotRand(),slotRand()]);
   [0,1,2].forEach(i=>{$('#ssR'+i+' .ss-strip').innerHTML=slotCur[i].map(slotCell).join('');});
   $('#ssClose').addEventListener('click',()=>{sfx('click');closeSlot();});
   $('#ssGo').addEventListener('click',slotSpin);
+  $('#ssCards').addEventListener('click',openAlbum);
+  $('#alClose').addEventListener('click',()=>{sfx('click');$('#ssAlbum').hidden=true;slotRefresh();});
   window.addEventListener('resize',()=>{if(!el.hidden)slotLayout();});
   return el;}
 function slotLayout(){const el=$('#slotScreen');const W=Math.min(innerWidth*.94,430);
@@ -573,16 +609,17 @@ function slotLayout(){const el=$('#slotScreen');const W=Math.min(innerWidth*.94,
   el.style.setProperty('--mw',W+'px');el.style.setProperty('--ch',ch.toFixed(1)+'px');}
 function slotCh(){const r=$('#ssR0');return r?r.clientHeight/3:90;}
 function slotRefresh(){
-  const f=$('#ssFill');if(f)f.style.width=(100*S.oil/OIL_CAP)+'%';
-  const t=$('#ssBarTxt');if(t)t.textContent=S.oil+'/'+OIL_CAP;
+  const f=$('#ssFill');if(f)f.style.width=(100*S.oil/oilCap())+'%';
+  const t=$('#ssBarTxt');if(t)t.textContent=S.oil+'/'+oilCap();
   const empty=S.oil<=0,go=$('#ssGo'),gt=$('#ssGoTxt');
   if(go&&!slotBusy){go.disabled=empty;go.classList.toggle('pulse',!empty);if(gt)gt.textContent=empty?'SEM PETRÓLEO':'GIRAR';}
-  const sub=$('#ssSub');if(sub)sub.innerHTML=empty?'<b>Tanque vazio!</b> Toque nas gotas pretas de petróleo pela cidade':(S.oil>=OIL_CAP?'Tanque cheio! Cada giro gasta 1 petróleo':'Gotas pretas de petróleo pela cidade enchem o tanque');
-  if(!slotCounting){const c=$('#ssCoins');if(c)c.textContent=fmt(S.coins);}}
+  const sub=$('#ssSub');if(sub)sub.innerHTML=empty?'<b>Tanque vazio!</b> Toque nas gotas pretas de petróleo pela cidade':(S.oil>=oilCap()?'Tanque cheio! Cada giro gasta 1 petróleo':'Gotas pretas de petróleo pela cidade enchem o tanque');
+  if(!slotCounting){const c=$('#ssCoins');if(c)c.textContent=fmt(S.coins);}
+  const dot=$('#ssCardDot');if(dot)dot.hidden=!cardsReadyCount();}
 function openSlot(){const el=ensureSlotScreen();slotLayout();slotRefresh();
   el.hidden=false;el.classList.remove('open');void el.offsetWidth;el.classList.add('open');sfx('unlock');
   clearInterval(openSlot._t);openSlot._t=setInterval(()=>{if(el.hidden){clearInterval(openSlot._t);return;}slotRefresh();},500);}
-function closeSlot(){const el=$('#slotScreen');if(el)el.hidden=true;clearInterval(openSlot._t);}
+function closeSlot(){const el=$('#slotScreen');if(el){el.hidden=true;const a=$('#ssAlbum');if(a)a.hidden=true;}clearInterval(openSlot._t);}
 function slotReel(i,finalCol,dur){return new Promise(res=>{
   const reel=$('#ssR'+i),strip=reel.querySelector('.ss-strip'),ch=slotCh();
   const K=12+i*6,fill=[];for(let k=0;k<K;k++)fill.push(slotRand());
@@ -642,6 +679,7 @@ async function slotSpin(){
     vib(res.sym==='jackpot'?[30,40,30,40,60]:[20,30,40]);m.classList.remove('winlights');void m.offsetWidth;m.classList.add('winlights');}
   else sfx(res.sym?'unlock':'coin');
   slotShowWin(res);
+  if(res.cards&&res.cards.length)setTimeout(()=>showNewCards(res.cards),big?1800:1000);
   screenConfetti(big?(res.sym==='jackpot'?220:120):res.sym?30:0);
   if(res.r.coins){slotFlyCoins(big?18:res.sym?9:5);setTimeout(()=>slotCountTo(c0,S.coins,big?1500:900),650);}else slotCounting=false;
   setTimeout(()=>{slotBusy=false;slotRefresh();},big?900:450);

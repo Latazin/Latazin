@@ -8,7 +8,7 @@ function newState(){
     set:{music:true,sfx:true,vib:true,ind:true},tut:0,last:Date.now(),played:0,streak:{day:'',n:0},lbName:'',
     gemBoost:0,instUntil:0,maxLv:1,chestT:240,doneD:[],adCdBoost:0,adCdChest:0,adCdCar:0,
     pop:0,happy:55,rp:0,crys:0,tech:{},mods:[],prj:{},story:{},ctx:{},ctxCd:{},cxSeen:{},seenT:{},dgoal:{},dbonus:{},dmg:{},road:{},colDone:{},metas:{},rank:0,seen2:true,devSeen:{},
-    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,oil:0,oilNext:0,oilV2:0};
+    ghUntil:0,ghNext:0,flash:null,flashNext:0,wheelDay:'',lbRank:0,oil:0,oilNext:0,oilV2:0,cards:{},cardDone:{},cardPity:0};
 }
 let S=newState();
 function initCity(st){
@@ -140,18 +140,18 @@ function recalc(){
     if(b.skin){m*=1.1;why.push(['Estilo '+SKINS[b.skin].n,1.1]);}
     if(M.cat[t.cat]){m*=M.cat[t.cat];why.push(['Evento',M.cat[t.cat]]);}if(M.dist[d]){m*=M.dist[d];why.push(['Evento no bairro',M.dist[d]]);}
     b._inc=base*m;b._why=why;rev+=b._inc;if(ev&&ev.k==='golden'&&ev.bid===b.id)goldX+=b._inc*6;}
-  const p=pref();const gmB=ECO.inc*(1+.05*((p?p.lvl:1)-1))*(1+.05*S.ess)*(1+.1*completedCount())*happyM*M.inc*(tk('fut4')?2:1)*(prjDone('elev')?3:1);
+  const p=pref();const gmB=ECO.inc*cardIncMul()*(1+.05*((p?p.lvl:1)-1))*(1+.05*S.ess)*(1+.1*completedCount())*happyM*M.inc*(tk('fut4')?2:1)*(prjDone('elev')?3:1);
   let gm=gmB*(1+sessionBonus());if(gemBoostOn())gm*=2;if(ev&&ev.k==='rush')gm*=3;
   const ups=up*(tk('aut2')?.7:1);
   ips=(rev+goldX)*gm-ups;ipsBase=rev*gmB-ups;
   Object.assign(C,{gm,gmB,happyT:hT,hparts,hcap:H,jobs:J,wf,staff,unemp,pwP,pwC,powEff,goods,deliv,gd,supply,cust,cf,V,hotel,hotelOcc,trafD:demand,trafC:tcap,cg,pol:polNet,polIdx,green,
-    rp:rp*(tk('fut2')?1.5:1)*(prjDone('campus')?2:1)*M.rp,crys,cov:{edu:cEdu,health:cHealth,safe:cSafe},eduQ,up:ups,rev,transit,mpop:M.pop,tour,hp});
+    rp:rp*(tk('fut2')?1.5:1)*(prjDone('campus')?2:1)*M.rp,crys:crys*(cardOn('k9')?2:1),cov:{edu:cEdu,health:cHealth,safe:cSafe},eduQ,up:ups,rev,transit,mpop:M.pop,tour,hp});
   dirty=false;
 }
 /* ---------- Ajustes de economia (mais difícil: anúncio e roleta compensam mais) ---------- */
 const ECO={inc:0.72,off:0.6,cnt:1.18,upG:1.14};
-function ecoCost(c){return c*(1+0.6*clamp(Math.log10(Math.max(1,c)/200)/2,0,1));}
-function rewardBase(){return Math.max(0,ipsBase)/ECO.inc;}
+function ecoCost(c){return c*(1+0.6*clamp(Math.log10(Math.max(1,c)/200)/2,0,1))*(cardOn('k5')?.8:1);}
+function rewardBase(){return Math.max(0,ipsBase)/ECO.inc/cardIncMul();}
 function bIncome(b){let v=(b._inc||0)*C.gm;if(ev&&ev.k==='golden'&&ev.bid===b.id)v*=7;return v;}
 function upCost(b){const T=TYPES[b.t];if(b.t==='pref')return{c0:60,g:2.05};return{c0:ecoCost(T.cost)*0.55*(T.cat==='pub'&&!T.inc?1.4:1),g:ECO.upG};}
 function bulkCost(b,n){const {c0,g}=upCost(b);const base=c0*Math.pow(g,b.lvl-1);return base*(Math.pow(g,n)-1)/(g-1);}
@@ -163,7 +163,7 @@ function typeLock(t){const T=TYPES[t];if(T.cat==='hidden')return 'Indisponível'
   if(cityRank()<T.rk)return `Cidade precisa ser ${RANKS[T.rk][1]} (${fmt(RANKS[T.rk][0])} hab.)`;if(T.req&&!tk(T.req))return `Pesquise: ${TECHM[T.req].n}`;return null;}
 function spend(c){if(!(c>=0)||S.coins<c)return false;S.coins=Math.max(0,S.coins-c);return true;}
 function earn(v){if(!(v>0)||!isFinite(v))return;S.coins+=v;S.run+=v;S.life+=v;dailyProg('earn',v);}
-function offRate(){return ((S.ess>=1?0.75:0.5)+(hasCU('banco')?0.25:0))*ECO.off;}
+function offRate(){return ((S.ess>=1?0.75:0.5)+(hasCU('banco')?0.25:0))*ECO.off*(cardOn('k2')?1.3:1);}
 function offCap(){return (S.ess>=10?8:4)*3600;}
 
 /* ---------- nível dos bairros ---------- */
@@ -241,6 +241,45 @@ function checkFlashProgress(){if(!S.flash)return;
 // Petróleo é coletado em gotas raras espalhadas pela cidade (ver oilDrop em p6.js) —
 // não recarrega sozinho e não pode ser comprado: de propósito, pra ser difícil.
 const OIL_CAP=5;
+/* ---------- Cartas colecionáveis (saem no caça-níquel; trocar por bônus permanentes) ---------- */
+const CARDS=[
+ {id:'k1', n:'Moeda da Sorte',   rar:0,w:20,need:3, rw:'+10% de renda para sempre',          ic:'c1'},
+ {id:'k2', n:'Carteira Gorda',   rar:0,w:18,need:4, rw:'+30% de renda offline para sempre',   ic:'wallet'},
+ {id:'k3', n:'Tanque Gigante',   rar:1,w:16,need:5, rw:'Tanque de petróleo +3 (mais giros)',  ic:'barrel'},
+ {id:'k4', n:'Gota Dourada',     rar:1,w:14,need:6, rw:'Gotas de petróleo 2× mais frequentes e +1 petróleo', ic:'gdrop'},
+ {id:'k5', n:'Cupom Mágico',     rar:2,w:12,need:7, rw:'-20% no custo de construir e melhorar', ic:'tag'},
+ {id:'k6', n:'Raio Eterno',      rar:2,w:10,need:8, rw:'+30% de renda para sempre',           ic:'turbo'},
+ {id:'k7', n:'Trevo de 4 Folhas',rar:3,w:9, need:9, rw:'Prêmios do caça-níquel +60%',          ic:'clover'},
+ {id:'k8', n:'Super Anúncio',    rar:3,w:8, need:10,rw:'Anúncios pagam o DOBRO',               ic:'play'},
+ {id:'k9', n:'Cristal Eterno',   rar:4,w:7, need:11,rw:'+120 joias, +6 Cristais e Cristais 2×', ic:'crys'},
+ {id:'k10',n:'Coroa Lendária',   rar:4,w:6, need:12,rw:'Renda DOBRADA (2×) para sempre',      ic:'jackpot'},
+];
+const CARD_RAR=[{n:'Comum',c:'#9aa7c7'},{n:'Incomum',c:'#2fd08a'},{n:'Rara',c:'#5aa9ff'},{n:'Épica',c:'#b266ff'},{n:'Lendária',c:'#ffb703'}];
+function cardOn(id){return !!(S.cardDone&&S.cardDone[id]);}
+function oilCap(){return OIL_CAP+(cardOn('k3')?3:0);}
+function cardIncMul(){return (cardOn('k1')?1.1:1)*(cardOn('k6')?1.3:1)*(cardOn('k10')?2:1);}
+function adMul(){return cardOn('k8')?2:1;}
+function pickCard(minRar){const pool=CARDS.filter(c=>c.rar>=(minRar||0));const tot=pool.reduce((a,c)=>a+c.w,0);let r=Math.random()*tot;for(const c of pool){if(r<c.w)return c;r-=c.w;}return pool[0];}
+function rollCards(kind){
+  if(!S.cards)S.cards={};if(!S.cardDone)S.cardDone={};
+  S.cardPity=(S.cardPity||0)+1;
+  const chance=kind==='triple'?1:kind==='pair'?.8:.4;let n=Math.random()<chance?1:0;
+  if(kind==='triple')n+=ri(1,2);
+  const out=[];
+  for(let i=0;i<n;i++)out.push(pickCard(0));
+  if(S.cardPity>=6&&!out.some(c=>c.rar>=2)){out.push(pickCard(2));}
+  if(out.some(c=>c.rar>=2))S.cardPity=0;
+  const got=[];
+  for(const c of out){
+    if(S.cardDone[c.id]){S.gems+=4;got.push({c,dup:true});}
+    else{S.cards[c.id]=(S.cards[c.id]||0)+1;got.push({c,dup:false,have:S.cards[c.id]});}}
+  return got;}
+function cardReady(id){const c=CARDS.find(x=>x.id===id);return c&&!cardOn(id)&&(S.cards[id]||0)>=c.need;}
+function cardsReadyCount(){return S.cards?CARDS.filter(c=>cardReady(c.id)).length:0;}
+function redeemCard(id){const c=CARDS.find(x=>x.id===id);if(!c||!cardReady(id))return false;
+  S.cards[id]-=c.need;S.cardDone[id]=1;
+  if(id==='k9'){S.gems+=120;S.crys+=6;}
+  dirty=true;save();return true;}
 const SLOT_SYMS=['c1','c2','c3','gem','turbo','crys','jackpot'];
 const SLOT_OUT=[{k:'jackpot',n:3,w:2},{k:'crys',n:3,w:4},{k:'c3',n:3,w:7},{k:'gem',n:3,w:8},{k:'turbo',n:3,w:8},{k:'c2',n:3,w:10},{k:'c1',n:3,w:13},{k:'pair',n:2,w:30},{k:'none',n:0,w:18}];
 const SLOT_PAIR=[{k:'c1',w:30},{k:'c2',w:22},{k:'gem',w:16},{k:'turbo',w:12},{k:'c3',w:10},{k:'crys',w:6},{k:'jackpot',w:4}];
@@ -263,18 +302,20 @@ function spinSlot(){if(S.oil<=0)return null;S.oil--;
   let r,title;
   if(sym){r=SLOT_PRIZE[sym].f(mult);title=SLOT_PRIZE[sym].t;if(mult<1)title=sym==='jackpot'?'Quase o jackpot!':sym==='crys'?'Quase um cristal!':title;}
   else{r={coins:Math.max(40,rewardBase()*rnd(15,30))};title='Quase!';}
+  if(cardOn('k7')){if(r.coins)r.coins*=1.6;if(r.gems)r.gems=Math.round(r.gems*1.6);}
   if(r.coins)r.coins=Math.round(r.coins);
   if(r.coins)earn(r.coins);if(r.gems)S.gems+=r.gems;if(r.crys)S.crys+=r.crys;
   if(r.turboMin){S.mods=S.mods.filter(m=>m.k!=='inc'||!m.slot);S.mods.push({k:'inc',v:3,until:Date.now()+r.turboMin*60000,slot:true,label:'Turbo do caça-níquel'});dirty=true;}
   dailyProg&&dailyProg('spin',1);save();
-  return {mid,cells,sym,triple:o.n===3,r,title};}
+  const cards=rollCards(o.n===3?'triple':sym?'pair':'none');save();
+  return {mid,cells,sym,triple:o.n===3,r,title,cards};}
 
 /* ---------- anúncios (AdMob, via app nativo) ---------- */
 function requestAd(kind){if(!NATIVE){toast('Anúncios só funcionam no app instalado','r');return;}native('ad:'+kind);}
 window.__ccAdReward=(kind)=>{
-  if(kind==='boost'){S.adCdBoost=Date.now()+15*60000;S.mods=S.mods.filter(m=>m.k!=='inc'||!m.ad);S.mods.push({k:'inc',v:3,until:Date.now()+30*60000,ad:true,label:'Turbo do anúncio'});const v=Math.max(200,rewardBase()*rnd(120,180));earn(v);dirty=true;toast('Anúncio assistido: renda 3× por 30 min e +'+fmt(v)+' moedas!','g');sfx('unlock');vib([20,30,20]);screenConfetti(40);}
-  else if(kind==='chest'){S.adCdChest=Date.now()+15*60000;grantChest('ad');}
-  else if(kind==='car'){S.adCdCar=Date.now()+rnd(18,26)*60000;const v=Math.max(600,rewardBase()*rnd(600,900));earn(v);const g=ri(6,12);S.gems+=g;dirty=true;
+  if(kind==='boost'){S.adCdBoost=Date.now()+15*60000;S.mods=S.mods.filter(m=>m.k!=='inc'||!m.ad);S.mods.push({k:'inc',v:3,until:Date.now()+30*60000,ad:true,label:'Turbo do anúncio'});const v=Math.max(200,rewardBase()*rnd(120,180))*adMul();earn(v);S.oil=Math.min(oilCap(),S.oil+1);dirty=true;toast('Anúncio assistido: renda 3× por 30 min, +'+fmt(v)+' moedas e +1 petróleo!','g');sfx('unlock');vib([20,30,20]);screenConfetti(40);}
+  else if(kind==='chest'){S.adCdChest=Date.now()+15*60000;S.oil=Math.min(oilCap(),S.oil+1);grantChest('ad');}
+  else if(kind==='car'){S.adCdCar=Date.now()+rnd(18,26)*60000;S.oil=Math.min(oilCap(),S.oil+2);const v=Math.max(600,rewardBase()*rnd(600,900))*adMul();earn(v);const g=ri(6,12)*adMul();S.gems+=g;dirty=true;
     if(adCar){sparkle(adCar.x,adCar.y-14,26);adCar=null;}adCarAnnounced=false;
     toast('Carro dourado: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
   save();refreshPanel();};
@@ -407,7 +448,7 @@ function collectBubble(b,auto){const v=b.bub;b.bub=0;b.nextBub=ev&&ev.k==='golde
   floatText(wx,wy-top-24,'+'+fmt(val)+(combo.n>1&&!auto?' ×'+(1+Math.min(2,combo.n*0.1)).toFixed(1):''),combo.n>5?'#ff8fab':'#ffd23f',combo.n>5?19:16);
   const [sx,sy]=w2s(wx,wy-top-14);flyCoins(sx,sy,auto?2:6);if(!auto){sfx('coin');vib(8);}b._bounce=TIME;if(S.tut===0){S.tut=1;tutRender();}}
 function grantChest(src){const base=src==='ad'?Math.max(400,rewardBase()*rnd(300,480)):Math.max(50,ipsBase*rnd(60,180));const g=ri(2,6)+(src==='super'?6:0)+(src==='ad'?5:0);const L=[];
-  const coins=src==='super'?base*3:base;earn(coins);S.gems+=g;L.push(['coin',fmt(coins)+' moedas']);L.push(['gem',g+' joias']);
+  const coins=(src==='super'?base*3:base)*(src==='ad'?adMul():1);earn(coins);S.gems+=g;L.push(['coin',fmt(coins)+' moedas']);L.push(['gem',g+' joias']);
   if(Math.random()<.25||src==='super'){const rp=Math.max(10,Math.round(C.rp*90));S.rp+=rp;L.push(['rp',rp+' de pesquisa']);}
   if(src==='super'&&Math.random()<.5){S.crys+=1;L.push(['cry','1 Cristal']);}
   if(src==='super'||Math.random()<.4){const c=rollCos();if(c){if(S.cos.own.includes(c.id)){S.gems+=10;L.push(['dup',c.n+' (repetido: +10 joias)',c.r]);}else{S.cos.own.push(c.id);L.push(['cos',c.n,c.r]);}}}
