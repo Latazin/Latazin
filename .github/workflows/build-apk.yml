@@ -78,17 +78,32 @@ jobs:
 
       - run: flutter pub get
       - run: dart run flutter_launcher_icons
-      - run: flutter build apk --release --build-number=$((100 + ${{ github.run_number }}))
+      - name: Build APK
+        id: build
+        run: |
+          set -o pipefail
+          flutter build apk --release --build-number=$((100 + ${{ github.run_number }})) 2>&1 | tee /tmp/build_log.txt
 
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: cartoon-city-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Publicar para download
+        if: success()
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-${{ github.run_number }}
           name: Cartoon City (build ${{ github.run_number }})
           body: Baixe o arquivo app-release.apk no celular Android e toque nele para instalar.
           files: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Publicar log de erro (se o build falhar)
+        if: failure()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-log-${{ github.run_number }}
+          name: Log de erro (build ${{ github.run_number }})
+          body: Build falhou. Veja build_log.txt.
+          files: /tmp/build_log.txt
