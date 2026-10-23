@@ -24,6 +24,7 @@ flutter:
   assets:
     - assets/game/index.html
     - assets/game/version.txt
+    - assets/icon/icon_foreground.png
   fonts:
     - family: Lilita
       fonts:
