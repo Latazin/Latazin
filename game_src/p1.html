@@ -78,6 +78,22 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 #side.low{top:calc(160px + env(safe-area-inset-top,0px))}
 .side-btn{position:relative;width:54px;border-radius:16px;border:2px solid #fff;background:var(--cream);box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);padding:4px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:1px}
 .dot-new{position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#ff5577;border:2px solid #fff;box-shadow:0 0 0 1px #c9304f;animation:pop 1s infinite}
+.slot-cab{background:radial-gradient(ellipse at 50% -15%,#3b1f5c 0%,#1a0f2e 55%,#0c0714 100%);border-radius:22px;padding:18px 14px 16px;margin:-6px -6px 12px;border:3px solid #caa43a;box-shadow:inset 0 0 28px rgba(0,0,0,.65),0 0 22px rgba(202,164,58,.28)}
+.slot-cab h2{color:#ffd65c;text-shadow:0 2px 0 #000,0 0 16px rgba(255,214,92,.55);text-align:center;margin:0 0 2px;letter-spacing:.5px}
+.slot-cab .note{color:#cdbce8!important}
+.marquee{display:flex;justify-content:center;gap:6px;margin:2px 0 10px}
+.marquee i{width:6px;height:6px;border-radius:50%;background:#ffd65c;box-shadow:0 0 6px #ffd65c,0 0 2px #fff;animation:bulbBlink 1.2s infinite}
+.marquee i:nth-child(3n+1){animation-delay:.2s}.marquee i:nth-child(3n+2){animation-delay:.5s}.marquee i:nth-child(3n){animation-delay:.8s}
+@keyframes bulbBlink{0%,100%{opacity:1}50%{opacity:.2}}
+.reelWin{width:84px;height:84px;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(180deg,#0c0c14,#05050a);border:3px solid #caa43a;box-shadow:inset 0 0 16px rgba(0,0,0,.85)}
+.reelWin .shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 26%,transparent 74%,rgba(0,0,0,.45));pointer-events:none}
+.reelStrip{display:flex;flex-direction:column}
+.schip{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2b2b38,#0e0e16 72%);display:flex;align-items:center;justify-content:center;flex:none}
+.schip svg{width:60%;height:60%}
+.slot-cab.winGlow{animation:winPulse 1.5s ease-in-out}
+@keyframes winPulse{0%,100%{box-shadow:inset 0 0 28px rgba(0,0,0,.65),0 0 22px rgba(202,164,58,.28)}50%{box-shadow:inset 0 0 28px rgba(0,0,0,.4),0 0 62px rgba(255,214,92,.9)}}
+.btn.slot-go{background:linear-gradient(180deg,#ff6b5e,#c21f3a);box-shadow:0 4px 0 #7a0f20,0 0 16px rgba(255,80,80,.4);width:100%;justify-content:center}
+.btn.slot-buy{background:linear-gradient(180deg,#ffe169,#caa43a);color:#3a2600;text-shadow:none;box-shadow:0 4px 0 #8a6a1a;width:100%;justify-content:center}
 .side-btn span{font-weight:900;font-size:10px;line-height:1.1;font-variant-numeric:tabular-nums;text-align:center}
 .side-btn.ready{background:linear-gradient(180deg,#fff2b0,#ffd24a);animation:wiggle 1.6s infinite}
 @keyframes wiggle{0%,70%,100%{transform:rotate(0)}75%{transform:rotate(-8deg)}85%{transform:rotate(8deg)}92%{transform:rotate(-4deg)}}

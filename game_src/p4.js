@@ -236,13 +236,13 @@ function checkFlashProgress(){if(!S.flash)return;
 /* ---------- Caça-Moedas (caça-níqueis permanente, estilo Coin Master) ---------- */
 const SLOT_REGEN_MS=12*60000;
 const SLOT_SYMS=[
-  {id:'c1',ic:'🪙',w:30,k:'coin',m:6},
-  {id:'c2',ic:'💰',w:20,k:'coin',m:24},
-  {id:'c3',ic:'🏆',w:8, k:'coin',m:85},
-  {id:'gem',ic:'💎',w:16,k:'gem',v:2},
-  {id:'turbo',ic:'⚡',w:14,k:'turbo',v:8},
-  {id:'crys',ic:'🔮',w:4, k:'crys',v:1},
-  {id:'star',ic:'⭐',w:8, k:'star'},
+  {id:'c1',w:30,k:'coin',m:6},
+  {id:'c2',w:20,k:'coin',m:24},
+  {id:'c3',w:8, k:'coin',m:85},
+  {id:'gem',w:16,k:'gem',v:2},
+  {id:'turbo',w:14,k:'turbo',v:8},
+  {id:'crys',w:4, k:'crys',v:1},
+  {id:'star',w:8, k:'star'},
 ];
 function spinCap(){return Math.min(9,5+Math.floor(S.rank/2));}
 function pickSlotSym(){const tot=SLOT_SYMS.reduce((a,s)=>a+s.w,0);let r=Math.random()*tot;for(const s of SLOT_SYMS){if(r<s.w)return s;r-=s.w;}return SLOT_SYMS[0];}
