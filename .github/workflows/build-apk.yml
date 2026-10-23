@@ -1,0 +1,47 @@
+name: Gerar APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Criar pastas Android e iOS
+        run: flutter create . --org com.cartooncity --project-name cartoon_city --platforms android,ios
+
+      - name: Nome do app
+        run: sed -i 's/android:label="cartoon_city"/android:label="Cartoon City"/' android/app/src/main/AndroidManifest.xml
+
+      - run: flutter pub get
+      - run: dart run flutter_launcher_icons
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cartoon-city-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Publicar para download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Cartoon City (build ${{ github.run_number }})
+          body: Baixe o arquivo app-release.apk no celular Android e toque nele para instalar.
+          files: build/app/outputs/flutter-apk/app-release.apk
