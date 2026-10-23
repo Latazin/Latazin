@@ -72,21 +72,26 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   bool _loading = true;
   DateTime _lastVib = DateTime.fromMillisecondsSinceEpoch(0);
 
-  RewardedAd? _adBoost;
-  RewardedAd? _adChest;
+  final Map<String, RewardedAd?> _ads = {'boost': null, 'chest': null, 'car': null};
+
+  String _unitFor(String kind) {
+    switch (kind) {
+      case 'boost':
+        return AdIds.rewardedBoost;
+      case 'car':
+        return AdIds.rewardedCar;
+      default:
+        return AdIds.rewardedChest;
+    }
+  }
 
   void _loadAd(String kind) {
-    final unitId = kind == 'boost' ? AdIds.rewardedBoost : AdIds.rewardedChest;
     RewardedAd.load(
-      adUnitId: unitId,
+      adUnitId: _unitFor(kind),
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
-          if (kind == 'boost') {
-            _adBoost = ad;
-          } else {
-            _adChest = ad;
-          }
+          _ads[kind] = ad;
         },
         onAdFailedToLoad: (_) {
           // sem internet ou sem anúncio disponível agora; tenta de novo mais tarde
@@ -99,7 +104,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   }
 
   void _showAd(String kind) {
-    final ad = kind == 'boost' ? _adBoost : _adChest;
+    final ad = _ads[kind];
     if (ad == null) {
       _web.runJavaScript("window.__ccAdFail && window.__ccAdFail('$kind');");
       _loadAd(kind);
@@ -119,11 +124,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     ad.show(onUserEarnedReward: (_, __) {
       _web.runJavaScript("window.__ccAdReward && window.__ccAdReward('$kind');");
     });
-    if (kind == 'boost') {
-      _adBoost = null;
-    } else {
-      _adChest = null;
-    }
+    _ads[kind] = null;
   }
 
   @override
@@ -132,6 +133,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadAd('boost');
     _loadAd('chest');
+    _loadAd('car');
     _web = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF79CFFF))
@@ -233,8 +235,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _adBoost?.dispose();
-    _adChest?.dispose();
+    for (final ad in _ads.values) {
+      ad?.dispose();
+    }
     super.dispose();
   }
 
@@ -274,7 +277,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       }
     } else if (m.startsWith('copy:')) {
       await Clipboard.setData(ClipboardData(text: m.substring(5)));
-    } else if (m == 'ad:boost' || m == 'ad:chest') {
+    } else if (m == 'ad:boost' || m == 'ad:chest' || m == 'ad:car') {
       _showAd(m.substring(3));
     }
   }

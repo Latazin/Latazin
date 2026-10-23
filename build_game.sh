@@ -14,6 +14,7 @@ def b64(f): return base64.b64encode(open(os.path.join(fd,f),'rb').read()).decode
 fonts=('<style>\n'
  "@font-face{font-family:'Lilita One';src:url(data:font/ttf;base64,"+b64('LilitaOne-Regular.ttf')+") format('truetype');font-weight:400;font-display:block}\n"
  "@font-face{font-family:'Nunito';src:url(data:font/ttf;base64,"+b64('Nunito-Variable.ttf')+") format('truetype');font-weight:200 1000;font-display:block}\n"
+ "@font-face{font-family:'Baloo 2';src:url(data:font/ttf;base64,"+b64('Baloo2-Bold.ttf')+") format('truetype');font-weight:700 900;font-display:block}\n"
  'html,body{margin:0;padding:0}\n</style>\n')
 title=re.search(r'<title>.*?</title>\n',src).group(0)
 body=src.replace(title,'')

@@ -365,6 +365,7 @@ function renderSheet(keep){
       h+=`<div class="sec">Assista e ganhe</div>`;
       h+=`<div class="row"><div class="info"><h3>Turbo 2× por 30 min</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="row"><div class="info"><h3>Baú bônus</h3><p>${adChestReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdChest-Date.now())/1000)}</p></div>${adChestReady?'<button class="btn y" data-act="ad:chest">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      const carReady=!(S.adCdCar>Date.now());h+=`<div class="row"><div class="info"><h3>Carro dourado</h3><p>${carReady?'Estacionado perto da prefeitura — toque nele no mapa':'Já passou por hoje · volta em '+fmtTime((S.adCdCar-Date.now())/1000)}</p></div>${carReady?'<button class="btn y" data-act="gocar">Ir até lá</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="sec">Comprar com joias</div>`;
       h+=`<div class="row"><div class="info"><h3>Turbo 2× por 15 min</h3><p>${gemBoostOn()?'Ativo: '+fmtTime((S.gemBoost-Date.now())/1000)+' restantes (compra soma tempo)':'Dobra toda a produção'}</p></div>${gBtn(20,'g:boost','Usar')}</div>`;
       h+=`<div class="row"><div class="info"><h3>City Rush agora</h3><p>3× por 20 segundos</p></div>${ev?'<button class="btn off" disabled>Evento ativo</button>':gBtn(15,'g:rush','Usar')}</div>`;
@@ -394,6 +395,7 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='cu'){const u=CU.find(x=>x.id===p1);if(u&&!S.cu[u.id]&&spend(u.cost)){S.cu[u.id]=1;dirty=true;sfx('up');toast(u.n+' comprado!','g');screenConfetti(30);renderSheet(true);}else sfx('err');}
   else if(a==='unlock')unlockDistrict(+p1);
   else if(a==='go'){const gx=p1%GXN,gy=Math.floor(p1/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.1;sfx('click');}
+  else if(a==='gocar'){const [wx,wy]=proj(CARSPOT.x+.5,CARSPOT.y+.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.3;sfx('click');}
   else if(a==='gob'){const bb=S.buildings.find(x=>x.id===+p1);if(bb){closeSheet();const [wx,wy]=bWorld(bb);camTo(wx,wy-30,1.4);}}
   else if(a==='rush'){const bb=S.buildings.find(x=>x.id===+p1);const gc=Math.max(1,Math.ceil((bb.ready-Date.now())/20000));if(S.gems>=gc){S.gems-=gc;bb.ready=Date.now();finishBuild(bb);renderSheet(true);}else{sfx('err');toast('Joias insuficientes','r');}}
   else if(a==='demo'){if(demoArm!==+p1){demoArm=+p1;sfx('click');renderSheet(true);setTimeout(()=>{if(demoArm===+p1){demoArm=null;if(sheetMode==='bld')renderSheet(true);}},4000);return;}demoArm=null;demolish(+p1);}
@@ -464,7 +466,7 @@ function openStats(){const p=pref();recalc();openModal(`<h2>Estatísticas</h2>
   <div class="kv"><span>Multiplicador global</span><b>×${C.gm.toFixed(2)}</b></div><div class="kv"><span>Bolhas · meteoros · baús</span><b>${S.cnt.bub} · ${S.cnt.met} · ${S.cnt.chest}</b></div>
   <div class="kv"><span>Renascimentos</span><b>${S.cnt.pres}</b></div><div class="kv"><span>Tempo jogado</span><b>${fmtTime(S.played)}</b></div>
   <button class="btn big" data-m="close">Fechar</button>`);}
-function openSettings(){save();let code='';try{code=btoa(unescape(encodeURIComponent(JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v))));}catch(e){}
+function openSettings(){const str=save();
   openModal(`<h2>Configurações</h2>
   <div class="toggle">Música<button class="sw ${S.set.music?'on':''}" data-m="sw" data-k="music" aria-label="Música"></button></div>
   <div class="toggle">Efeitos sonoros<button class="sw ${S.set.sfx?'on':''}" data-m="sw" data-k="sfx" aria-label="Efeitos"></button></div>
@@ -472,11 +474,12 @@ function openSettings(){save();let code='';try{code=btoa(unescape(encodeURICompo
   <div class="toggle">Indicadores sobre os prédios<button class="sw ${S.set.ind?'on':''}" data-m="sw" data-k="ind" aria-label="Indicadores"></button></div>
   <div class="kv"><span>Renda offline</span><b>${Math.round(offRate()*100)}% · até ${offCap()/3600}h</b></div>
   <div class="sec">Salvar progresso</div><p class="note">O jogo salva sozinho a cada 10 segundos neste aparelho. Copie o código abaixo para guardar ou levar para outro aparelho.</p>
-  <textarea id="saveTa" readonly>${code}</textarea><button class="btn b" data-m="copy">Copiar código</button>
+  <textarea id="saveTa" readonly placeholder="Gerando código…"></textarea><button class="btn b" data-m="copy">Copiar código</button>
   <div class="sec">Carregar progresso</div><textarea id="impTa" placeholder="Cole aqui um código exportado"></textarea><button class="btn" data-m="import">Carregar código</button>
   <button class="btn y" data-m="backup">Restaurar backup automático</button><button class="btn r" data-m="reset">Apagar tudo e recomeçar</button>
   <p class="note" style="text-align:center">Atalhos: WASD/setas movem, +/− zoom, H prefeitura, B construir, U melhorar, C cidade, P pesquisa.</p>
-  <button class="btn big" data-m="close">Fechar</button>`);}
+  <button class="btn big" data-m="close">Fechar</button>`);
+  setTimeout(()=>{try{const code=btoa(unescape(encodeURIComponent(str)));const ta=$('#saveTa');if(ta)ta.value=code;}catch(e){}},0);}
 $('#btnStats').addEventListener('click',()=>{audioInit();sfx('click');openStats();});
 $('#btnSettings').addEventListener('click',()=>{audioInit();sfx('click');openSettings();});
 function showBanner(title,small){$('#banner').innerHTML=`<div class="in"><small>${small}</small><h1>${title}</h1></div>`;clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>$('#banner').innerHTML='',3300);}

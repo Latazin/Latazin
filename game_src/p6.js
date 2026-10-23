@@ -85,7 +85,8 @@ function drawPed(a,u,v){const [x,y]=proj(u,v);if(a.k==='vip'){const pg=TINT;TINT
 /* =====================================================================
    EVENTOS RÁPIDOS (moedas, dourado, rush...)
    ===================================================================== */
-let evTimer=35,meteor=null,meteorT=50,superChest=null;
+let evTimer=35,meteor=null,meteorT=50,superChest=null,adCar=null,adCarAnnounced=false;
+const CARSPOT={x:6,y:3};
 const EVDEF={
   rain:{n:'Chuva de Moedas!',sub:'Toque nas moedas espalhadas pela cidade',dur:10,cls:''},
   golden:{n:'Prédio Dourado!',sub:'Um prédio produz 7× — toque nele',dur:30,cls:''},
@@ -105,7 +106,8 @@ function startEvent(k){const L=builtList();if((k==='golden'||k==='mega')&&L.filt
 function endEvent(){if(!ev)return;if(ev.k==='rush'||ev.k==='golden')dirty=true;if(ev.k==='chest')superChest=null;if(ev.k==='rain')worldCoins=[];ev=null;renderEvBar();}
 function eventTick(dt){
   if(ev){ev.t+=dt;if(ev.t>=ev.dur)endEvent();}
-  else{evTimer-=dt;if(evTimer<=0&&S.tut>=4){const r=Math.random();const k=r<.24?'rain':r<.46?'golden':r<.64?'rush':r<.8?'mega':r<.92?'inst':'chest';startEvent(k);evTimer=rnd(60,110);}}
+  else{evTimer-=dt;if(evTimer<=0&&S.tut>=4){const r=Math.random();const k=r<.24?'rain':r<.46?'golden':r<.64?'rush':r<.8?'mega':r<.92?'inst':'chest';startEvent(k);
+    evTimer=sessionT<180?rnd(22,42):rnd(60,110);}}
   meteorT-=dt*(S.ess>=50?2:1);if(!meteor&&meteorT<=0&&S.tut>=4){const fromL=Math.random()<.5;meteor={x:fromL?-40:W+40,y:rnd(H*.2,H*.44),vx:(fromL?1:-1)*rnd(90,130),vy:rnd(8,20),t:0};meteorT=rnd(60,100);sfx('meteor');}
   if(meteor){meteor.t+=dt;meteor.x+=meteor.vx*dt;meteor.y+=meteor.vy*dt;if(meteor.x<-80||meteor.x>W+80)meteor=null;}}
 function renderEvBar(){const el=$('#evBar');let h='';
@@ -139,6 +141,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
   for(const b of S.buildings){if(b.bub>0&&b._bx!==undefined&&Math.hypot(wx-b._bx,wy-b._by)<Math.max(R,20)){collectBubble(b);return;}}
   if(ev&&ev.k==='rain'){for(let i=0;i<worldCoins.length;i++){const c=worldCoins[i];if(c.z<40&&Math.hypot(wx-c.x,wy-(c.y-8))<Math.max(R,16)){const v=Math.max(10,ipsBase*4);earn(v);floatText(c.x,c.y-20,'+'+fmt(v),'#ffd23f',15);flyCoins(...w2s(c.x,c.y-8),3);sfx('coin');worldCoins.splice(i,1);if(!ev.tapped){ev.tapped=1;eventTap();}return;}}}
   if(superChest&&Math.hypot(wx-superChest.x,wy-(superChest.y-14))<Math.max(R,26)){burst(superChest.x,superChest.y-14,40);superChest=null;eventTap();grantChest('super');endEvent();return;}
+  if(adCar&&Math.hypot(wx-adCar.x,wy-(adCar.y-8))<Math.max(R,30)){sfx('click');requestAd('car');return;}
   let hit=null,hd=-1;for(const b of S.buildings){const [cx,cy]=bWorld(b);const top=b._top||30;if(wx>cx-30&&wx<cx+30&&wy<cy+14&&wy>cy-top-6){const d=b.x+b.y;if(d>hd){hd=d;hit=b;}}}
   if(hit){
     if(ev&&ev.k==='mega'&&ev.bid===hit.id){hit.lvl+=10;S.maxLv=Math.max(S.maxLv,hit.lvl);dirty=true;const [cx,cy]=bWorld(hit);burst(cx,cy-30,50);floatText(cx,cy-70,'+10 níveis!','#c9a8ff',20);showBanner('Mega Upgrade!',TYPES[hit.t].n);sfx('unlock');eventTap();endEvent();checkAch();return;}
@@ -176,6 +179,9 @@ function update(dt){
   let arrived=0;for(const f of fly){f.t+=dt;if(f.t>=f.d&&!f.done){f.done=true;arrived++;}}fly=fly.filter(f=>!f.done);if(arrived){const cp=$('#coinPill');cp.classList.remove('pop');void cp.offsetWidth;cp.classList.add('pop');sfx('coin');}
   for(const c of worldCoins){c.t+=dt;if(c.z>0){c.vz-=500*dt;c.z+=c.vz*dt;if(c.z<=0){c.z=0;c.vz=Math.abs(c.vz)>60?-c.vz*.4:0;}}}
   if(unlockAnim){unlockAnim.t+=dt;if(unlockAnim.t>3)unlockAnim=null;}if(superChest)superChest.t+=dt;if(ceremony&&TIME-ceremony.t0>3.4)ceremony=null;
+  if(!adCar&&S.adCdCar<=Date.now()&&S.tut>=4){const [cx,cy]=proj(CARSPOT.x+.5,CARSPOT.y+.5);adCar={x:cx,y:cy,t:0};
+    if(!adCarAnnounced){adCarAnnounced=true;toast('O carro dourado chegou! Toque nele pra assistir um anúncio e ganhar moedas','g');sfx('unlock');}}
+  if(adCar)adCar.t+=dt;
   dispCoins=S.coins<dispCoins?S.coins:lerp(dispCoins,S.coins,1-Math.pow(.0005,dt));if(Math.abs(dispCoins-S.coins)<1)dispCoins=S.coins;
   uiT-=dt;if(uiT<=0){uiT=.25;updHUD();}
   ipsT-=dt;if(ipsT<=0){ipsT=.5;dirty=true;}
@@ -252,6 +258,11 @@ function render(){
   if(superChest){const s2=superChest;const b2=Math.abs(Math.sin(TIME*4))*6;glow(s2.x,s2.y-14,40,'rgba(200,150,255,.7)');ell(s2.x,s2.y,14,7,'rgba(43,35,80,.25)',false);
     X.save();X.translate(s2.x,s2.y-b2);X.rotate(Math.sin(TIME*8)*.08);box(0,0,.42,.32,12,'#b25cff');box(0,0,.44,.34,6,'#d6a3ff',12);ell(0,-14,3,3,'#ffd23f');X.restore();
     if(Math.random()<.3)parts.push({k:'spark',x:s2.x+rnd(-14,14),y:s2.y-rnd(10,30),vx:0,vy:-20,t:0,life:.7,c:'#e9d6ff'});}
+  if(adCar){const ac=adCar;glow(ac.x,ac.y-6,38,'rgba(255,210,60,.55)');ell(ac.x,ac.y,13,6,'rgba(43,35,80,.22)',false);
+    box(ac.x,ac.y,.44,.22,6,'#ffc21a',1.5);box(ac.x,ac.y,.26,.18,5,'#fff6cf',6.5);
+    ball(ac.x-9,ac.y+3,3,'#2b2350');ball(ac.x+9,ac.y+3,3,'#2b2350');
+    const bob=Math.sin(ac.t*3)*3;drawCoin(ac.x,ac.y-22+bob,9,TIME*4);
+    if(Math.random()<.25)parts.push({k:'spark',x:ac.x+rnd(-12,12),y:ac.y-rnd(4,16),vx:0,vy:-14,t:0,life:.6,c:'#fff3a8'});}
   if(ceremony){const b=ceremony.b;const [cx,cy]=bWorld(b);const t=TIME-ceremony.t0;const A=P(cx,cy,-.45,.45,0),B=P(cx,cy,.45,.45,0);line(A[0],A[1],A[0],A[1]-14,'#ffd23f',2);line(B[0],B[1],B[0],B[1]-14,'#ffd23f',2);
     if(t<1.2){X.beginPath();X.moveTo(A[0],A[1]-11);X.quadraticCurveTo((A[0]+B[0])/2,(A[1]+B[1])/2-6,B[0],B[1]-11);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.stroke();ell((A[0]+B[0])/2,(A[1]+B[1])/2-9,4,3,'#ff3b5c');}
     else{const f=Math.min(1,(t-1.2)*1.5);X.strokeStyle='#ff3b5c';X.lineWidth=3;X.beginPath();X.moveTo(A[0],A[1]-11);X.lineTo(lerp(A[0],(A[0]+B[0])/2,.6),lerp(A[1]-11,(A[1]+B[1])/2+4,f));X.moveTo(B[0],B[1]-11);X.lineTo(lerp(B[0],(A[0]+B[0])/2,.6),lerp(B[1]-11,(A[1]+B[1])/2+4,f));X.stroke();}}
@@ -402,7 +413,8 @@ function boot(){resize();const src=load();afterLoad();
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else window.__ccResume();});window.addEventListener('pagehide',save);
   window.__cc={S:()=>S,C,build,upgrade,startEvent,unlockDistrict,tap,econ,recalc,doPrestige,essGain,research,startStage,openSheet,setTarget:p=>targetPlot=p,chooseEv,openEvent,
     forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;},
-    map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true)};}
+    map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true),
+    update,w2s,CARSPOT,setAdCdCar:v=>S.adCdCar=v,get adCar(){return adCar;}};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};
 if(window.CCNative){let started=false;const go=()=>{if(started)return;started=true;boot();};

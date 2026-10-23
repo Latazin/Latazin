@@ -21,6 +21,7 @@ class AdIds {
   static const String admobAppId = 'ca-app-pub-4705801610677571~7249815840';
   static const String rewardedBoost = 'ca-app-pub-4705801610677571/2638945002';
   static const String rewardedChest = 'ca-app-pub-4705801610677571/4590320926';
+  static const String rewardedCar = 'ca-app-pub-4705801610677571/6922724810';
 
   static bool get isTest => admobAppId.contains('3940256099942544');
 }

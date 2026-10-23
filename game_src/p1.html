@@ -11,6 +11,7 @@
   --coral:#ff6b6b; --coral-d:#cf4040; --sky:#6fc8ff; --sky-d:#2f8fd6; --off:#d9d2e8; --off-d:#aaa1c4;
   --display:'Lilita One','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
   --body:'Nunito','Segoe UI',system-ui,sans-serif;
+  --num:'Baloo 2','Nunito','Segoe UI',system-ui,sans-serif;
   color-scheme: light;
 }
 [hidden]{display:none!important}
@@ -28,7 +29,7 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 #top>*{pointer-events:auto}
 .pill{display:flex;align-items:center;gap:7px;background:var(--cream);border-radius:999px;padding:4px 12px 4px 4px;
   box-shadow:0 3px 0 var(--line),0 6px 14px rgba(43,35,80,.18);border:2px solid #fff;min-width:0}
-.pill b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1;letter-spacing:.3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill b{font-family:var(--num);font-weight:800;font-size:19px;line-height:1;letter-spacing:.3px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pill small{display:block;font-weight:800;font-size:11px;color:var(--mint-d);line-height:1.1;white-space:nowrap}
 .pill small.neg{color:var(--coral-d)}
 #coinPill{flex:1 1 auto;max-width:210px}
@@ -172,7 +173,7 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .stat{background:#fff;border-radius:14px;padding:7px 8px;box-shadow:0 3px 0 var(--line);min-width:0}
 .stat small{display:block;font-size:10px;font-weight:900;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px}
-.stat b{font-family:var(--display);font-weight:400;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat b{font-family:var(--num);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .upgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .upgrid .btn{flex-direction:column;gap:2px;padding:8px 4px;font-size:15px;justify-content:center}
 .upgrid .btn small{font-family:var(--body);font-weight:900;font-size:10.5px;display:flex;align-items:center;gap:3px}
@@ -187,14 +188,14 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 .card2{background:#fff;border-radius:16px;padding:9px 10px;box-shadow:0 3px 0 var(--line);min-width:0}
 .card2 h4{margin:0;font-size:11px;font-weight:900;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px}
 .card2 h4 svg{width:16px;height:16px}
-.card2 b{display:block;font-family:var(--display);font-weight:400;font-size:19px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card2 b{display:block;font-family:var(--num);font-weight:800;font-size:19px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card2 p{margin:2px 0 0;font-size:11px;font-weight:800;color:var(--ink-soft);line-height:1.3}
 .card2.warn{box-shadow:0 3px 0 #ffc4c4,0 0 0 2px #ffc4c4}
 .card2.full{grid-column:1/-1}
 .spark{width:100%;height:56px;display:block}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tile{border:none;background:#fff;border-radius:18px;box-shadow:0 3px 0 var(--line);padding:12px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left}
-.tile b{font-family:var(--display);font-weight:400;font-size:17px}
+.tile b{font-family:var(--num);font-weight:800;font-size:17px}
 .tile span{font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.3}
 .tile svg{width:34px;height:34px}
 
@@ -210,7 +211,7 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 .node.avail{background:#fff6d6;box-shadow:0 3px 0 var(--sun),0 0 0 2px var(--sun)}
 .node.lock{opacity:.5}
 .node.sel{outline:3px solid var(--grape);outline-offset:1px}
-.node b{font-family:var(--display);font-weight:400;font-size:13px;line-height:1.1}
+.node b{font-family:var(--num);font-weight:800;font-size:13px;line-height:1.1}
 .node small{font-size:10.5px;font-weight:900;color:var(--ink-soft)}
 .tdet{background:#fff;border-radius:18px;padding:12px;box-shadow:0 3px 0 var(--line);display:flex;flex-direction:column;gap:6px}
 .tdet h3{margin:0;font-family:var(--display);font-weight:400;font-size:19px}
@@ -233,14 +234,14 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 #modal .card{width:min(390px,100%);box-sizing:border-box;max-height:84vh;overflow-y:auto;background:var(--cream);border-radius:28px;border:3px solid #fff;box-shadow:0 8px 0 var(--line),0 20px 50px rgba(0,0,0,.3);padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:cardIn .4s cubic-bezier(.3,1.5,.5,1);touch-action:pan-y}
 @keyframes cardIn{from{transform:scale(.7);opacity:0}}
 #modal h2{margin:0;font-family:var(--display);font-weight:400;font-size:26px;text-align:center;text-wrap:balance}
-#modal .big-num{font-family:var(--display);font-size:38px;text-align:center;color:#d98a00;text-shadow:0 3px 0 #fff1c2;display:flex;align-items:center;justify-content:center;gap:8px;font-variant-numeric:tabular-nums}
+#modal .big-num{font-family:var(--num);font-weight:800;font-size:38px;text-align:center;color:#d98a00;text-shadow:0 3px 0 #fff1c2;display:flex;align-items:center;justify-content:center;gap:8px;font-variant-numeric:tabular-nums}
 #modal p{margin:0;text-align:center;font-weight:700;color:var(--ink-soft);line-height:1.45}
 #modal .speaker{display:flex;gap:12px;align-items:center}
 #modal .speaker .por{width:72px;height:72px;border-radius:22px}
 #modal .speaker p{text-align:left}
 #modal .speaker small{display:block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px}
 .choice{width:100%;border:none;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line);padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px}
-.choice b{font-family:var(--display);font-weight:400;font-size:16px}
+.choice b{font-family:var(--num);font-weight:800;font-size:16px}
 .choice span{font-size:12px;font-weight:800;color:var(--ink-soft);line-height:1.35}
 .choice.pri{background:#e6fff2;box-shadow:0 4px 0 #9fe3c4}
 .choice.off{opacity:.55}
