@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -267,8 +268,25 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   }
 }
 
-class _Splash extends StatelessWidget {
+class _Splash extends StatefulWidget {
   const _Splash();
+  @override
+  State<_Splash> createState() => _SplashState();
+}
+
+class _SplashState extends State<_Splash> with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -297,17 +315,51 @@ class _Splash extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/icon/icon_foreground.png', width: 150, height: 150),
-            const SizedBox(height: 12),
-            Text('Cartoon City', style: title(46, Colors.white)),
-            const SizedBox(height: 8),
-            Text('IDLE EMPIRE', style: title(20, const Color(0xFFFFD23F))),
-            const SizedBox(height: 28),
-            const SizedBox(
-              width: 34,
-              height: 34,
-              child: CircularProgressIndicator(strokeWidth: 4, color: Color(0xFF8E5CFF)),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.4, end: 1),
+              duration: const Duration(milliseconds: 650),
+              curve: Curves.elasticOut,
+              builder: (ctx, v, child) => Transform.scale(scale: v, child: child),
+              child: AnimatedBuilder(
+                animation: _c,
+                builder: (ctx, child) {
+                  final bob = math.sin(_c.value * 2 * math.pi) * 6;
+                  return Transform.translate(offset: Offset(0, bob), child: child);
+                },
+                child: Image.asset('assets/icon/icon_foreground.png', width: 156, height: 156),
+              ),
             ),
+            const SizedBox(height: 10),
+            Text('Cartoon City', style: title(44, Colors.white)),
+            const SizedBox(height: 6),
+            Text('IDLE EMPIRE', style: title(19, const Color(0xFFFFD23F))),
+            const SizedBox(height: 30),
+            AnimatedBuilder(
+              animation: _c,
+              builder: (ctx, _) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (i) {
+                    final t = (_c.value - i * 0.18) % 1.0;
+                    final s = 0.55 + 0.45 * (0.5 + 0.5 * math.sin(t * 2 * math.pi));
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Transform.scale(
+                        scale: s,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(color: Color(0xFF8E5CFF), shape: BoxShape.circle),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            Text('Carregando a cidade…',
+                style: TextStyle(fontWeight: FontWeight.w800, color: ink.withOpacity(.7), fontSize: 12.5)),
           ],
         ),
       ),

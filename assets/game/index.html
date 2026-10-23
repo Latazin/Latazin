@@ -266,7 +266,7 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 .rar-comum{color:#4d8f5c}.rar-incomum{color:#2a9a5f}.rar-raro{color:#2f7fd6}.rar-épico{color:#8e3fd8}.rar-lendário{color:#d98a00}
 
 /* coach / personagens */
-#coach{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:7;display:flex;gap:10px;align-items:flex-end;pointer-events:none}
+#coach{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:calc(64px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:7;display:flex;gap:10px;align-items:flex-end;pointer-events:none}
 #coach .por{width:62px;height:62px;border-radius:20px;pointer-events:auto;animation:bob 2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-4px)}}
 #coach .bub{flex:1;min-width:0;background:#fff;border-radius:18px 18px 18px 4px;padding:10px 12px;box-shadow:0 4px 0 var(--line),0 10px 24px rgba(43,35,80,.2);font-weight:800;font-size:13.5px;line-height:1.4;pointer-events:auto;animation:cardIn .4s cubic-bezier(.3,1.5,.5,1)}
@@ -275,7 +275,7 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 #coach .row2{display:flex;gap:8px;margin-top:6px;justify-content:flex-end;align-items:center}
 #coach .skip{border:none;background:none;font-weight:800;color:var(--ink-soft);font-size:12px;text-decoration:underline}
 
-#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(98px + env(safe-area-inset-top,0px));z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(340px,calc(100% - 32px))}
+#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(156px + env(safe-area-inset-top,0px));z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(340px,calc(100% - 32px))}
 .toast{background:var(--ink);color:#fff;border-radius:14px;padding:8px 14px;font-weight:800;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:toast 2.6s forwards;text-align:center}
 .toast.g{background:var(--mint-d)}.toast.p{background:var(--grape-d)}.toast.r{background:var(--coral-d)}
 @keyframes toast{0%{transform:translateY(-12px) scale(.9);opacity:0}10%,80%{transform:none;opacity:1}100%{opacity:0;transform:translateY(-8px)}}
@@ -391,7 +391,7 @@ const SKINS={
 /* =====================================================================
    MUNDO
    ===================================================================== */
-const HW=32,HH=16,DS=6,GXN=4,GYN=3,WT=GXN*DS+1,HT=GYN*DS+1;
+const HW=32,HH=16,DS=6,GXN=4,GYN=4,WT=GXN*DS+1,HT=GYN*DS+1;
 const DEV=[['Abandonado','#9a8f86',0.85],['Emergente','#7fbf6a',1],['Desenvolvido','#2fd08a',1.1],['Sofisticado','#38b6ff',1.25],['Extraordinário','#ffb703',1.5]];
 const DIST=[
  {n:'Centro Histórico',cost:0,pref:1,g:'#8fd65a',deco:'round',acc:'#ff8fab',mech:'Patrimônio: monumentos e decorações dão turismo em dobro aqui.',ex:'Torre do Relógio e Museu',ch:'lucia'},
@@ -406,6 +406,12 @@ const DIST=[
  {n:'Capital Cósmica',cost:2.5e15,pref:28,g:'#30286a',deco:'star',acc:'#ffd166',mech:'Maravilhas: construções lendárias rendem +50% aqui.',ex:'Cidade Suspensa e Portal Cósmico',ch:'faisca'},
  {n:'Reino da Essência',cost:1e9,pref:10,ess:25,g:'#cbb0ff',deco:'crystal',acc:'#b388ff',mech:'Região secreta do prestígio. Monumentos 2× aqui.',ex:'Monumento da Essência',ch:'iris'},
 ];
+/* Mapa 2 — só se desbloqueia depois que TODOS os bairros 1–10 do Mapa 1 estiverem completos.
+   Fica reservado como o próximo desafio antes do Renascimento, pra ninguém zerar o jogo rápido demais. */
+DIST[12]={n:'Vale Aurora',cost:1e17,pref:32,g:'#6fe3c0',deco:'pine',acc:'#2ee6b8',mech:'Terra renascida: casas e natureza rendem +40% aqui.',ex:'Cachoeira Viva e Jardim Suspenso',ch:'iris'};
+DIST[13]={n:'Porto das Estrelas',cost:5e18,pref:36,g:'#5a6fd8',deco:'holo',acc:'#8fa6ff',mech:'Portal interdimensional: turismo e tecnologia rendem o dobro aqui.',ex:'Plataforma Orbital e Farol Estelar',ch:'faisca'};
+DIST[14]={n:'Deserto de Cristal',cost:2e20,pref:40,g:'#e0b96a',deco:'crystal',acc:'#ffd166',mech:'Minas raras: indústria rende +50% e produz o dobro de Cristais aqui.',ex:'Mina Celestial e Refinaria Prisma',ch:'zeca'};
+DIST[15]={n:'Trono dos Fundadores',cost:8e21,pref:45,g:'#4a2f86',deco:'star',acc:'#ffd700',mech:'A capital definitiva da sua cidade. Tudo aqui rende +25%.',ex:'Grande Trono e Estátua dos Fundadores',ch:'lucia'};
 const RANKS=[[0,'Vila'],[100,'Vilarejo'],[600,'Cidade'],[3000,'Cidade Grande'],[15000,'Metrópole'],[80000,'Megalópole'],[500000,'Capital Cósmica']];
 const RANK_UNLOCK=['Casas, comércio, natureza e decoração','Indústria, energia, escolas e pesquisa','Serviços, hospitais e entretenimento','Turismo, tecnologia e projetos municipais','Extravagâncias e monumentos','Construções lendárias','Arquitetura impossível'];
 
@@ -1207,12 +1213,14 @@ function nonPref(){return S.buildings.filter(b=>b.t!=='pref'&&b.t!=='prj'&&TYPES
 function isReady(b){return !(b.ready>Date.now());}
 function tk(id){return !!S.tech[id];}
 function prjDone(id){return !!(S.prj[id]&&S.prj[id].s>=3);}
-function distOf(x,y){if(x<0||y<0||x>=WT-1||y>=HT-1)return -1;const gx=Math.floor(x/DS),gy=Math.floor(y/DS);const d=gy*GXN+gx;return d<=11?d:-1;}
+function distOf(x,y){if(x<0||y<0||x>=WT-1||y>=HT-1)return -1;const gx=Math.floor(x/DS),gy=Math.floor(y/DS);const d=gy*GXN+gx;return d<=15?d:-1;}
+function map1Done(){for(let d=0;d<=9;d++){if(!S.unlocked.includes(d))return false;const p=plotsOf(d);if(!p.every(([x,y])=>occ.has(x+','+y)))return false;}return true;}
+function map2Done(){for(let d=12;d<=15;d++){if(!S.unlocked.includes(d))return false;const p=plotsOf(d);if(!p.every(([x,y])=>occ.has(x+','+y)))return false;}return true;}
 function isRoad(x,y){return x>=0&&y>=0&&x<WT&&y<HT&&(x%DS===0||y%DS===0);}
 function plotsOf(d){const gx=d%GXN,gy=Math.floor(d/GXN),out=[];for(let j=1;j<DS;j++)for(let i=1;i<DS;i++){const x=gx*DS+i,y=gy*DS+j;if(d===0&&RESERVED[x+','+y])continue;out.push([x,y]);}return out;}
 const occ=new Map();
 function rebuildOcc(){occ.clear();for(const b of S.buildings)occ.set(b.x+','+b.y,b);}
-function plotFree(x,y){const d=distOf(x,y);if(d<0||d>10||!S.unlocked.includes(d)||isRoad(x,y))return false;if(d===0&&RESERVED[x+','+y])return false;return !occ.has(x+','+y);}
+function plotFree(x,y){const d=distOf(x,y);if(d<0||d>15||d===11||!S.unlocked.includes(d)||isRoad(x,y))return false;if(d===0&&RESERVED[x+','+y])return false;return !occ.has(x+','+y);}
 function completedCount(){let c=0;for(const d of S.unlocked){const p=plotsOf(d);if(p.every(([x,y])=>occ.has(x+','+y)))c++;}return c;}
 function countType(t){let c=0;for(const b of S.buildings)if(b.t===t)c++;return c;}
 function countTagReady(tg){let c=0;for(const b of S.buildings)if(isReady(b)&&TYPES[b.t].tags.includes(tg))c++;return c;}
@@ -1241,10 +1249,10 @@ function recalc(){
   const now=Date.now();S.mods=S.mods.filter(m=>m.perm||m.until>now);
   const M={inc:1,tour:1,rp:1,happy:0,pow:1,cons:1,traffic:1,pop:1,cat:{},dist:{}};
   for(const m of S.mods){if(m.k==='cat')M.cat[m.c]=(M.cat[m.c]||1)*m.v;else if(m.k==='dist')M.dist[m.d]=(M.dist[m.d]||1)*m.v;else if(m.k==='happy')M.happy+=m.v;else if(M[m.k]!==undefined)M[m.k]*=m.v;}
-  const ready=[];const dc=[];for(let d=0;d<12;d++)dc.push({_n:0});
+  const ready=[];const dc=[];for(let d=0;d<16;d++)dc.push({_n:0});
   for(const b of S.buildings){if(b.ready>now||b.t==='prj')continue;const d=distOf(b.x,b.y);if(d<0)continue;ready.push(b);const t=TYPES[b.t];for(const tg of t.tags)dc[d][tg]=(dc[d][tg]||0)+1;if(t.cat!=='deco')dc[d]._n++;}
   C.dc=dc;C.cx={};let verde=0,civico=false;
-  for(let d=0;d<=10;d++){for(const cp of CPLX){if(cp.need.every(([tg,n])=>(dc[d][tg]||0)>=n)){(C.cx[d]=C.cx[d]||[]).push(cp.id);if(cp.id==='verde')verde++;if(cp.id==='civico')civico=true;const key=d+':'+cp.id;if(!S.cxSeen[key]){S.cxSeen[key]=1;setTimeout(()=>newComplex(cp,d),50);}}}}
+  for(let d=0;d<=15;d++){if(d===11)continue;for(const cp of CPLX){if(cp.need.every(([tg,n])=>(dc[d][tg]||0)>=n)){(C.cx[d]=C.cx[d]||[]).push(cp.id);if(cp.id==='verde')verde++;if(cp.id==='civico')civico=true;const key=d+':'+cp.id;if(!S.cxSeen[key]){S.cxSeen[key]=1;setTimeout(()=>newComplex(cp,d),50);}}}}
   const hasCx=(d,id)=>!!(C.cx[d]&&C.cx[d].includes(id));
   for(const b of ready)b._s=synAt(b.t,b.x,b.y,b.id);
   let H=0,J=0,pwP=0,pwC=0,goods=0,gd=0,cust=0,hp=0,tour=0,edu=0,health=0,safe=0,trans=0,rp=0,pol=0,hotel=0,logi=0,green=0,up=0,crys=0,transit=0;
@@ -1265,7 +1273,7 @@ function recalc(){
     if(f.pol){let v=f.pol*s;if(t.tags.includes('power')&&tk('ene3'))v*=.4;if(t.cat==='ind'&&tk('ind4'))v*=.5;if(d===2)v*=.5;pol+=v;}
     if(f.hotel)hotel+=f.hotel*s*(tk('tur3')?1.5:1);
     if(f.logi)logi+=f.logi*s;if(f.green)green+=f.green*s*(tk('amb3')?1.5:1);if(f.up)up+=f.up*s;
-    if(b.t==='mina')crys+=0.004*Math.sqrt(s);}
+    if(b.t==='mina')crys+=0.004*Math.sqrt(s)*(d===14?2:1);}
   hp+=3;let roadHappy=0,roadTour=0;for(const d of S.unlocked){const r=ROADS.find(x=>x.id===(S.road[d]||'asfalto'));if(r){roadHappy+=r.happy;roadTour+=r.tour||0;}}
   tour+=roadTour;roadHappy=Math.min(8,roadHappy);
   if(prjDone('fusao')){pwP+=100000;pol*=.2;}
@@ -1311,6 +1319,10 @@ function recalc(){
     if(S.dgoal[d]){m*=1.25;why.push(['Meta do bairro concluída',1.25]);}
     if(S.dmg[d]>now){m*=.7;why.push(['Estragos da tempestade',.7]);}
     if(d===7&&d7n>1){const a=1+Math.min(.5,.02*(d7n-1));m*=a;why.push(['Aglomeração financeira',a]);}
+    if(d===12&&(t.cat==='res'||t.cat==='nat')){m*=1.4;why.push(['Vale Aurora',1.4]);}
+    if(d===13&&(t.cat==='tech'||t.tags.includes('attraction'))){m*=2;why.push(['Porto das Estrelas',2]);}
+    if(d===14&&t.cat==='ind'){m*=1.5;why.push(['Deserto de Cristal',1.5]);}
+    if(d===15){m*=1.25;why.push(['Trono dos Fundadores',1.25]);}
     if(b.skin){m*=1.1;why.push(['Estilo '+SKINS[b.skin].n,1.1]);}
     if(M.cat[t.cat]){m*=M.cat[t.cat];why.push(['Evento',M.cat[t.cat]]);}if(M.dist[d]){m*=M.dist[d];why.push(['Evento no bairro',M.dist[d]]);}
     b._inc=base*m;b._why=why;rev+=b._inc;if(ev&&ev.k==='golden'&&ev.bid===b.id)goldX+=b._inc*6;}
@@ -1455,9 +1467,11 @@ function upgrade(b,n){
   if(S.tut===2){S.tut=3;tutRender();}refreshPanel();checkAch();}
 function demolish(id){const b=S.buildings.find(x=>x.id===id);if(!b||b.t==='pref'||b.t==='prj')return;S.buildings=S.buildings.filter(x=>x.id!==id);rebuildOcc();dirty=true;sfx('build');closeSheet();toast('Construção removida');save();}
 let unlockAnim=null;
-function unlockDistrict(d){const D=DIST[d];if(S.unlocked.includes(d))return;
+function unlockDistrict(d){const D=DIST[d];if(!D||S.unlocked.includes(d))return;
   if(D.ess&&S.ess<D.ess){sfx('err');return;}if(pref().lvl<D.pref){sfx('err');toast('A Prefeitura precisa do nível '+D.pref,'r');return;}
   if(d>0&&d<10&&!S.unlocked.includes(d-1)){sfx('err');toast('Desbloqueie o bairro anterior primeiro','r');return;}
+  if(d===12&&!map1Done()){sfx('err');toast('Complete todos os bairros do Mapa 1 antes de expandir','r');return;}
+  if(d>12&&d<=15&&!S.unlocked.includes(d-1)){sfx('err');toast('Desbloqueie o bairro anterior primeiro','r');return;}
   if(!spend(D.cost)){sfx('err');toast('Moedas insuficientes','r');return;}
   S.unlocked.push(d);groundDirty=true;syncAgents(true);dirty=true;closeSheet();updateDev();
   const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);cam.tx=wx;cam.ty=wy-10;cam.tz=1.35;
@@ -1501,7 +1515,7 @@ function startStage(id){const p=PRJM[id],st=prjState(id);if(st.s>=3||prjBusy(id)
   b.ready=Date.now()+tt*1000;b.bt0=tt;b._wasBusy=true;const [wx,wy]=bWorld(b);camTo(wx,wy-20);burst(wx,wy-10,22);sfx('build');toast('Obra iniciada: '+g.n,'g');dirty=true;refreshPanel();save();}
 
 /* ---------- prestígio ---------- */
-function essGain(){if(S.run<1e7)return 0;return Math.floor(3*Math.sqrt(S.run/1e7));}
+function essGain(){if(!map1Done()||!map2Done())return 0;if(S.run<1e7)return 0;return Math.floor(3*Math.sqrt(S.run/1e7));}
 function doPrestige(){const g=essGain();if(g<1)return;S.ess+=g;S.cnt.pres++;
   S.coins=S.ess>=3?5000:100;initCity(S);S.unlocked=[0];S.cu={};if(S.ess>=35)S.cu.robo=1;S.run=0;S.instUntil=0;S.doneD=[];S.pop=0;S.happy=55;S.prj={};S.mods=[];S.dmg={};S.road={};S.dgoal={};S.dbonus={};S.ctx={};S.rank=0;
   ev=null;sev=null;renderEvBar();worldCoins=[];superChest=null;rebuildOcc();groundDirty=true;syncAgents(true);dirty=true;closeSheet();C.devL=[];updateDev(true);
@@ -1544,6 +1558,18 @@ const ACH=[
  {id:'leg',n:'Maravilha',d:'Construa uma construção Lendária',c:()=>S.buildings.some(b=>TYPES[b.t].cat==='leg'),g:60},
  {id:'dec20',n:'Paisagista',d:'Coloque 20 decorações',c:()=>S.cnt.deco>=20,g:15},
 ];
+/* ---------- guia inicial (pós-tutorial) ---------- */
+const GUIDE=[
+ {id:'g1',n:'Construa 5 prédios',d:'Toque em Construir e escolha onde crescer.',c:()=>nonPref()>=5,g:{cs:8,gems:5}},
+ {id:'g2',n:'Melhore um prédio até o nível 5',d:'Toque num prédio e use Melhorar para ele render mais.',c:()=>S.maxLv>=5,g:{cs:10,gems:5}},
+ {id:'g3',n:'Colete 10 bolhas de moedas',d:'Toque nas bolhas douradas que aparecem sobre os prédios.',c:()=>S.cnt.bub>=10,g:{gems:6}},
+ {id:'g4',n:'Desbloqueie o Centro Comercial',d:'Abra Bairros e compre o 2º bairro quando puder.',c:()=>S.unlocked.includes(1),g:{gems:10,rp:50}},
+ {id:'g5',n:'Conclua sua 1ª pesquisa',d:'Abra Pesquisa e estude a primeira tecnologia disponível.',g:{gems:8},c:()=>Object.keys(S.tech).length>=1},
+ {id:'g6',n:'Complete 1 missão diária',d:'Veja Missões → Diárias e cumpra qualquer uma delas.',c:()=>S.daily&&S.daily.list.some(m=>m.done),g:{gems:8}},
+ {id:'g7',n:'Coloque uma decoração',d:'Decorações dão felicidade — procure na categoria Decoração.',c:()=>S.cnt.deco>=1,g:{gems:6}},
+ {id:'g8',n:'Complete o primeiro bairro',d:'Ocupe todos os terrenos do Centro Histórico.',c:()=>completedCount()>=1,g:{gems:20,crys:1}},
+];
+function guideClaimable(){return GUIDE.some(g=>g.c()&&!S.metas['gd_'+g.id]);}
 const METAS=[
  ...[[1000,10],[10000,20],[100000,40],[1e6,80],[1e7,150]].map(([n,g])=>({id:'mp'+n,grp:'População',n:fmt(n)+' habitantes',p:()=>[S.pop,n],r:{gems:g,rp:n/100}})),
  ...[[60,10],[75,20],[90,40]].map(([n,g])=>({id:'mh'+n,grp:'Felicidade',n:'Felicidade de '+n+'%',p:()=>[S.happy,n],r:{gems:g}})),
@@ -1782,6 +1808,10 @@ const DGOAL=[
  {t:'Uma construção Lendária aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='leg'),1]},
  {t:'Um Monumento da Essência aqui',p:d=>[cntIn(d,b=>b.t==='monu'),1]},
 ];
+DGOAL[12]={t:'10 residências ou natureza aqui',p:d=>[cntIn(d,b=>['res','nat'].includes(TYPES[b.t].cat)),10]};
+DGOAL[13]={t:'6 tecnologias ou atrações aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='tech'||TYPES[b.t].tags.includes('attraction')),6]};
+DGOAL[14]={t:'8 indústrias aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='ind'),8]};
+DGOAL[15]={t:'20 prédios neste bairro',p:d=>[cntIn(d,b=>TYPES[b.t].cat!=='deco'),20]};
 function cntIn(d,f){let c=0;for(const b of S.buildings)if(isReady(b)&&distOf(b.x,b.y)===d&&b.t!=='prj'&&f(b))c++;return c;}
 
 let demoArm=null,presArm=false;
@@ -1876,9 +1906,11 @@ function renderSheet(keep){
   }
   else if(sheetMode==='districts'){$('#sheetTitle').textContent='Bairros';setTabs(null);
     h+=`<p class="note">Cada bairro tem uma regra própria e construções exclusivas. Bairro completo (todos os terrenos ocupados): +10% de renda na cidade.</p>`;
-    for(let d=0;d<=10;d++){const D=DIST[d];const un=S.unlocked.includes(d);if(d===10&&S.ess<1&&!un)continue;const plots=plotsOf(d);const used=plots.filter(([x,y])=>occ.has(x+','+y)).length;
-      const prevOk=d===0||d===10||S.unlocked.includes(d-1);const prOk=pref().lvl>=D.pref;const essOk=!D.ess||S.ess>=D.ess;
-      let act;if(un)act=`<button class="btn b" data-act="go:${d}">Ver</button>`;else if(!prevOk)act=`<button class="btn off" disabled>Anterior antes</button>`;else if(!essOk)act=`<button class="btn off" disabled>${D.ess} Essência</button>`;else if(!prOk)act=`<button class="btn off" disabled>Prefeitura ${D.pref}</button>`;else act=cBtn(D.cost,'unlock:'+d,'','y');
+    for(let d=0;d<=15;d++){const D=DIST[d];if(!D)continue;const un=S.unlocked.includes(d);if(d===10&&S.ess<1&&!un)continue;
+      if(d===12)h+=`<div class="sec">${map1Done()?'Mapa 2 — Nova Expansão':'Mapa 2 — bloqueado'}</div><p class="note">${map1Done()?'Novos bairros, bem mais caros, pra continuar crescendo antes do Renascimento.':'Complete todos os bairros do Mapa 1 (todos os terrenos ocupados) para revelar o Mapa 2.'}</p>`;
+      const plots=plotsOf(d);const used=plots.filter(([x,y])=>occ.has(x+','+y)).length;
+      const prevOk=d===0||d===10?true:d===12?map1Done():S.unlocked.includes(d-1);const prOk=pref().lvl>=D.pref;const essOk=!D.ess||S.ess>=D.ess;
+      let act;if(un)act=`<button class="btn b" data-act="go:${d}">Ver</button>`;else if(!prevOk)act=`<button class="btn off" disabled>${d===12?'Complete o Mapa 1':'Anterior antes'}</button>`;else if(!essOk)act=`<button class="btn off" disabled>${D.ess} Essência</button>`;else if(!prOk)act=`<button class="btn off" disabled>Prefeitura ${D.pref}</button>`;else act=cBtn(D.cost,'unlock:'+d,'','y');
       const l=C.devL[d]||0;h+=`<div class="row ${un||prevOk?'':'locked'}"><div class="th" style="background:${D.g}"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 6l14 7-14 7-14-7z" fill="${shade(D.g,.25)}" stroke="#2b2350" stroke-width="1.5"/><path d="M6 13v12l14 7V20zM34 13v12l-14 7V20z" fill="${shade(D.g,-.25)}" stroke="#2b2350" stroke-width="1.5"/><circle cx="20" cy="13" r="3" fill="${D.acc}"/></svg></div><div class="info"><h3>${d===10?'':((d+1)+'. ')}${D.n}</h3>
         ${un?`<p><span class="tag" style="background:${DEV[l][1]};color:#fff">${DEV[l][0]}</span><span class="tag">${used}/${plots.length} terrenos</span></p>`:`<p>Prefeitura nível ${D.pref}${D.ess?' · '+D.ess+' Essência':''}</p>`}<p>${D.mech}</p><p>Exclusivos: ${D.ex}</p></div>${act}</div>`;
       if(un){const g=DGOAL[d];const [a,bn]=g.p(d);const done=S.dgoal[d];h+=`<div class="row" style="margin-top:-4px;margin-left:16px"><div class="info"><h3 style="font-size:14px">Meta do bairro: ${g.t}</h3>${bar(a/bn,'p')}<p>${done?'Concluída: renda +25% neste bairro':fmt(Math.min(a,bn))+'/'+fmt(bn)+' · prêmio: +25% de renda aqui e 20 joias'}</p></div>${done?'':a>=bn?`<button class="btn y" data-act="dgoal:${d}">Pegar</button>`:''}</div>`;
@@ -1886,8 +1918,12 @@ function renderSheet(keep){
         h+=`<div class="row" style="margin-top:-4px;margin-left:16px"><div class="info"><h3 style="font-size:14px">Ruas: ${ROADS[ri2].n}</h3><p>${nxr?'Próximo estilo: '+nxr.n+' (+'+nxr.happy+' felicidade, +'+nxr.tour+' turismo)':'Estilo máximo!'}</p></div>${nxr?cBtn(nxr.cost,'road:'+d,'','w'):''}</div>`;
         if(S.dmg[d]>Date.now())h+=`<div class="row hot" style="margin-left:16px"><div class="info"><h3 style="font-size:14px">Estragos da tempestade</h3><p>Renda −30% aqui por mais ${fmtTime((S.dmg[d]-Date.now())/1000)}</p></div>${cBtn(cost(30),'repair:'+d,'Consertar','r')}</div>`;}}
   }
-  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas']]);ensureDaily();
-    if(sheetTab==='req'){for(const ch of Object.keys(CHARS)){const c=CHARS[ch];if(!charUnlocked(ch)){h+=`<div class="qcard" style="opacity:.55">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role}</div><p>Chega quando a cidade virar ${RANKS[CHAR_UNLOCK[ch]][1]}.</p></div></div>`;continue;}
+  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['guide','Guia'],['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas']]);ensureDaily();
+    if(sheetTab==='guide'){const left=GUIDE.filter(g=>!S.metas['gd_'+g.id]);
+      h+=`<p class="note">Primeiros passos pra organizar sua cidade. Complete na ordem que quiser — cada um dá uma recompensa.</p>`;
+      if(!left.length)h+=`<div class="qcard">${portrait('lucia')}<div class="info"><h3>Guia concluído!</h3><p>Você já sabe o essencial. De agora em diante, use Metas e Conquistas pra continuar evoluindo.</p></div></div>`;
+      for(const g of GUIDE){const done=!!S.metas['gd_'+g.id];const ok=g.c();h+=`<div class="row ${done?'':ok?'hot':''}"><div class="info"><h3>${g.n}</h3><p>${g.d}</p><p class="note">Prêmio: ${rewardTxt(g.g)}</p></div>${done?'<button class="btn off" disabled>Feito</button>':ok?`<button class="btn y" data-act="gclaim:${g.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
+    else if(sheetTab==='req'){for(const ch of Object.keys(CHARS)){const c=CHARS[ch];if(!charUnlocked(ch)){h+=`<div class="qcard" style="opacity:.55">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role}</div><p>Chega quando a cidade virar ${RANKS[CHAR_UNLOCK[ch]][1]}.</p></div></div>`;continue;}
       const q=S.ctx[ch];if(q)h+=`<div class="qcard" style="box-shadow:0 3px 0 var(--sun),0 0 0 2px var(--sun)">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">Pedido urgente · ${c.n}</div><h3>${q.t}</h3><p>${q.d}</p>${bar(((S.cnt.tags[q.tag]||0)-q.base)/q.n,'y')}<div class="acts">${q.done?`<button class="btn y" data-act="cclaim:${ch}">Pegar prêmio</button>`:`<span class="tag">${Math.max(0,(S.cnt.tags[q.tag]||0)-q.base)}/${q.n}</span>`}</div></div></div>`;
       const s=stepOf(ch);if(s){const dn=stepDone(s);let pr='';if(s.p){const [a,bb]=s.p();pr=bar(a/bb,'p')+`<span class="tag">${fmt(Math.min(a,bb))}/${fmt(bb)}</span>`;}
         h+=`<div class="qcard">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role} · ${(S.story[ch]||0)+1}/${STORY[ch].length}</div><h3>${s.t}</h3><p>${s.d}</p>${pr}<div class="acts">${dn?`<button class="btn y" data-act="sclaim:${ch}">Pegar prêmio</button>`:''}<span class="note">Prêmio: ${rewardTxt(s.r)}</span></div></div></div>`;}
@@ -1931,7 +1967,8 @@ function renderSheet(keep){
   }
   else if(sheetMode==='prestige'){$('#sheetTitle').textContent='Prestígio';setTabs(null);const g=essGain();
     h+=`<div class="row"><i class="ico ess"></i><div class="info"><h3>${S.ess} Essência Urbana</h3><p>+${S.ess*5}% de renda permanente (+5% por Essência)</p></div></div>`;
-    h+=`<div class="row"><div class="info"><h3>Ganho agora: +${g}</h3><p>Moedas ganhas neste ciclo: ${fmt(S.run)}${g<1?' · mínimo 10M para renascer':''}</p>${g<1?bar(S.run/1e7,'p'):`<p>Próxima Essência em ${fmt(Math.pow((g+1)/3,2)*1e7-S.run)} moedas</p>`}</div></div>`;
+    const mapsOk=map1Done()&&map2Done();
+    h+=`<div class="row"><div class="info"><h3>Ganho agora: +${g}</h3><p>${!map1Done()?'Complete todos os bairros do Mapa 1 para revelar o Mapa 2.':!map2Done()?'Complete todos os bairros do Mapa 2 (em Bairros) para liberar o Renascimento.':'Moedas ganhas neste ciclo: '+fmt(S.run)+(g<1?' · mínimo 10M para renascer':'')}</p>${mapsOk?(g<1?bar(S.run/1e7,'p'):`<p>Próxima Essência em ${fmt(Math.pow((g+1)/3,2)*1e7-S.run)} moedas</p>`):''}</div></div>`;
     h+=`<div class="sec">O que reinicia</div><p class="note">Moedas, prédios, níveis, bairros, população, projetos e melhorias da cidade.</p><div class="sec">O que fica</div><p class="note">Essência, joias, Cristais, pesquisas, coleção, conquistas, histórias dos personagens e configurações.</p>`;
     h+=`<div class="sec">Desbloqueios da Essência</div>`;for(const [n,t] of PERKS)h+=`<div class="row ${S.ess>=n?'':'locked'}"><div class="info"><h3>${n} Essência</h3><p>${t}</p></div><span class="tag ${S.ess>=n?'g':''}">${S.ess>=n?'ativo':'bloqueado'}</span></div>`;
     h+=`<button class="btn big p" data-act="prestige" ${g<1?'disabled':''}>${presArm?'Toque de novo para confirmar':'Renascer (+'+g+' Essência)'}</button>`;
@@ -1958,6 +1995,7 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='dbonus'){if(!S.daily.bonus){S.daily.bonus=true;grantChest('daily');updateDots();renderSheet(true);}}
   else if(a==='aclaim'){const ac=ACH.find(x=>x.id===p1);if(S.ach[p1]==='done'){S.ach[p1]='claimed';S.gems+=ac.g;let msg='+'+ac.g+' joias';if(ac.cos&&!S.cos.own.includes(ac.cos)){S.cos.own.push(ac.cos);msg+=' + '+COS.find(x=>x.id===ac.cos).n;}sfx('chest');toast(msg,'p');updateDots();renderSheet(true);}}
   else if(a==='mclaim'){const m=METAS.find(x=>x.id===p1);if(m&&!S.metas[p1]){const [x,y]=m.p();if(x>=y){S.metas[p1]=1;giveReward(m.r,m.n);updateDots();renderSheet(true);}}}
+  else if(a==='gclaim'){const g=GUIDE.find(x=>x.id===p1);if(g&&!S.metas['gd_'+p1]&&g.c()){S.metas['gd_'+p1]=1;giveReward(g.g,g.n);updateDots();renderSheet(true);}}
   else if(a==='sclaim')claimStory(p1);else if(a==='cclaim')claimCtx(p1);
   else if(a==='dgoal'){const g=DGOAL[+p1];const [x,y]=g.p(+p1);if(x>=y&&!S.dgoal[p1]){S.dgoal[p1]=1;S.gems+=20;dirty=true;showBanner('Meta concluída!',DIST[p1].n);screenConfetti(60);sfx('unlock');renderSheet(true);}}
   else if(a==='road'){const d=+p1;const i=ROADS.findIndex(r=>r.id===(S.road[d]||'asfalto'));const n=ROADS[i+1];if(n&&spend(n.cost)){S.road[d]=n.id;groundDirty=true;dirty=true;sfx('up');toast('Ruas de '+DIST[d].n+': '+n.n,'g');updateDev();renderSheet(true);}else sfx('err');}
@@ -1986,7 +2024,7 @@ $('#homeBtn').addEventListener('click',()=>{audioInit();sfx('click');goHome();})
 $('#zIn').addEventListener('click',()=>{cam.tz=clamp((cam.tz||cam.z)*1.2,.4,2.4);sfx('click');});
 $('#zOut').addEventListener('click',()=>{cam.tz=clamp((cam.tz||cam.z)/1.2,.4,2.4);sfx('click');});
 $('#chestBtn').addEventListener('click',()=>{audioInit();if(S.chestT<=0){S.chestT=240;grantChest('free');}else{sfx('click');toast('Baú grátis em '+fmtTime(S.chestT));}});
-function updateDots(){let n=0;if(S.daily){for(const m of S.daily.list)if(m.done&&!m.claimed)n++;if(S.daily.list.every(m=>m.claimed)&&!S.daily.bonus)n++;}for(const a of ACH)if(S.ach[a.id]==='done')n++;
+function updateDots(){let n=0;if(guideClaimable())n++;if(S.daily){for(const m of S.daily.list)if(m.done&&!m.claimed)n++;if(S.daily.list.every(m=>m.claimed)&&!S.daily.bonus)n++;}for(const a of ACH)if(S.ach[a.id]==='done')n++;
   for(const m of METAS)if(!S.metas[m.id]){const [a,b]=m.p();if(a>=b)n++;}for(const ch in CHARS){if(charUnlocked(ch)&&stepDone(stepOf(ch)))n++;if(S.ctx[ch]&&S.ctx[ch].done)n++;}
   setDot('#nb-missions',n);let t=0;for(const x of TECH)if(!tk(x.id)&&x.req.every(r=>tk(r))&&S.rp>=x.cost&&(!x.cry||S.crys>=x.cry))t++;setDot('#nb-research',t);
   setDot('#nb-more',essGain()>=1?'!':0,'#8e5cff');}
@@ -2054,13 +2092,13 @@ function tutRender(){const c=$('#coach');document.querySelectorAll('.hl').forEac
   const [t,m]=TUT[S.tut];c.hidden=false;c.innerHTML=portrait('lucia')+`<div class="bub"><small style="color:${CHARS.lucia.col}">Prefeita Lúcia</small><b class="t">${t}</b>${m}<div class="row2">${S.tut===3?'<button class="btn" id="tutOk">Vamos lá! +10 joias</button>':'<button class="skip" id="tutSkip">Pular tutorial</button>'}</div></div>`;
   if(S.tut===1)$('#nb-build').classList.add('hl');
   if(S.tut===0){const h=S.buildings.find(b=>b.t==='casa');if(h)h.bub=Math.max(h.bub||0,20);}
-  const ok=$('#tutOk');if(ok)ok.onclick=()=>{S.tut=4;S.gems+=10;sfx('chest');toast('+10 joias','p');c.hidden=true;save();setTimeout(()=>{const s=stepOf('lucia');if(s)say('lucia','Primeiro desafio: <b>'+s.t+'</b>. '+s.d,9,['Ver missões',()=>openSheet('missions','req')]);},800);};
-  const sk=$('#tutSkip');if(sk)sk.onclick=()=>{S.tut=4;c.hidden=true;save();};}
+  const ok=$('#tutOk');if(ok)ok.onclick=()=>{S.tut=4;S.gems+=10;sfx('chest');toast('+10 joias','p');c.hidden=true;save();setTimeout(()=>{say('lucia','Criei um Guia com os primeiros passos pra você não se perder. Dá uma olhada!',8,['Ver guia',()=>openSheet('missions','guide')]);},800);};
+  const sk=$('#tutSkip');if(sk)sk.onclick=()=>{S.tut=4;c.hidden=true;save();openSheet('missions','guide');};}
 /* =====================================================================
    CÂMERA
    ===================================================================== */
 const cam={x:0,y:200,z:1.2,tx:null,ty:null,tz:null};
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);}
+function resize(){DPR=Math.min(1.6,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);}
 window.addEventListener('resize',resize);
 function w2s(wx,wy){return [(wx-cam.x)*cam.z+W/2,(wy-cam.y)*cam.z+H/2];}
 function s2w(sx,sy){return [(sx-W/2)/cam.z+cam.x,(sy-H/2)/cam.z+cam.y];}
@@ -2075,7 +2113,7 @@ function goHome(){const [wx,wy]=bWorld(pref());camTo(wx,wy-20,1.25);}
 const GOFF={x:-HT*HW-12,y:-14};const GW=(WT+HT)*HW+24,GH=(WT+HT)*HH+72;const GS=2;
 const gcv=document.createElement('canvas');gcv.width=GW*GS;gcv.height=GH*GS;const gctx=gcv.getContext('2d');let groundDirty=true;
 function tilePoly(x,y){return [proj(x,y),proj(x+1,y),proj(x+1,y+1),proj(x,y+1)];}
-function distUnlockedG(gx,gy){if(gx<0||gy<0||gx>=GXN||gy>=GYN)return false;const d=gy*GXN+gx;return d<=10&&S.unlocked.includes(d);}
+function distUnlockedG(gx,gy){if(gx<0||gy<0||gx>=GXN||gy>=GYN)return false;const d=gy*GXN+gx;return d!==11&&S.unlocked.includes(d);}
 function roadActive(x,y){const gx=Math.floor(x/DS),gy=Math.floor(y/DS);
   if(x%DS===0&&y%DS===0)return distUnlockedG(gx,gy)||distUnlockedG(gx-1,gy)||distUnlockedG(gx,gy-1)||distUnlockedG(gx-1,gy-1);
   if(y%DS===0)return distUnlockedG(gx,gy)||distUnlockedG(gx,gy-1);return distUnlockedG(gx,gy)||distUnlockedG(gx-1,gy);}
@@ -2119,7 +2157,7 @@ function buildEdges(){EDGES=[];for(let y=0;y<=GYN;y++)for(let x=0;x<=GXN;x++){if
 const CARC=['#ff5d6c','#5aa9ff','#ffd23f','#2fd08a','#ff9f43','#ffffff','#9b5de5'];
 function newAgent(k){const e=pick(EDGES);if(!e)return null;const rev=Math.random()<.5;const car=k!=='ped'&&k!=='vip';
   return {k,car,fx:rev?e[2]:e[0],fy:rev?e[3]:e[1],tx:rev?e[0]:e[2],ty:rev?e[1]:e[3],p:Math.random(),sp:car?(k==='truck'?rnd(.7,1):k==='bus'?rnd(.6,.9):rnd(.9,1.6)):rnd(.25,.45)*(k==='vip'?.7:1),c:pick(CARC),sk:pick(['#ffd7b5','#e0ac69','#8d5524','#f1c27d']),sh:pick(CARC),id:aid++,_born:TIME};}
-function agentTargets(){const n=S.unlocked.length;return {car:clamp(Math.round(4+n*2+C.trafD*.5),6,34),bus:(tk('tra2')||countType('onibus'))?clamp(2+C.transit*2,0,8):0,truck:clamp(Math.round(C.deliv/6),0,10),ped:clamp(Math.round(8+S.pop/25+C.V/20),8,60)};}
+function agentTargets(){const n=S.unlocked.length;return {car:clamp(Math.round(4+n*1.4+C.trafD*.35),6,22),bus:(tk('tra2')||countType('onibus'))?clamp(2+C.transit*1.5,0,6):0,truck:clamp(Math.round(C.deliv/8),0,7),ped:clamp(Math.round(6+S.pop/32+C.V/26),6,38)};}
 function syncAgents(force){if(force){buildEdges();agents=agents.filter(a=>a.k==='vip');}if(!EDGES.length)buildEdges();const tg=agentTargets();
   for(const k in tg){const cur=agents.filter(a=>a.k===k);let diff=tg[k]-cur.length;if(!force)diff=clamp(diff,-2,2);
     if(diff>0)for(let i=0;i<diff;i++){const a=newAgent(k);if(a)agents.push(a);}else if(diff<0){for(let i=0;i<-diff;i++){const idx=agents.indexOf(cur[i]);if(idx>=0)agents.splice(idx,1);}}}}
@@ -2203,7 +2241,7 @@ function tap(sx,sy){const [wx,wy]=s2w(sx,sy);
     if(ev&&ev.k==='golden'&&ev.bid===hit.id&&TIME-(ev.lt||0)>.35){ev.lt=TIME;const v=Math.max(20,bIncome(hit)*2);earn(v);const [cx,cy]=bWorld(hit);floatText(cx,cy-(hit._top||30)-20,'+'+fmt(v),'#ffd23f',18);flyCoins(...w2s(cx,cy-30),6);sfx('coin');if(!ev.tapped){ev.tapped=1;eventTap();}}
     hit._bounce=TIME;sfx('click');openBuilding(hit);return;}
   const u=Math.floor((wx/HW+wy/HH)/2),v=Math.floor((wy/HH-wx/HW)/2);const d=distOf(u,v);
-  if(d>=0&&d<=10&&!isRoad(u,v)){if(!S.unlocked.includes(d)){sfx('click');openSheet('districts');return;}if(plotFree(u,v)){targetPlot=[u,v];sfx('click');openSheet('build');return;}}
+  if(d>=0&&d<=15&&d!==11&&!isRoad(u,v)){if(!S.unlocked.includes(d)){sfx('click');openSheet('districts');return;}if(plotFree(u,v)){targetPlot=[u,v];sfx('click');openSheet('build');return;}}
   targetPlot=null;}
 
 /* =====================================================================
@@ -2228,9 +2266,9 @@ function update(dt){
   eventTick(dt);sevTick(dt);sayTick(dt);stepAgents(dt);
   if(cam.tx!==null&&cam.tx!==undefined){cam.x=lerp(cam.x,cam.tx,1-Math.pow(.004,dt));cam.y=lerp(cam.y,cam.ty,1-Math.pow(.004,dt));if(Math.hypot(cam.x-cam.tx,cam.y-cam.ty)<.5)cam.tx=null;}
   if(cam.tz){cam.z=lerp(cam.z,cam.tz,1-Math.pow(.01,dt));if(Math.abs(cam.z-cam.tz)<.003)cam.tz=null;}clampCam();
-  for(const p of parts){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.g)p.vy+=220*dt;if(p.k==='smoke'||p.k==='steam'){p.vx*=.98;p.r+=dt*(p.k==='smoke'?3:1.5);}}parts=parts.filter(p=>p.t<p.life);if(parts.length>450)parts.splice(0,parts.length-450);
+  for(const p of parts){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.g)p.vy+=220*dt;if(p.k==='smoke'||p.k==='steam'){p.vx*=.98;p.r+=dt*(p.k==='smoke'?3:1.5);}}parts=parts.filter(p=>p.t<p.life);if(parts.length>220)parts.splice(0,parts.length-220);
   for(const f of floats)f.t+=dt;floats=floats.filter(f=>f.t<1.4);
-  for(const c of confetti){c.t+=dt;c.x+=c.vx*dt+Math.sin(c.t*3+c.r)*20*dt;c.y+=c.vy*dt;c.r+=c.vr*dt;}confetti=confetti.filter(c=>c.t<c.life&&c.y<H+40);
+  for(const c of confetti){c.t+=dt;c.x+=c.vx*dt+Math.sin(c.t*3+c.r)*20*dt;c.y+=c.vy*dt;c.r+=c.vr*dt;}confetti=confetti.filter(c=>c.t<c.life&&c.y<H+40);if(confetti.length>160)confetti.splice(0,confetti.length-160);
   let arrived=0;for(const f of fly){f.t+=dt;if(f.t>=f.d&&!f.done){f.done=true;arrived++;}}fly=fly.filter(f=>!f.done);if(arrived){const cp=$('#coinPill');cp.classList.remove('pop');void cp.offsetWidth;cp.classList.add('pop');sfx('coin');}
   for(const c of worldCoins){c.t+=dt;if(c.z>0){c.vz-=500*dt;c.z+=c.vz*dt;if(c.z<=0){c.z=0;c.vz=Math.abs(c.vz)>60?-c.vz*.4:0;}}}
   if(unlockAnim){unlockAnim.t+=dt;if(unlockAnim.t>3)unlockAnim=null;}if(superChest)superChest.t+=dt;if(ceremony&&TIME-ceremony.t0>3.4)ceremony=null;
@@ -2301,7 +2339,7 @@ function render(){
   {const [fx,fy]=proj(1.5,1.5);D.push({d:3,fn:()=>dFountain(fx,fy)});const [sx,sy]=proj(1.5,5.5);D.push({d:7,fn:()=>dStatue(sx,sy)});}
   {const [bx,by]=proj(19+((TIME*.08)%1)*4.5,15.5);D.push({d:35,fn:()=>{ell(bx,by,9,4.5,'rgba(255,255,255,.4)',false);box(bx,by,.26,.14,4,'#ff5d6c');line(bx,by-4,bx,by-18,'#6b5a8f',1.2);poly([[bx,by-18],[bx+9,by-8],[bx,by-7]],'#ffffff');}});}
   for(const a of agents){const [u,v,dx,dy]=agentPos(a);const [wx,wy]=proj(u,v);if(!vis(wx,wy))continue;D.push({d:u+v,fn:a.car?()=>drawCar(a,u,v,dx,dy):()=>drawPed(a,u,v)});}
-  for(let d=0;d<=10;d++){if(S.unlocked.includes(d)&&!(unlockAnim&&unlockAnim.d===d))continue;if(d===10&&S.ess<1)continue;const gx=d%GXN,gy=Math.floor(d/GXN);const [cx,cy]=proj(gx*DS+3.5,gy*DS+3.5);if(!vis(cx,cy))continue;D.push({d:gx*DS+gy*DS+6.5,fog:d,cx,cy});}
+  for(let d=0;d<=15;d++){if(d===11||!DIST[d])continue;if(S.unlocked.includes(d)&&!(unlockAnim&&unlockAnim.d===d))continue;if(d===10&&S.ess<1)continue;if(d>=12&&!map1Done())continue;const gx=d%GXN,gy=Math.floor(d/GXN);const [cx,cy]=proj(gx*DS+3.5,gy*DS+3.5);if(!vis(cx,cy))continue;D.push({d:gx*DS+gy*DS+6.5,fog:d,cx,cy});}
   for(const d in C.cx){if(!S.unlocked.includes(+d))continue;D.push({d:-1,fn:()=>bunting(+d,C.cx[d])});}
   D.sort((a,b)=>a.d-b.d);
   for(const it of D){if(it.b)drawBuilding(it.b,it.cx,it.cy);else if(it.deco)deco(it.deco,it.cx,it.cy,it.seed);else if(it.fn)it.fn();else if(it.fog!==undefined)drawFog(it.fog,it.cx,it.cy);}
@@ -2443,9 +2481,11 @@ function afterLoad(){rebuildOcc();C.devL=[];updateDev(true);groundDirty=true;syn
   const [wx,wy]=bWorld(pref());cam.x=wx;cam.y=wy-20;cam.z=W<500?1.25:1.4;closeSheet();updateDots();tutRender();applyVol();stripRender();}
 function offlineGain(sec,initial){sec=clamp(sec,0,offCap());if(sec<30)return;recalc();const v=Math.max(0,ipsBase)*sec*offRate();const rp=C.rp*sec*offRate();
   S.rp+=rp;S.crys+=C.crys*sec*offRate();const tgt=C.hcap*(.5+.5*S.happy/100)*C.mpop;S.pop=lerp(S.pop,tgt,Math.min(1,sec/60));if(v>0)earn(v);
-  const d=today();let daily='';if(initial&&S.streak.day!==d){const y=new Date(Date.now()-864e5);const yd=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();S.streak.n=S.streak.day===yd?S.streak.n%7+1:1;S.streak.day=d;const g=4+S.streak.n*2;S.gems+=g;daily=`<div class="kv"><span>Bônus diário · dia ${S.streak.n} de 7</span><b>+${g} joias</b></div>`;}
+  const d=today();let daily='';let bigDay=false;if(initial&&S.streak.day!==d){const y=new Date(Date.now()-864e5);const yd=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();S.streak.n=S.streak.day===yd?S.streak.n%7+1:1;S.streak.day=d;const g=4+S.streak.n*2;S.gems+=g;bigDay=S.streak.n===7;
+    const dots=Array.from({length:7},(_,i)=>`<i style="flex:1;height:10px;border-radius:6px;background:${i<S.streak.n?'linear-gradient(90deg,#ffd23f,#ff8fab)':'var(--cream2)'};box-shadow:${i===S.streak.n-1?'0 0 0 2px #ffd23f':'none'}"></i>`).join('');
+    daily=`<div class="sec" style="margin-top:2px">Sequência diária · dia ${S.streak.n} de 7</div><div style="display:flex;gap:4px;margin:2px 2px 4px">${dots}</div><div class="kv"><span>${bigDay?'Semana completa!':'Bônus de hoje'}</span><b>+${g}${bigDay?' joias + 1 Cristal':' joias'}</b></div>`;if(bigDay)S.crys+=1;}
   openModal(`<h2>Bem-vindo de volta!</h2><p>Você ficou fora por <b>${fmtTime(sec)}</b>. A cidade continuou trabalhando:</p><div class="big-num"><i class="ico coin"></i>+${fmt(v)}</div>${rp>=1?`<div class="kv"><span>Pesquisa acumulada</span><b>+${fmt(rp)}</b></div>`:''}${daily}<p class="note" style="text-align:center">Renda offline: ${Math.round(offRate()*100)}% da produção, até ${offCap()/3600}h.</p><button class="btn big" data-m="close">Continuar</button>`);
-  sfx('chest');save();}
+  sfx('chest');if(bigDay){screenConfetti(100);sfx('unlock');}save();}
 function boot(){resize();const src=load();afterLoad();
   if(src){const away=(Date.now()-(S.last||Date.now()))/1000;if(away>30)offlineGain(away,true);else{const d=today();if(S.streak.day!==d){S.streak.day=d;S.streak.n=1;S.gems+=6;toast('Bônus diário: +6 joias','p');}}}
   else{S.streak.day=today();S.streak.n=1;}
@@ -2457,7 +2497,8 @@ function boot(){resize();const src=load();afterLoad();
   window.__ccResume=()=>{groundDirty=true;for(const b of S.buildings){if(b._born>TIME)b._born=-9;if(b._bounce>TIME)b._bounce=-9;}};
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else window.__ccResume();});window.addEventListener('pagehide',save);
   window.__cc={S:()=>S,C,build,upgrade,startEvent,unlockDistrict,tap,econ,recalc,doPrestige,essGain,research,startStage,openSheet,setTarget:p=>targetPlot=p,chooseEv,openEvent,
-    forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;}};}
+    forceSev:id=>{sev={id,pending:true,wait:45};renderEvBar();},openB:id=>openBuilding(S.buildings.find(b=>b.id===id)),storm:()=>{weather={k:'storm',until:TIME+30};},night:()=>{TIME=120;},finishAll:()=>{for(const b of S.buildings)if(b.ready>Date.now())b.ready=Date.now()-1;},get ips(){return ips;},
+    map1Done,map2Done,plotsOf,occ,DIST,TYPES,GUIDE,distOf,render,renderSheet:()=>renderSheet(true)};}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{for(const k in thumbs)delete thumbs[k];});
 window.__ccBack=()=>{if(!$('#modal').hidden){closeModal();return 'handled';}if(sheetMode){closeSheet();targetPlot=null;return 'handled';}if(heatMode){heatMode=null;renderHeatChip();return 'handled';}return 'none';};
 if(window.CCNative){let started=false;const go=()=>{if(started)return;started=true;boot();};

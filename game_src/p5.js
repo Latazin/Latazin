@@ -210,6 +210,10 @@ const DGOAL=[
  {t:'Uma construção Lendária aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='leg'),1]},
  {t:'Um Monumento da Essência aqui',p:d=>[cntIn(d,b=>b.t==='monu'),1]},
 ];
+DGOAL[12]={t:'10 residências ou natureza aqui',p:d=>[cntIn(d,b=>['res','nat'].includes(TYPES[b.t].cat)),10]};
+DGOAL[13]={t:'6 tecnologias ou atrações aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='tech'||TYPES[b.t].tags.includes('attraction')),6]};
+DGOAL[14]={t:'8 indústrias aqui',p:d=>[cntIn(d,b=>TYPES[b.t].cat==='ind'),8]};
+DGOAL[15]={t:'20 prédios neste bairro',p:d=>[cntIn(d,b=>TYPES[b.t].cat!=='deco'),20]};
 function cntIn(d,f){let c=0;for(const b of S.buildings)if(isReady(b)&&distOf(b.x,b.y)===d&&b.t!=='prj'&&f(b))c++;return c;}
 
 let demoArm=null,presArm=false;
@@ -304,9 +308,11 @@ function renderSheet(keep){
   }
   else if(sheetMode==='districts'){$('#sheetTitle').textContent='Bairros';setTabs(null);
     h+=`<p class="note">Cada bairro tem uma regra própria e construções exclusivas. Bairro completo (todos os terrenos ocupados): +10% de renda na cidade.</p>`;
-    for(let d=0;d<=10;d++){const D=DIST[d];const un=S.unlocked.includes(d);if(d===10&&S.ess<1&&!un)continue;const plots=plotsOf(d);const used=plots.filter(([x,y])=>occ.has(x+','+y)).length;
-      const prevOk=d===0||d===10||S.unlocked.includes(d-1);const prOk=pref().lvl>=D.pref;const essOk=!D.ess||S.ess>=D.ess;
-      let act;if(un)act=`<button class="btn b" data-act="go:${d}">Ver</button>`;else if(!prevOk)act=`<button class="btn off" disabled>Anterior antes</button>`;else if(!essOk)act=`<button class="btn off" disabled>${D.ess} Essência</button>`;else if(!prOk)act=`<button class="btn off" disabled>Prefeitura ${D.pref}</button>`;else act=cBtn(D.cost,'unlock:'+d,'','y');
+    for(let d=0;d<=15;d++){const D=DIST[d];if(!D)continue;const un=S.unlocked.includes(d);if(d===10&&S.ess<1&&!un)continue;
+      if(d===12)h+=`<div class="sec">${map1Done()?'Mapa 2 — Nova Expansão':'Mapa 2 — bloqueado'}</div><p class="note">${map1Done()?'Novos bairros, bem mais caros, pra continuar crescendo antes do Renascimento.':'Complete todos os bairros do Mapa 1 (todos os terrenos ocupados) para revelar o Mapa 2.'}</p>`;
+      const plots=plotsOf(d);const used=plots.filter(([x,y])=>occ.has(x+','+y)).length;
+      const prevOk=d===0||d===10?true:d===12?map1Done():S.unlocked.includes(d-1);const prOk=pref().lvl>=D.pref;const essOk=!D.ess||S.ess>=D.ess;
+      let act;if(un)act=`<button class="btn b" data-act="go:${d}">Ver</button>`;else if(!prevOk)act=`<button class="btn off" disabled>${d===12?'Complete o Mapa 1':'Anterior antes'}</button>`;else if(!essOk)act=`<button class="btn off" disabled>${D.ess} Essência</button>`;else if(!prOk)act=`<button class="btn off" disabled>Prefeitura ${D.pref}</button>`;else act=cBtn(D.cost,'unlock:'+d,'','y');
       const l=C.devL[d]||0;h+=`<div class="row ${un||prevOk?'':'locked'}"><div class="th" style="background:${D.g}"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 6l14 7-14 7-14-7z" fill="${shade(D.g,.25)}" stroke="#2b2350" stroke-width="1.5"/><path d="M6 13v12l14 7V20zM34 13v12l-14 7V20z" fill="${shade(D.g,-.25)}" stroke="#2b2350" stroke-width="1.5"/><circle cx="20" cy="13" r="3" fill="${D.acc}"/></svg></div><div class="info"><h3>${d===10?'':((d+1)+'. ')}${D.n}</h3>
         ${un?`<p><span class="tag" style="background:${DEV[l][1]};color:#fff">${DEV[l][0]}</span><span class="tag">${used}/${plots.length} terrenos</span></p>`:`<p>Prefeitura nível ${D.pref}${D.ess?' · '+D.ess+' Essência':''}</p>`}<p>${D.mech}</p><p>Exclusivos: ${D.ex}</p></div>${act}</div>`;
       if(un){const g=DGOAL[d];const [a,bn]=g.p(d);const done=S.dgoal[d];h+=`<div class="row" style="margin-top:-4px;margin-left:16px"><div class="info"><h3 style="font-size:14px">Meta do bairro: ${g.t}</h3>${bar(a/bn,'p')}<p>${done?'Concluída: renda +25% neste bairro':fmt(Math.min(a,bn))+'/'+fmt(bn)+' · prêmio: +25% de renda aqui e 20 joias'}</p></div>${done?'':a>=bn?`<button class="btn y" data-act="dgoal:${d}">Pegar</button>`:''}</div>`;
@@ -314,8 +320,12 @@ function renderSheet(keep){
         h+=`<div class="row" style="margin-top:-4px;margin-left:16px"><div class="info"><h3 style="font-size:14px">Ruas: ${ROADS[ri2].n}</h3><p>${nxr?'Próximo estilo: '+nxr.n+' (+'+nxr.happy+' felicidade, +'+nxr.tour+' turismo)':'Estilo máximo!'}</p></div>${nxr?cBtn(nxr.cost,'road:'+d,'','w'):''}</div>`;
         if(S.dmg[d]>Date.now())h+=`<div class="row hot" style="margin-left:16px"><div class="info"><h3 style="font-size:14px">Estragos da tempestade</h3><p>Renda −30% aqui por mais ${fmtTime((S.dmg[d]-Date.now())/1000)}</p></div>${cBtn(cost(30),'repair:'+d,'Consertar','r')}</div>`;}}
   }
-  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas']]);ensureDaily();
-    if(sheetTab==='req'){for(const ch of Object.keys(CHARS)){const c=CHARS[ch];if(!charUnlocked(ch)){h+=`<div class="qcard" style="opacity:.55">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role}</div><p>Chega quando a cidade virar ${RANKS[CHAR_UNLOCK[ch]][1]}.</p></div></div>`;continue;}
+  else if(sheetMode==='missions'){$('#sheetTitle').textContent='Missões';setTabs([['guide','Guia'],['req','Pedidos'],['daily','Diárias'],['metas','Metas'],['ach','Conquistas']]);ensureDaily();
+    if(sheetTab==='guide'){const left=GUIDE.filter(g=>!S.metas['gd_'+g.id]);
+      h+=`<p class="note">Primeiros passos pra organizar sua cidade. Complete na ordem que quiser — cada um dá uma recompensa.</p>`;
+      if(!left.length)h+=`<div class="qcard">${portrait('lucia')}<div class="info"><h3>Guia concluído!</h3><p>Você já sabe o essencial. De agora em diante, use Metas e Conquistas pra continuar evoluindo.</p></div></div>`;
+      for(const g of GUIDE){const done=!!S.metas['gd_'+g.id];const ok=g.c();h+=`<div class="row ${done?'':ok?'hot':''}"><div class="info"><h3>${g.n}</h3><p>${g.d}</p><p class="note">Prêmio: ${rewardTxt(g.g)}</p></div>${done?'<button class="btn off" disabled>Feito</button>':ok?`<button class="btn y" data-act="gclaim:${g.id}">Pegar</button>`:'<button class="btn off" disabled>…</button>'}</div>`;}}
+    else if(sheetTab==='req'){for(const ch of Object.keys(CHARS)){const c=CHARS[ch];if(!charUnlocked(ch)){h+=`<div class="qcard" style="opacity:.55">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role}</div><p>Chega quando a cidade virar ${RANKS[CHAR_UNLOCK[ch]][1]}.</p></div></div>`;continue;}
       const q=S.ctx[ch];if(q)h+=`<div class="qcard" style="box-shadow:0 3px 0 var(--sun),0 0 0 2px var(--sun)">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">Pedido urgente · ${c.n}</div><h3>${q.t}</h3><p>${q.d}</p>${bar(((S.cnt.tags[q.tag]||0)-q.base)/q.n,'y')}<div class="acts">${q.done?`<button class="btn y" data-act="cclaim:${ch}">Pegar prêmio</button>`:`<span class="tag">${Math.max(0,(S.cnt.tags[q.tag]||0)-q.base)}/${q.n}</span>`}</div></div></div>`;
       const s=stepOf(ch);if(s){const dn=stepDone(s);let pr='';if(s.p){const [a,bb]=s.p();pr=bar(a/bb,'p')+`<span class="tag">${fmt(Math.min(a,bb))}/${fmt(bb)}</span>`;}
         h+=`<div class="qcard">${portrait(ch)}<div class="info"><div class="who" style="color:${c.col}">${c.n} · ${c.role} · ${(S.story[ch]||0)+1}/${STORY[ch].length}</div><h3>${s.t}</h3><p>${s.d}</p>${pr}<div class="acts">${dn?`<button class="btn y" data-act="sclaim:${ch}">Pegar prêmio</button>`:''}<span class="note">Prêmio: ${rewardTxt(s.r)}</span></div></div></div>`;}
@@ -359,7 +369,8 @@ function renderSheet(keep){
   }
   else if(sheetMode==='prestige'){$('#sheetTitle').textContent='Prestígio';setTabs(null);const g=essGain();
     h+=`<div class="row"><i class="ico ess"></i><div class="info"><h3>${S.ess} Essência Urbana</h3><p>+${S.ess*5}% de renda permanente (+5% por Essência)</p></div></div>`;
-    h+=`<div class="row"><div class="info"><h3>Ganho agora: +${g}</h3><p>Moedas ganhas neste ciclo: ${fmt(S.run)}${g<1?' · mínimo 10M para renascer':''}</p>${g<1?bar(S.run/1e7,'p'):`<p>Próxima Essência em ${fmt(Math.pow((g+1)/3,2)*1e7-S.run)} moedas</p>`}</div></div>`;
+    const mapsOk=map1Done()&&map2Done();
+    h+=`<div class="row"><div class="info"><h3>Ganho agora: +${g}</h3><p>${!map1Done()?'Complete todos os bairros do Mapa 1 para revelar o Mapa 2.':!map2Done()?'Complete todos os bairros do Mapa 2 (em Bairros) para liberar o Renascimento.':'Moedas ganhas neste ciclo: '+fmt(S.run)+(g<1?' · mínimo 10M para renascer':'')}</p>${mapsOk?(g<1?bar(S.run/1e7,'p'):`<p>Próxima Essência em ${fmt(Math.pow((g+1)/3,2)*1e7-S.run)} moedas</p>`):''}</div></div>`;
     h+=`<div class="sec">O que reinicia</div><p class="note">Moedas, prédios, níveis, bairros, população, projetos e melhorias da cidade.</p><div class="sec">O que fica</div><p class="note">Essência, joias, Cristais, pesquisas, coleção, conquistas, histórias dos personagens e configurações.</p>`;
     h+=`<div class="sec">Desbloqueios da Essência</div>`;for(const [n,t] of PERKS)h+=`<div class="row ${S.ess>=n?'':'locked'}"><div class="info"><h3>${n} Essência</h3><p>${t}</p></div><span class="tag ${S.ess>=n?'g':''}">${S.ess>=n?'ativo':'bloqueado'}</span></div>`;
     h+=`<button class="btn big p" data-act="prestige" ${g<1?'disabled':''}>${presArm?'Toque de novo para confirmar':'Renascer (+'+g+' Essência)'}</button>`;
@@ -386,6 +397,7 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='dbonus'){if(!S.daily.bonus){S.daily.bonus=true;grantChest('daily');updateDots();renderSheet(true);}}
   else if(a==='aclaim'){const ac=ACH.find(x=>x.id===p1);if(S.ach[p1]==='done'){S.ach[p1]='claimed';S.gems+=ac.g;let msg='+'+ac.g+' joias';if(ac.cos&&!S.cos.own.includes(ac.cos)){S.cos.own.push(ac.cos);msg+=' + '+COS.find(x=>x.id===ac.cos).n;}sfx('chest');toast(msg,'p');updateDots();renderSheet(true);}}
   else if(a==='mclaim'){const m=METAS.find(x=>x.id===p1);if(m&&!S.metas[p1]){const [x,y]=m.p();if(x>=y){S.metas[p1]=1;giveReward(m.r,m.n);updateDots();renderSheet(true);}}}
+  else if(a==='gclaim'){const g=GUIDE.find(x=>x.id===p1);if(g&&!S.metas['gd_'+p1]&&g.c()){S.metas['gd_'+p1]=1;giveReward(g.g,g.n);updateDots();renderSheet(true);}}
   else if(a==='sclaim')claimStory(p1);else if(a==='cclaim')claimCtx(p1);
   else if(a==='dgoal'){const g=DGOAL[+p1];const [x,y]=g.p(+p1);if(x>=y&&!S.dgoal[p1]){S.dgoal[p1]=1;S.gems+=20;dirty=true;showBanner('Meta concluída!',DIST[p1].n);screenConfetti(60);sfx('unlock');renderSheet(true);}}
   else if(a==='road'){const d=+p1;const i=ROADS.findIndex(r=>r.id===(S.road[d]||'asfalto'));const n=ROADS[i+1];if(n&&spend(n.cost)){S.road[d]=n.id;groundDirty=true;dirty=true;sfx('up');toast('Ruas de '+DIST[d].n+': '+n.n,'g');updateDev();renderSheet(true);}else sfx('err');}
@@ -414,7 +426,7 @@ $('#homeBtn').addEventListener('click',()=>{audioInit();sfx('click');goHome();})
 $('#zIn').addEventListener('click',()=>{cam.tz=clamp((cam.tz||cam.z)*1.2,.4,2.4);sfx('click');});
 $('#zOut').addEventListener('click',()=>{cam.tz=clamp((cam.tz||cam.z)/1.2,.4,2.4);sfx('click');});
 $('#chestBtn').addEventListener('click',()=>{audioInit();if(S.chestT<=0){S.chestT=240;grantChest('free');}else{sfx('click');toast('Baú grátis em '+fmtTime(S.chestT));}});
-function updateDots(){let n=0;if(S.daily){for(const m of S.daily.list)if(m.done&&!m.claimed)n++;if(S.daily.list.every(m=>m.claimed)&&!S.daily.bonus)n++;}for(const a of ACH)if(S.ach[a.id]==='done')n++;
+function updateDots(){let n=0;if(guideClaimable())n++;if(S.daily){for(const m of S.daily.list)if(m.done&&!m.claimed)n++;if(S.daily.list.every(m=>m.claimed)&&!S.daily.bonus)n++;}for(const a of ACH)if(S.ach[a.id]==='done')n++;
   for(const m of METAS)if(!S.metas[m.id]){const [a,b]=m.p();if(a>=b)n++;}for(const ch in CHARS){if(charUnlocked(ch)&&stepDone(stepOf(ch)))n++;if(S.ctx[ch]&&S.ctx[ch].done)n++;}
   setDot('#nb-missions',n);let t=0;for(const x of TECH)if(!tk(x.id)&&x.req.every(r=>tk(r))&&S.rp>=x.cost&&(!x.cry||S.crys>=x.cry))t++;setDot('#nb-research',t);
   setDot('#nb-more',essGain()>=1?'!':0,'#8e5cff');}
@@ -482,5 +494,5 @@ function tutRender(){const c=$('#coach');document.querySelectorAll('.hl').forEac
   const [t,m]=TUT[S.tut];c.hidden=false;c.innerHTML=portrait('lucia')+`<div class="bub"><small style="color:${CHARS.lucia.col}">Prefeita Lúcia</small><b class="t">${t}</b>${m}<div class="row2">${S.tut===3?'<button class="btn" id="tutOk">Vamos lá! +10 joias</button>':'<button class="skip" id="tutSkip">Pular tutorial</button>'}</div></div>`;
   if(S.tut===1)$('#nb-build').classList.add('hl');
   if(S.tut===0){const h=S.buildings.find(b=>b.t==='casa');if(h)h.bub=Math.max(h.bub||0,20);}
-  const ok=$('#tutOk');if(ok)ok.onclick=()=>{S.tut=4;S.gems+=10;sfx('chest');toast('+10 joias','p');c.hidden=true;save();setTimeout(()=>{const s=stepOf('lucia');if(s)say('lucia','Primeiro desafio: <b>'+s.t+'</b>. '+s.d,9,['Ver missões',()=>openSheet('missions','req')]);},800);};
-  const sk=$('#tutSkip');if(sk)sk.onclick=()=>{S.tut=4;c.hidden=true;save();};}
+  const ok=$('#tutOk');if(ok)ok.onclick=()=>{S.tut=4;S.gems+=10;sfx('chest');toast('+10 joias','p');c.hidden=true;save();setTimeout(()=>{say('lucia','Criei um Guia com os primeiros passos pra você não se perder. Dá uma olhada!',8,['Ver guia',()=>openSheet('missions','guide')]);},800);};
+  const sk=$('#tutSkip');if(sk)sk.onclick=()=>{S.tut=4;c.hidden=true;save();openSheet('missions','guide');};}

@@ -26,12 +26,14 @@ function nonPref(){return S.buildings.filter(b=>b.t!=='pref'&&b.t!=='prj'&&TYPES
 function isReady(b){return !(b.ready>Date.now());}
 function tk(id){return !!S.tech[id];}
 function prjDone(id){return !!(S.prj[id]&&S.prj[id].s>=3);}
-function distOf(x,y){if(x<0||y<0||x>=WT-1||y>=HT-1)return -1;const gx=Math.floor(x/DS),gy=Math.floor(y/DS);const d=gy*GXN+gx;return d<=11?d:-1;}
+function distOf(x,y){if(x<0||y<0||x>=WT-1||y>=HT-1)return -1;const gx=Math.floor(x/DS),gy=Math.floor(y/DS);const d=gy*GXN+gx;return d<=15?d:-1;}
+function map1Done(){for(let d=0;d<=9;d++){if(!S.unlocked.includes(d))return false;const p=plotsOf(d);if(!p.every(([x,y])=>occ.has(x+','+y)))return false;}return true;}
+function map2Done(){for(let d=12;d<=15;d++){if(!S.unlocked.includes(d))return false;const p=plotsOf(d);if(!p.every(([x,y])=>occ.has(x+','+y)))return false;}return true;}
 function isRoad(x,y){return x>=0&&y>=0&&x<WT&&y<HT&&(x%DS===0||y%DS===0);}
 function plotsOf(d){const gx=d%GXN,gy=Math.floor(d/GXN),out=[];for(let j=1;j<DS;j++)for(let i=1;i<DS;i++){const x=gx*DS+i,y=gy*DS+j;if(d===0&&RESERVED[x+','+y])continue;out.push([x,y]);}return out;}
 const occ=new Map();
 function rebuildOcc(){occ.clear();for(const b of S.buildings)occ.set(b.x+','+b.y,b);}
-function plotFree(x,y){const d=distOf(x,y);if(d<0||d>10||!S.unlocked.includes(d)||isRoad(x,y))return false;if(d===0&&RESERVED[x+','+y])return false;return !occ.has(x+','+y);}
+function plotFree(x,y){const d=distOf(x,y);if(d<0||d>15||d===11||!S.unlocked.includes(d)||isRoad(x,y))return false;if(d===0&&RESERVED[x+','+y])return false;return !occ.has(x+','+y);}
 function completedCount(){let c=0;for(const d of S.unlocked){const p=plotsOf(d);if(p.every(([x,y])=>occ.has(x+','+y)))c++;}return c;}
 function countType(t){let c=0;for(const b of S.buildings)if(b.t===t)c++;return c;}
 function countTagReady(tg){let c=0;for(const b of S.buildings)if(isReady(b)&&TYPES[b.t].tags.includes(tg))c++;return c;}
@@ -60,10 +62,10 @@ function recalc(){
   const now=Date.now();S.mods=S.mods.filter(m=>m.perm||m.until>now);
   const M={inc:1,tour:1,rp:1,happy:0,pow:1,cons:1,traffic:1,pop:1,cat:{},dist:{}};
   for(const m of S.mods){if(m.k==='cat')M.cat[m.c]=(M.cat[m.c]||1)*m.v;else if(m.k==='dist')M.dist[m.d]=(M.dist[m.d]||1)*m.v;else if(m.k==='happy')M.happy+=m.v;else if(M[m.k]!==undefined)M[m.k]*=m.v;}
-  const ready=[];const dc=[];for(let d=0;d<12;d++)dc.push({_n:0});
+  const ready=[];const dc=[];for(let d=0;d<16;d++)dc.push({_n:0});
   for(const b of S.buildings){if(b.ready>now||b.t==='prj')continue;const d=distOf(b.x,b.y);if(d<0)continue;ready.push(b);const t=TYPES[b.t];for(const tg of t.tags)dc[d][tg]=(dc[d][tg]||0)+1;if(t.cat!=='deco')dc[d]._n++;}
   C.dc=dc;C.cx={};let verde=0,civico=false;
-  for(let d=0;d<=10;d++){for(const cp of CPLX){if(cp.need.every(([tg,n])=>(dc[d][tg]||0)>=n)){(C.cx[d]=C.cx[d]||[]).push(cp.id);if(cp.id==='verde')verde++;if(cp.id==='civico')civico=true;const key=d+':'+cp.id;if(!S.cxSeen[key]){S.cxSeen[key]=1;setTimeout(()=>newComplex(cp,d),50);}}}}
+  for(let d=0;d<=15;d++){if(d===11)continue;for(const cp of CPLX){if(cp.need.every(([tg,n])=>(dc[d][tg]||0)>=n)){(C.cx[d]=C.cx[d]||[]).push(cp.id);if(cp.id==='verde')verde++;if(cp.id==='civico')civico=true;const key=d+':'+cp.id;if(!S.cxSeen[key]){S.cxSeen[key]=1;setTimeout(()=>newComplex(cp,d),50);}}}}
   const hasCx=(d,id)=>!!(C.cx[d]&&C.cx[d].includes(id));
   for(const b of ready)b._s=synAt(b.t,b.x,b.y,b.id);
   let H=0,J=0,pwP=0,pwC=0,goods=0,gd=0,cust=0,hp=0,tour=0,edu=0,health=0,safe=0,trans=0,rp=0,pol=0,hotel=0,logi=0,green=0,up=0,crys=0,transit=0;
@@ -84,7 +86,7 @@ function recalc(){
     if(f.pol){let v=f.pol*s;if(t.tags.includes('power')&&tk('ene3'))v*=.4;if(t.cat==='ind'&&tk('ind4'))v*=.5;if(d===2)v*=.5;pol+=v;}
     if(f.hotel)hotel+=f.hotel*s*(tk('tur3')?1.5:1);
     if(f.logi)logi+=f.logi*s;if(f.green)green+=f.green*s*(tk('amb3')?1.5:1);if(f.up)up+=f.up*s;
-    if(b.t==='mina')crys+=0.004*Math.sqrt(s);}
+    if(b.t==='mina')crys+=0.004*Math.sqrt(s)*(d===14?2:1);}
   hp+=3;let roadHappy=0,roadTour=0;for(const d of S.unlocked){const r=ROADS.find(x=>x.id===(S.road[d]||'asfalto'));if(r){roadHappy+=r.happy;roadTour+=r.tour||0;}}
   tour+=roadTour;roadHappy=Math.min(8,roadHappy);
   if(prjDone('fusao')){pwP+=100000;pol*=.2;}
@@ -130,6 +132,10 @@ function recalc(){
     if(S.dgoal[d]){m*=1.25;why.push(['Meta do bairro concluída',1.25]);}
     if(S.dmg[d]>now){m*=.7;why.push(['Estragos da tempestade',.7]);}
     if(d===7&&d7n>1){const a=1+Math.min(.5,.02*(d7n-1));m*=a;why.push(['Aglomeração financeira',a]);}
+    if(d===12&&(t.cat==='res'||t.cat==='nat')){m*=1.4;why.push(['Vale Aurora',1.4]);}
+    if(d===13&&(t.cat==='tech'||t.tags.includes('attraction'))){m*=2;why.push(['Porto das Estrelas',2]);}
+    if(d===14&&t.cat==='ind'){m*=1.5;why.push(['Deserto de Cristal',1.5]);}
+    if(d===15){m*=1.25;why.push(['Trono dos Fundadores',1.25]);}
     if(b.skin){m*=1.1;why.push(['Estilo '+SKINS[b.skin].n,1.1]);}
     if(M.cat[t.cat]){m*=M.cat[t.cat];why.push(['Evento',M.cat[t.cat]]);}if(M.dist[d]){m*=M.dist[d];why.push(['Evento no bairro',M.dist[d]]);}
     b._inc=base*m;b._why=why;rev+=b._inc;if(ev&&ev.k==='golden'&&ev.bid===b.id)goldX+=b._inc*6;}
@@ -274,9 +280,11 @@ function upgrade(b,n){
   if(S.tut===2){S.tut=3;tutRender();}refreshPanel();checkAch();}
 function demolish(id){const b=S.buildings.find(x=>x.id===id);if(!b||b.t==='pref'||b.t==='prj')return;S.buildings=S.buildings.filter(x=>x.id!==id);rebuildOcc();dirty=true;sfx('build');closeSheet();toast('Construção removida');save();}
 let unlockAnim=null;
-function unlockDistrict(d){const D=DIST[d];if(S.unlocked.includes(d))return;
+function unlockDistrict(d){const D=DIST[d];if(!D||S.unlocked.includes(d))return;
   if(D.ess&&S.ess<D.ess){sfx('err');return;}if(pref().lvl<D.pref){sfx('err');toast('A Prefeitura precisa do nível '+D.pref,'r');return;}
   if(d>0&&d<10&&!S.unlocked.includes(d-1)){sfx('err');toast('Desbloqueie o bairro anterior primeiro','r');return;}
+  if(d===12&&!map1Done()){sfx('err');toast('Complete todos os bairros do Mapa 1 antes de expandir','r');return;}
+  if(d>12&&d<=15&&!S.unlocked.includes(d-1)){sfx('err');toast('Desbloqueie o bairro anterior primeiro','r');return;}
   if(!spend(D.cost)){sfx('err');toast('Moedas insuficientes','r');return;}
   S.unlocked.push(d);groundDirty=true;syncAgents(true);dirty=true;closeSheet();updateDev();
   const gx=d%GXN,gy=Math.floor(d/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);cam.tx=wx;cam.ty=wy-10;cam.tz=1.35;
@@ -320,7 +328,7 @@ function startStage(id){const p=PRJM[id],st=prjState(id);if(st.s>=3||prjBusy(id)
   b.ready=Date.now()+tt*1000;b.bt0=tt;b._wasBusy=true;const [wx,wy]=bWorld(b);camTo(wx,wy-20);burst(wx,wy-10,22);sfx('build');toast('Obra iniciada: '+g.n,'g');dirty=true;refreshPanel();save();}
 
 /* ---------- prestígio ---------- */
-function essGain(){if(S.run<1e7)return 0;return Math.floor(3*Math.sqrt(S.run/1e7));}
+function essGain(){if(!map1Done()||!map2Done())return 0;if(S.run<1e7)return 0;return Math.floor(3*Math.sqrt(S.run/1e7));}
 function doPrestige(){const g=essGain();if(g<1)return;S.ess+=g;S.cnt.pres++;
   S.coins=S.ess>=3?5000:100;initCity(S);S.unlocked=[0];S.cu={};if(S.ess>=35)S.cu.robo=1;S.run=0;S.instUntil=0;S.doneD=[];S.pop=0;S.happy=55;S.prj={};S.mods=[];S.dmg={};S.road={};S.dgoal={};S.dbonus={};S.ctx={};S.rank=0;
   ev=null;sev=null;renderEvBar();worldCoins=[];superChest=null;rebuildOcc();groundDirty=true;syncAgents(true);dirty=true;closeSheet();C.devL=[];updateDev(true);
@@ -363,6 +371,18 @@ const ACH=[
  {id:'leg',n:'Maravilha',d:'Construa uma construção Lendária',c:()=>S.buildings.some(b=>TYPES[b.t].cat==='leg'),g:60},
  {id:'dec20',n:'Paisagista',d:'Coloque 20 decorações',c:()=>S.cnt.deco>=20,g:15},
 ];
+/* ---------- guia inicial (pós-tutorial) ---------- */
+const GUIDE=[
+ {id:'g1',n:'Construa 5 prédios',d:'Toque em Construir e escolha onde crescer.',c:()=>nonPref()>=5,g:{cs:8,gems:5}},
+ {id:'g2',n:'Melhore um prédio até o nível 5',d:'Toque num prédio e use Melhorar para ele render mais.',c:()=>S.maxLv>=5,g:{cs:10,gems:5}},
+ {id:'g3',n:'Colete 10 bolhas de moedas',d:'Toque nas bolhas douradas que aparecem sobre os prédios.',c:()=>S.cnt.bub>=10,g:{gems:6}},
+ {id:'g4',n:'Desbloqueie o Centro Comercial',d:'Abra Bairros e compre o 2º bairro quando puder.',c:()=>S.unlocked.includes(1),g:{gems:10,rp:50}},
+ {id:'g5',n:'Conclua sua 1ª pesquisa',d:'Abra Pesquisa e estude a primeira tecnologia disponível.',g:{gems:8},c:()=>Object.keys(S.tech).length>=1},
+ {id:'g6',n:'Complete 1 missão diária',d:'Veja Missões → Diárias e cumpra qualquer uma delas.',c:()=>S.daily&&S.daily.list.some(m=>m.done),g:{gems:8}},
+ {id:'g7',n:'Coloque uma decoração',d:'Decorações dão felicidade — procure na categoria Decoração.',c:()=>S.cnt.deco>=1,g:{gems:6}},
+ {id:'g8',n:'Complete o primeiro bairro',d:'Ocupe todos os terrenos do Centro Histórico.',c:()=>completedCount()>=1,g:{gems:20,crys:1}},
+];
+function guideClaimable(){return GUIDE.some(g=>g.c()&&!S.metas['gd_'+g.id]);}
 const METAS=[
  ...[[1000,10],[10000,20],[100000,40],[1e6,80],[1e7,150]].map(([n,g])=>({id:'mp'+n,grp:'População',n:fmt(n)+' habitantes',p:()=>[S.pop,n],r:{gems:g,rp:n/100}})),
  ...[[60,10],[75,20],[90,40]].map(([n,g])=>({id:'mh'+n,grp:'Felicidade',n:'Felicidade de '+n+'%',p:()=>[S.happy,n],r:{gems:g}})),

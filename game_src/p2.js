@@ -45,7 +45,7 @@ const SKINS={
 /* =====================================================================
    MUNDO
    ===================================================================== */
-const HW=32,HH=16,DS=6,GXN=4,GYN=3,WT=GXN*DS+1,HT=GYN*DS+1;
+const HW=32,HH=16,DS=6,GXN=4,GYN=4,WT=GXN*DS+1,HT=GYN*DS+1;
 const DEV=[['Abandonado','#9a8f86',0.85],['Emergente','#7fbf6a',1],['Desenvolvido','#2fd08a',1.1],['Sofisticado','#38b6ff',1.25],['Extraordinário','#ffb703',1.5]];
 const DIST=[
  {n:'Centro Histórico',cost:0,pref:1,g:'#8fd65a',deco:'round',acc:'#ff8fab',mech:'Patrimônio: monumentos e decorações dão turismo em dobro aqui.',ex:'Torre do Relógio e Museu',ch:'lucia'},
@@ -60,6 +60,12 @@ const DIST=[
  {n:'Capital Cósmica',cost:2.5e15,pref:28,g:'#30286a',deco:'star',acc:'#ffd166',mech:'Maravilhas: construções lendárias rendem +50% aqui.',ex:'Cidade Suspensa e Portal Cósmico',ch:'faisca'},
  {n:'Reino da Essência',cost:1e9,pref:10,ess:25,g:'#cbb0ff',deco:'crystal',acc:'#b388ff',mech:'Região secreta do prestígio. Monumentos 2× aqui.',ex:'Monumento da Essência',ch:'iris'},
 ];
+/* Mapa 2 — só se desbloqueia depois que TODOS os bairros 1–10 do Mapa 1 estiverem completos.
+   Fica reservado como o próximo desafio antes do Renascimento, pra ninguém zerar o jogo rápido demais. */
+DIST[12]={n:'Vale Aurora',cost:1e17,pref:32,g:'#6fe3c0',deco:'pine',acc:'#2ee6b8',mech:'Terra renascida: casas e natureza rendem +40% aqui.',ex:'Cachoeira Viva e Jardim Suspenso',ch:'iris'};
+DIST[13]={n:'Porto das Estrelas',cost:5e18,pref:36,g:'#5a6fd8',deco:'holo',acc:'#8fa6ff',mech:'Portal interdimensional: turismo e tecnologia rendem o dobro aqui.',ex:'Plataforma Orbital e Farol Estelar',ch:'faisca'};
+DIST[14]={n:'Deserto de Cristal',cost:2e20,pref:40,g:'#e0b96a',deco:'crystal',acc:'#ffd166',mech:'Minas raras: indústria rende +50% e produz o dobro de Cristais aqui.',ex:'Mina Celestial e Refinaria Prisma',ch:'zeca'};
+DIST[15]={n:'Trono dos Fundadores',cost:8e21,pref:45,g:'#4a2f86',deco:'star',acc:'#ffd700',mech:'A capital definitiva da sua cidade. Tudo aqui rende +25%.',ex:'Grande Trono e Estátua dos Fundadores',ch:'lucia'};
 const RANKS=[[0,'Vila'],[100,'Vilarejo'],[600,'Cidade'],[3000,'Cidade Grande'],[15000,'Metrópole'],[80000,'Megalópole'],[500000,'Capital Cósmica']];
 const RANK_UNLOCK=['Casas, comércio, natureza e decoração','Indústria, energia, escolas e pesquisa','Serviços, hospitais e entretenimento','Turismo, tecnologia e projetos municipais','Extravagâncias e monumentos','Construções lendárias','Arquitetura impossível'];
 

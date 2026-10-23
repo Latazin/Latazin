@@ -258,7 +258,7 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 .rar-comum{color:#4d8f5c}.rar-incomum{color:#2a9a5f}.rar-raro{color:#2f7fd6}.rar-épico{color:#8e3fd8}.rar-lendário{color:#d98a00}
 
 /* coach / personagens */
-#coach{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:7;display:flex;gap:10px;align-items:flex-end;pointer-events:none}
+#coach{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:calc(64px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:7;display:flex;gap:10px;align-items:flex-end;pointer-events:none}
 #coach .por{width:62px;height:62px;border-radius:20px;pointer-events:auto;animation:bob 2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-4px)}}
 #coach .bub{flex:1;min-width:0;background:#fff;border-radius:18px 18px 18px 4px;padding:10px 12px;box-shadow:0 4px 0 var(--line),0 10px 24px rgba(43,35,80,.2);font-weight:800;font-size:13.5px;line-height:1.4;pointer-events:auto;animation:cardIn .4s cubic-bezier(.3,1.5,.5,1)}
@@ -267,7 +267,7 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 #coach .row2{display:flex;gap:8px;margin-top:6px;justify-content:flex-end;align-items:center}
 #coach .skip{border:none;background:none;font-weight:800;color:var(--ink-soft);font-size:12px;text-decoration:underline}
 
-#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(98px + env(safe-area-inset-top,0px));z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(340px,calc(100% - 32px))}
+#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(156px + env(safe-area-inset-top,0px));z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(340px,calc(100% - 32px))}
 .toast{background:var(--ink);color:#fff;border-radius:14px;padding:8px 14px;font-weight:800;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:toast 2.6s forwards;text-align:center}
 .toast.g{background:var(--mint-d)}.toast.p{background:var(--grape-d)}.toast.r{background:var(--coral-d)}
 @keyframes toast{0%{transform:translateY(-12px) scale(.9);opacity:0}10%,80%{transform:none;opacity:1}100%{opacity:0;transform:translateY(-8px)}}
