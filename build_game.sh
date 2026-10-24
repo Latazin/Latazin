@@ -19,6 +19,7 @@ fonts=('<style>\n'
 title=re.search(r'<title>.*?</title>\n',src).group(0)
 body=src.replace(title,'')
 js=''.join(open('game_src/'+f).read() for f in ['p2.js','p3.js','p4.js','p5.js','p6.js'])
+js=js.replace('__GAME_VER__',open(os.path.join(os.path.dirname(sys.argv[1]),'version.txt')).read().strip())
 doc=('<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n'
  '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">\n'
  +title+fonts+'</head>\n<body>\n'+body+'<script>\n(()=>{\'use strict\';\n'+js+'})();\n</script>\n</body>\n</html>\n')

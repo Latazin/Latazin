@@ -516,6 +516,10 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 #banner h1{text-shadow:var(--o3),0 8px 0 rgba(0,0,0,.18)}
 #coach .bub{border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink),0 12px 24px rgba(30,20,70,.25)}
 #coach .por{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+#updBar{position:fixed;left:50%;top:calc(120px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;width:min(340px,calc(100% - 32px));box-sizing:border-box;padding:14px 16px 16px;border-radius:22px;border:4px solid #2b2350;background:linear-gradient(180deg,#a77bff,#6a38e0);box-shadow:0 6px 0 #2b2350,0 18px 40px rgba(0,0,0,.35),inset 0 3px 0 rgba(255,255,255,.3);text-align:center;animation:cardIn .45s cubic-bezier(.3,1.5,.5,1)}
+#updBar .ub-t{font-family:var(--display);font-size:24px;color:#fff;text-shadow:var(--o3)}
+#updBar .ub-s{font-weight:800;font-size:13px;color:#efe7ff;margin:4px 0 12px}
+#updBar .btn{width:100%;justify-content:center}
 </style>
 
 <div id="app">
@@ -3163,7 +3167,22 @@ function offlineGain(sec,initial){sec=clamp(sec,0,offCap());if(sec<30)return;rec
     daily=`<div class="sec" style="margin-top:2px">Sequência diária · dia ${S.streak.n} de 7</div><div style="display:flex;gap:4px;margin:2px 2px 4px">${dots}</div><div class="kv"><span>${bigDay?'Semana completa!':'Bônus de hoje'}</span><b>+${g}${bigDay?' joias + 1 Cristal':' joias'}</b></div>`;if(bigDay)S.crys+=1;}
   openModal(`<h2>Bem-vindo de volta!</h2><p>Você ficou fora por <b>${fmtTime(sec)}</b>. A cidade continuou trabalhando:</p><div class="big-num"><i class="ico coin"></i>+${fmt(v)}</div>${rp>=1?`<div class="kv"><span>Pesquisa acumulada</span><b>+${fmt(rp)}</b></div>`:''}${daily}<p class="note" style="text-align:center">Renda offline: ${Math.round(offRate()*100)}% da produção, até ${offCap()/3600}h.</p><button class="btn big" data-m="close">Continuar</button>`);
   sfx('chest');if(bigDay){screenConfetti(100);sfx('unlock');}save();}
-function boot(){resize();const src=load();afterLoad();
+/* ---------- atualização pelo próprio jogo (funciona mesmo quando o app volta do segundo plano) ---------- */
+const GAME_VER=parseInt('19')||0,UPD_BASE='https://raw.githubusercontent.com/Latazin/Latazin/cartoon-city-app/assets/game/';
+let updChecked=0,updBusy=false;
+async function checkWebUpdate(force){if(!NATIVE||!GAME_VER||updBusy)return;const now=Date.now();if(!force&&now-updChecked<5*60000)return;updChecked=now;
+  try{const r=await fetch(UPD_BASE+'version.txt?t='+now,{cache:'no-store'});const v=parseInt((await r.text()).trim());if(v>GAME_VER)showUpdateBar(v);}catch(e){}}
+function showUpdateBar(v){if(document.getElementById('updBar'))return;const d=document.createElement('div');d.id='updBar';
+  d.innerHTML='<div class="ub-t">Nova versão do jogo!</div><div class="ub-s">Melhorias e novidades prontas pra você</div><button class="btn y big" id="updGo">ATUALIZAR AGORA</button>';
+  document.body.appendChild(d);sfx('unlock');
+  document.getElementById('updGo').onclick=async()=>{if(updBusy)return;updBusy=true;const b=document.getElementById('updGo');b.textContent='Baixando...';b.disabled=true;
+    try{save();const r=await fetch(UPD_BASE+'index.html?t='+Date.now(),{cache:'no-store'});const h=await r.text();
+      if(h.length<100000||h.indexOf('__ccRestore')<0)throw 0;
+      try{window.__ccSave&&window.__ccSave();}catch(e){}
+      setTimeout(()=>{document.open();document.write(h);document.close();},400);}
+    catch(e){updBusy=false;b.disabled=false;b.textContent='Tentar de novo';}};}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkWebUpdate(false);});
+function boot(){setTimeout(()=>checkWebUpdate(true),6000);resize();const src=load();afterLoad();
   if(src){const away=(Date.now()-(S.last||Date.now()))/1000;if(away>30)offlineGain(away,true);else{const d=today();if(S.streak.day!==d){S.streak.day=d;S.streak.n=1;S.gems+=6;toast('Bônus diário: +6 joias','p');}}}
   else{S.streak.day=today();S.streak.n=1;}
   if(src===BACK_KEY)toast('Progresso recuperado do backup','g');ensureDaily();updHUD();

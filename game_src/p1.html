@@ -507,6 +507,10 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
 #banner h1{text-shadow:var(--o3),0 8px 0 rgba(0,0,0,.18)}
 #coach .bub{border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink),0 12px 24px rgba(30,20,70,.25)}
 #coach .por{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+#updBar{position:fixed;left:50%;top:calc(120px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;width:min(340px,calc(100% - 32px));box-sizing:border-box;padding:14px 16px 16px;border-radius:22px;border:4px solid #2b2350;background:linear-gradient(180deg,#a77bff,#6a38e0);box-shadow:0 6px 0 #2b2350,0 18px 40px rgba(0,0,0,.35),inset 0 3px 0 rgba(255,255,255,.3);text-align:center;animation:cardIn .45s cubic-bezier(.3,1.5,.5,1)}
+#updBar .ub-t{font-family:var(--display);font-size:24px;color:#fff;text-shadow:var(--o3)}
+#updBar .ub-s{font-weight:800;font-size:13px;color:#efe7ff;margin:4px 0 12px}
+#updBar .btn{width:100%;justify-content:center}
 </style>
 
 <div id="app">
