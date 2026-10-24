@@ -357,7 +357,7 @@ button:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
 .qcard .acts{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
 
 /* modal */
-#modal{position:absolute;inset:0;z-index:20;background:rgba(32,24,72,.5);display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));backdrop-filter:blur(2px)}
+#modal{position:absolute;inset:0;z-index:20;background:rgba(32,24,72,.5);display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:rgba(32,24,72,.62)}
 #modal .card{width:min(390px,100%);box-sizing:border-box;max-height:84vh;overflow-y:auto;background:var(--cream);border-radius:28px;border:3px solid #fff;box-shadow:0 8px 0 var(--line),0 20px 50px rgba(0,0,0,.3);padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:cardIn .4s cubic-bezier(.3,1.5,.5,1);touch-action:pan-y}
 @keyframes cardIn{from{transform:scale(.7);opacity:0}}
 #modal h2{margin:0;font-family:var(--display);font-weight:400;font-size:26px;text-align:center;text-wrap:balance}
@@ -418,6 +418,95 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
   #coach{right:auto;width:460px;bottom:96px}
   #heatChip{bottom:96px}
 }
+
+/* ================= TEMA v2 — visual de jogo (contorno, volume e brilho) ================= */
+:root{--o2:0 2px 0 #2b2350,1.5px 1.5px 0 #2b2350,-1.5px 1.5px 0 #2b2350,1.5px -1.5px 0 #2b2350,-1.5px -1.5px 0 #2b2350,0 -1.5px 0 #2b2350,1.5px 0 0 #2b2350,-1.5px 0 0 #2b2350;
+  --o3:0 3px 0 #2b2350,2px 2px 0 #2b2350,-2px 2px 0 #2b2350,2px -2px 0 #2b2350,-2px -2px 0 #2b2350,0 -2px 0 #2b2350,2px 0 0 #2b2350,-2px 0 0 #2b2350;
+  --navy1:#5546a6;--navy2:#2f2470;--gloss:inset 0 3px 0 rgba(255,255,255,.45),inset 0 -4px 0 rgba(0,0,0,.14)}
+/* HUD topo */
+.pill{background:linear-gradient(180deg,var(--navy1),var(--navy2));border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),0 8px 16px rgba(30,20,70,.25),inset 0 2px 0 rgba(255,255,255,.22);padding:3px 14px 3px 3px}
+.pill b{font-family:var(--display);font-weight:400;font-size:21px;color:#fff;text-shadow:var(--o2);letter-spacing:.5px}
+.pill small{color:#7dffb2;text-shadow:0 1px 0 var(--ink);font-size:11.5px}
+.pill small.neg{color:#ffb3b3}
+.ico.coin{width:34px;height:34px;box-shadow:inset 0 -3px 0 #c98400,0 0 0 3px var(--ink)}
+.ico.gem{box-shadow:0 0 0 3px var(--ink),inset -3px -3px 0 rgba(0,0,0,.15)}
+.icon-btn{width:44px;height:44px;border-radius:15px;border:3px solid var(--ink);background:linear-gradient(180deg,#ffffff,#e6dcff);box-shadow:0 4px 0 var(--ink),0 8px 14px rgba(30,20,70,.2),var(--gloss)}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink),var(--gloss)}
+.icon-btn svg{width:24px;height:24px}
+#zoomBtns .icon-btn{font-size:24px;color:var(--ink)}
+#strip{gap:6px;padding-bottom:6px}
+#strip button{border:2.5px solid var(--ink);background:linear-gradient(180deg,var(--navy1),var(--navy2));color:#fff;border-radius:12px;padding:2px 9px 2px 5px;font-family:var(--display);font-weight:400;font-size:13px;text-shadow:0 1px 0 var(--ink);box-shadow:0 3px 0 var(--ink),inset 0 2px 0 rgba(255,255,255,.18)}
+#strip button.rank{background:linear-gradient(180deg,#c3a2ff,#7a4cf0);color:#fff;text-shadow:var(--o2)}
+#strip button.wr{background:linear-gradient(180deg,#ffe680,#ffb703);color:#fff;text-shadow:var(--o2)}
+#strip button.wr svg{width:20px;height:20px}
+#strip button.warn{background:linear-gradient(180deg,#ff8a8a,#e03d52);color:#fff}
+#strip svg{filter:drop-shadow(0 1px 0 rgba(0,0,0,.3))}
+#rankChip{flex:none;display:flex;align-items:center;gap:4px;height:40px;padding:0 11px 0 6px;border-radius:14px;border:3px solid var(--ink);background:linear-gradient(180deg,#ffe066,#ffb703);box-shadow:0 4px 0 var(--ink),var(--gloss);font-family:var(--display);font-size:18px;color:#fff;text-shadow:var(--o2)}
+#rankChip svg{width:26px;height:26px}
+#rankChip:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+/* botões laterais */
+.side-btn{width:54px;border-radius:16px;border:3px solid var(--ink);background:linear-gradient(180deg,#ffffff,#e6dcff);box-shadow:0 4px 0 var(--ink),0 8px 14px rgba(30,20,70,.22),var(--gloss);padding:4px 2px 13px;gap:0}
+.side-btn svg.sb{width:38px;height:38px;filter:drop-shadow(0 2px 0 rgba(43,35,80,.25))}
+.side-btn span{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);min-width:40px;padding:1px 6px 2px;border-radius:9px;border:2.5px solid var(--ink);background:var(--navy2);color:#fff;font-family:var(--display);font-weight:400;font-size:11.5px;text-shadow:0 1px 0 var(--ink);white-space:nowrap}
+#side{gap:16px}
+#chestBtn{background:linear-gradient(180deg,#ffd9a0,#ffa94d)}
+#slotBtn{background:linear-gradient(180deg,#d9c6ff,#9d73ff)}
+#wheelBtn{background:linear-gradient(180deg,#ffc2d6,#ff6f9c)}
+#carBtn{background:linear-gradient(180deg,#b6f3ff,#38c6ff)}
+.side-btn.ready span{background:linear-gradient(180deg,#ff6b5e,#c21f3a)}
+/* barra inferior */
+#nav{background:linear-gradient(180deg,var(--navy1),var(--navy2));border-top:4px solid var(--ink);box-shadow:0 -6px 18px rgba(30,20,70,.25),inset 0 3px 0 rgba(255,255,255,.16);padding-top:6px;gap:2px}
+#nav button{border:none;background:none;box-shadow:none;border-radius:16px;padding:4px 0 3px;transition:transform .15s}
+#nav button svg{width:30px;height:30px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+#nav button span{font-family:var(--display);font-size:11px;color:#fff;text-shadow:var(--o2);letter-spacing:.2px}
+#nav button.on{background:linear-gradient(180deg,#ffe066,#ffb703);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),var(--gloss);transform:translateY(-8px)}
+#nav button:active{transform:translateY(2px)}
+#nav .dot{border:2.5px solid var(--ink);background:linear-gradient(180deg,#ff8a8a,#e03d52);font-family:var(--display);font-weight:400;top:-6px;right:0}
+@media (min-width:760px){#nav{border:4px solid var(--ink);border-radius:24px;bottom:10px;box-shadow:0 6px 0 var(--ink),0 14px 28px rgba(30,20,70,.3);background:linear-gradient(180deg,var(--navy1),var(--navy2))}}
+/* painel inferior */
+#sheet{background:linear-gradient(180deg,#fff9ee,#f6ead3);border:4px solid var(--ink);border-bottom:none;box-shadow:0 -6px 0 rgba(43,35,80,.25),0 -14px 34px rgba(30,20,70,.3)}
+#sheet header{background:linear-gradient(180deg,#a77bff,#6a38e0);border-bottom:4px solid var(--ink);border-radius:22px 22px 0 0;padding-top:14px;padding-bottom:10px;box-shadow:inset 0 3px 0 rgba(255,255,255,.3)}
+#sheet h2{color:#fff;text-shadow:var(--o3);font-size:27px}
+#sheet .grip{background:rgba(255,255,255,.55);top:5px;z-index:2}
+#tabs{padding-top:10px;gap:7px}
+#tabs button{border:2.5px solid var(--ink);background:#fff;color:var(--ink);font-size:14px;box-shadow:0 3px 0 var(--ink);padding:6px 13px}
+#tabs button.on{background:linear-gradient(180deg,#ffe066,#ffb703);color:#fff;text-shadow:var(--o2);box-shadow:0 3px 0 var(--ink),var(--gloss)}
+.x-btn{width:42px;height:42px;border-radius:14px;border:3px solid var(--ink);background:linear-gradient(180deg,#ff8a8a,#e03d52);box-shadow:0 4px 0 var(--ink),var(--gloss);font-size:0;display:grid;place-items:center;padding:0}
+.x-btn::before{content:'';width:18px;height:18px;background:linear-gradient(45deg,transparent 40%,#fff 40%,#fff 60%,transparent 60%),linear-gradient(-45deg,transparent 40%,#fff 40%,#fff 60%,transparent 60%);filter:drop-shadow(0 1px 0 var(--ink))}
+.x-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+/* cartões */
+.row,.qcard,.card2,.tile{border:2.5px solid var(--ink);box-shadow:0 4px 0 var(--ink);border-radius:18px;background:#fff}
+.row.hot{box-shadow:0 4px 0 var(--ink),0 0 0 3px #ffd23f}
+.row .th{border:2.5px solid var(--ink);background:linear-gradient(180deg,#d9f3ff,#9fd8ff)}
+.row h3,.qcard h3{font-size:17px}
+.card2.warn{box-shadow:0 4px 0 var(--ink),0 0 0 3px #ff8a8a}
+.tile:active,.row:active{transform:translateY(2px)}
+.sec{font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px;margin-top:10px}
+.sec::after{content:'';flex:1;height:3px;border-radius:3px;background:rgba(43,35,80,.15)}
+.tag{border:1.5px solid rgba(43,35,80,.35);border-radius:7px}
+/* botões */
+.btn{border:3px solid var(--ink);border-radius:14px;background:linear-gradient(180deg,#6ff0ad,#2fd08a 55%,#1fb173);box-shadow:0 4px 0 var(--ink),var(--gloss);text-shadow:var(--o2);padding:7px 12px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink),var(--gloss)}
+.btn.y{background:linear-gradient(180deg,#ffe680,#ffc21a 55%,#f5a000);color:#fff;text-shadow:var(--o2);box-shadow:0 4px 0 var(--ink),var(--gloss)}
+.btn.p{background:linear-gradient(180deg,#c3a2ff,#8e5cff 55%,#6a38e0);box-shadow:0 4px 0 var(--ink),var(--gloss)}
+.btn.r{background:linear-gradient(180deg,#ff9a9a,#ff5d6c 55%,#e03d52);box-shadow:0 4px 0 var(--ink),var(--gloss)}
+.btn.b{background:linear-gradient(180deg,#9be2ff,#38b6ff 55%,#1a8ee0);box-shadow:0 4px 0 var(--ink),var(--gloss)}
+.btn.w{background:linear-gradient(180deg,#fff,#ece4ff);color:var(--ink);text-shadow:none;box-shadow:0 4px 0 var(--ink),var(--gloss)}
+.btn.off,.btn:disabled{background:linear-gradient(180deg,#ddd7ea,#ada5c6);box-shadow:0 4px 0 var(--ink);color:#fff;text-shadow:var(--o2)}
+.btn.big{font-size:19px;padding:11px 18px;border-radius:18px}
+/* barras */
+.prog{height:13px;border:2.5px solid var(--ink);background:#ece4ff;border-radius:10px}
+.prog i{border-radius:0;box-shadow:inset 0 3px 0 rgba(255,255,255,.4)}
+/* janela modal */
+#modal .card{border:4px solid var(--ink);box-shadow:0 8px 0 var(--ink),0 24px 50px rgba(0,0,0,.35);background:linear-gradient(180deg,#fff9ee,#f6ead3)}
+#modal h2{color:#fff;text-shadow:var(--o3);font-size:29px;background:linear-gradient(180deg,#a77bff,#6a38e0);border:3.5px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink),inset 0 3px 0 rgba(255,255,255,.3);padding:6px 12px 8px;margin:-6px 0 4px}
+/* avisos */
+.toast{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink),0 10px 20px rgba(0,0,0,.2);background:linear-gradient(180deg,var(--navy1),var(--navy2));font-family:var(--display);font-weight:400;font-size:14.5px;text-shadow:0 1px 0 var(--ink);letter-spacing:.2px}
+.toast.g{background:linear-gradient(180deg,#46dd98,#179a62)}.toast.p{background:linear-gradient(180deg,#a77bff,#5c30c9)}.toast.r{background:linear-gradient(180deg,#ff7a7a,#c9304f)}
+#banner small{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);background:linear-gradient(180deg,#a77bff,#6a38e0);text-shadow:0 1px 0 var(--ink)}
+#banner h1{text-shadow:var(--o3),0 8px 0 rgba(0,0,0,.18)}
+#coach .bub{border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink),0 12px 24px rgba(30,20,70,.25)}
+#coach .por{border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
 </style>
 
 <div id="app">
@@ -434,10 +523,10 @@ textarea{width:100%;box-sizing:border-box;min-height:70px;border-radius:12px;bor
   <div id="evBar"></div>
   <div id="heatChip" hidden></div>
   <div id="side">
-    <button class="side-btn" id="chestBtn" aria-label="Baú grátis"><div class="chest-ico"><i></i></div><span id="chestTxt">4:00</span></button>
-    <button class="side-btn ready" id="carBtn" aria-label="Carro dourado: toque para recompensa" hidden><div style="font-size:21px;line-height:1.1">🚗</div><span>Toque!</span></button>
-    <button class="side-btn" id="wheelBtn" aria-label="Baú misterioso diário" hidden><i class="dot-new" id="wheelDot" hidden></i><div style="font-size:21px;line-height:1.1">🎁</div><span id="wheelTxt">Grátis!</span></button>
-    <button class="side-btn" id="slotBtn" aria-label="Roleta do Petróleo"><i class="dot-new" id="slotDot" hidden></i><div style="font-size:21px;line-height:1.1">🛢️</div><span id="slotTxt">0</span></button>
+    <button class="side-btn" id="chestBtn" aria-label="Baú grátis"><svg class="sb" viewBox="0 0 48 48"><path d="M6 22 Q6 9 24 9 Q42 9 42 22 Z" fill="#c9712e" stroke="#2b2350" stroke-width="3" stroke-linejoin="round"/><path d="M10 20 Q12 13 24 13 Q36 13 38 20" fill="none" stroke="#e8954a" stroke-width="3" stroke-linecap="round"/><rect x="6" y="21" width="36" height="19" rx="3" fill="#b25c1f" stroke="#2b2350" stroke-width="3"/><rect x="6" y="21" width="36" height="5" fill="#ffc21a" stroke="#2b2350" stroke-width="2.5"/><rect x="19" y="18" width="10" height="13" rx="3" fill="#ffd23f" stroke="#2b2350" stroke-width="2.6"/><circle cx="24" cy="25" r="2.2" fill="#2b2350"/><path d="M11 30v6M37 30v6" stroke="#8a4512" stroke-width="2.5" stroke-linecap="round"/></svg><span id="chestTxt">4:00</span></button>
+    <button class="side-btn ready" id="carBtn" aria-label="Nave espacial: toque para recompensa" hidden><svg class="sb" viewBox="0 0 48 48"><path d="M16 22 A8 9 0 0 1 32 22" fill="#7ff0ff" stroke="#2b2350" stroke-width="3"/><circle cx="24" cy="18" r="3.4" fill="#5fd35f" stroke="#2b2350" stroke-width="2"/><ellipse cx="24" cy="27" rx="20" ry="8" fill="#c9d6ff" stroke="#2b2350" stroke-width="3"/><ellipse cx="24" cy="25" rx="14" ry="3.5" fill="#eef2ff"/><circle cx="12" cy="29" r="2.3" fill="#ffd23f" stroke="#2b2350" stroke-width="1.5"/><circle cx="24" cy="31" r="2.3" fill="#ff5d6c" stroke="#2b2350" stroke-width="1.5"/><circle cx="36" cy="29" r="2.3" fill="#2fd08a" stroke="#2b2350" stroke-width="1.5"/><path d="M17 35 L13 45 H35 L31 35" fill="#fff6a0" opacity=".75"/></svg><span>Toque!</span></button>
+    <button class="side-btn" id="wheelBtn" aria-label="Baú misterioso diário" hidden><i class="dot-new" id="wheelDot" hidden></i><svg class="sb" viewBox="0 0 48 48"><rect x="7" y="19" width="34" height="23" rx="3" fill="#ff5d9e" stroke="#2b2350" stroke-width="3"/><rect x="5" y="13" width="38" height="9" rx="3" fill="#ff8dbb" stroke="#2b2350" stroke-width="3"/><rect x="20" y="13" width="8" height="29" fill="#ffd23f" stroke="#2b2350" stroke-width="2.6"/><path d="M24 13 C18 3 9 7 14 12 C16 14 22 13 24 13 C26 13 32 14 34 12 C39 7 30 3 24 13Z" fill="#ffd23f" stroke="#2b2350" stroke-width="2.6" stroke-linejoin="round"/></svg><span id="wheelTxt">Grátis!</span></button>
+    <button class="side-btn" id="slotBtn" aria-label="Roleta do Petróleo"><i class="dot-new" id="slotDot" hidden></i><svg class="sb" viewBox="0 0 48 48"><ellipse cx="24" cy="10" rx="14" ry="5" fill="#a98cff" stroke="#2b2350" stroke-width="3"/><path d="M10 10 V38 C10 44 38 44 38 38 V10 C38 15 10 15 10 10Z" fill="#6a38e0" stroke="#2b2350" stroke-width="3" stroke-linejoin="round"/><path d="M10 20 C10 25 38 25 38 20 M10 30 C10 35 38 35 38 30" fill="none" stroke="#2b2350" stroke-width="2.6"/><ellipse cx="16" cy="27" rx="2.2" ry="8" fill="#fff" opacity=".35"/><path d="M24 17 C28 23 30 25 30 28 A6 6 0 0 1 18 28 C18 25 20 23 24 17Z" fill="#140e22" stroke="#fff" stroke-width="1.6"/></svg><span id="slotTxt">0</span></button>
     <div id="boosts" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
   <div id="zoomBtns">

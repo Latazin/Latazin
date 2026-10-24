@@ -317,7 +317,7 @@ window.__ccAdReward=(kind)=>{
   else if(kind==='chest'){S.adCdChest=Date.now()+15*60000;S.oil=Math.min(oilCap(),S.oil+1);grantChest('ad');}
   else if(kind==='car'){S.adCdCar=Date.now()+rnd(18,26)*60000;S.oil=Math.min(oilCap(),S.oil+2);const v=Math.max(600,rewardBase()*rnd(600,900))*adMul();earn(v);const g=ri(6,12)*adMul();S.gems+=g;dirty=true;
     if(adCar){sparkle(adCar.x,adCar.y-14,26);adCar=null;}adCarAnnounced=false;
-    toast('Carro dourado: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
+    toast('Nave espacial: +'+fmt(v)+' moedas e +'+g+' joias!','g');sfx('unlock');vib([20,30,20,30,20]);screenConfetti(90);}
   save();refreshPanel();};
 window.__ccAdFail=()=>{toast('Anúncio indisponível agora. Tente de novo em instantes.','r');};
 function serializeState(){return JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);}

@@ -187,7 +187,7 @@ const ICO={
  svc:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="#8e5cff" stroke="#2b2350" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 let _stripLast=null;
-function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<button class="rank" data-go="city">${RANKS[r][1]}</button>`;
+function stripRender(){const h=Math.round(S.happy);const r=cityRank();let s=`<button class="rank" data-go="city">${RANKS[r][1]}</button><button class="wr" data-go="missions:rank"><svg viewBox="0 0 32 32"><path d="M9 4h14v6a7 7 0 0 1-14 0z" fill="#ffd23f" stroke="#2b2350" stroke-width="2.4" stroke-linejoin="round"/><path d="M9 6c-4 0-5 6 1 7M23 6c4 0 5 6-1 7" fill="none" stroke="#2b2350" stroke-width="2.2" stroke-linecap="round"/><rect x="13.5" y="16" width="5" height="6" fill="#ffd23f" stroke="#2b2350" stroke-width="2"/><rect x="9" y="22" width="14" height="5" rx="2" fill="#ffb703" stroke="#2b2350" stroke-width="2.2"/><path d="M12 7 v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>${S.lbRank?'#'+fmt(S.lbRank):'Ranking'}</button>`;
   s+=`<button data-go="city">${ICO.pop}${fmt(S.pop)}</button>`;
   s+=`<button data-go="city:happy" class="${h<40?'warn':''}">${ICO.happy(h)}${h}%</button>`;
   const sur=C.pwP-C.pwC;s+=`<button data-go="city" class="${C.powEff<1?'warn':''}">${ICO.pw}${sur>=0?'+':''}${fmt(sur)}</button>`;
@@ -377,7 +377,7 @@ function renderSheet(keep){
       h+=`<div class="sec">Assista e ganhe</div>`;
       h+=`<div class="row"><div class="info"><h3>Turbo 3× por 30 min + moedas</h3><p>${adBoostReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdBoost-Date.now())/1000)}</p></div>${adBoostReady?'<button class="btn y" data-act="ad:boost">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="row"><div class="info"><h3>Baú bônus</h3><p>${adChestReady?'Grátis assistindo um anúncio curto':'Disponível em '+fmtTime((S.adCdChest-Date.now())/1000)}</p></div>${adChestReady?'<button class="btn y" data-act="ad:chest">Assistir anúncio</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
-      const carReady=!(S.adCdCar>Date.now());h+=`<div class="row"><div class="info"><h3>Carro dourado</h3><p>${carReady?'Estacionado perto da prefeitura — toque nele no mapa':'Já passou por hoje · volta em '+fmtTime((S.adCdCar-Date.now())/1000)}</p></div>${carReady?'<button class="btn y" data-act="gocar">Ir até lá</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
+      const carReady=!(S.adCdCar>Date.now());h+=`<div class="row"><div class="info"><h3>Nave espacial</h3><p>${carReady?'Pairando ao lado da cidade — toque nela no mapa':'Já foi embora · volta em '+fmtTime((S.adCdCar-Date.now())/1000)}</p></div>${carReady?'<button class="btn y" data-act="gocar">Ir até lá</button>':'<button class="btn off" disabled>Aguarde</button>'}</div>`;
       h+=`<div class="sec">Comprar com joias</div>`;
       h+=`<div class="row"><div class="info"><h3>Turbo 2× por 15 min</h3><p>${gemBoostOn()?'Ativo: '+fmtTime((S.gemBoost-Date.now())/1000)+' restantes (compra soma tempo)':'Dobra toda a produção'}</p></div>${gBtn(20,'g:boost','Usar')}</div>`;
       h+=`<div class="row"><div class="info"><h3>City Rush agora</h3><p>3× por 20 segundos</p></div>${ev?'<button class="btn off" disabled>Evento ativo</button>':gBtn(15,'g:rush','Usar')}</div>`;
@@ -407,7 +407,7 @@ $('#body').addEventListener('click',e=>{const sb=e.target.closest('[data-bulk]')
   else if(a==='cu'){const u=CU.find(x=>x.id===p1);if(u&&!S.cu[u.id]&&spend(u.cost)){S.cu[u.id]=1;dirty=true;sfx('up');toast(u.n+' comprado!','g');screenConfetti(30);renderSheet(true);}else sfx('err');}
   else if(a==='unlock')unlockDistrict(+p1);
   else if(a==='go'){const gx=p1%GXN,gy=Math.floor(p1/GXN);const [wx,wy]=proj(gx*DS+3.5,gy*DS+3.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.1;sfx('click');}
-  else if(a==='gocar'){const [wx,wy]=proj(CARSPOT.x+.5,CARSPOT.y+.5);closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.3;sfx('click');}
+  else if(a==='gocar'){const [wx,wy]=adCar?[adCar.x,adCar.y]:shipHome();closeSheet();cam.tx=wx;cam.ty=wy;cam.tz=1.3;sfx('click');}
   else if(a==='lbsend'){const inp=$('#lbNameInput');const name=(inp?inp.value:'').trim().slice(0,18);S.lbName=name||'Jogador';save();sfx('click');lbSubmit();}
   else if(a==='lbrefresh'){lbErr=false;lbFetchTop();renderSheet(true);}
   else if(a==='gob'){const bb=S.buildings.find(x=>x.id===+p1);if(bb){closeSheet();const [wx,wy]=bWorld(bb);camTo(wx,wy-30,1.4);}}
